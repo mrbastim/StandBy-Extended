@@ -30,8 +30,23 @@ android {
         jvmTarget = "17"
     }
 
+    val releaseKeystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+    val releaseSigningConfig = if (releaseKeystorePath.isNullOrBlank()) {
+        null
+    } else {
+        signingConfigs.create("release") {
+            storeFile = file(releaseKeystorePath)
+            storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+            keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         getByName("release") {
+            if (releaseSigningConfig != null) {
+                signingConfig = releaseSigningConfig
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
