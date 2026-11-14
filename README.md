@@ -1,4 +1,6 @@
-# StandBy for Android
+# StandBy Extended
+
+This build uses application ID and namespace `com.mrbastim.standby.extended`, so it can be installed alongside the original StandBy (`com.emretenoz.standby`). Each app keeps its own settings; existing StandBy settings are not automatically transferred.
 
 A polished, native Android ambient display inspired by iPhone StandBy. While the app is open, it watches charging and orientation state. When automatic mode is enabled and the device is both charging and in landscape, it enters an immersive, AMOLED-black StandBy interface. An Android `DreamService` provides the same experience after display timeout on supported devices.
 
@@ -33,7 +35,7 @@ StandBy activates when all three conditions are true:
 
 An ordinary Android app cannot reliably launch an activity from the background whenever power is connected. Modern Android background-activity launch restrictions intentionally prevent this, so this MVP does not attempt unreliable workarounds. Open the app before docking or charging; it will react immediately to charging and rotation changes while it is running.
 
-For activation after the display times out or locks, the app also provides an Android `DreamService`. In the app, tap **Open Android screen saver settings**, select **StandBy**, and configure the system screen saver to start **while charging**. Android then owns activation and can safely show StandBy after screen timeout without background-activity hacks. Menu wording and availability vary by device manufacturer; some OEMs disable or replace Android screen savers.
+For activation after the display times out or locks, the app also provides an Android `DreamService`. In the app, tap **Open Android screen saver settings**, select **StandBy Extended**, and configure the system screen saver to start **while charging**. Android then owns activation and can safely show StandBy after screen timeout without background-activity hacks. Menu wording and availability vary by device manufacturer; some OEMs disable or replace Android screen savers.
 
 The system-state and UI layers are separated so future versions can add an opt-in foreground service with a persistent notification, a notification action, OEM-specific integration, or another user-granted capability without rewriting the StandBy UI or activation logic.
 
@@ -44,7 +46,7 @@ While the activity is already running and StandBy is active, it requests permiss
 ## Project structure
 
 ```text
-app/src/main/java/com/emretenoz/standby/
+app/src/main/java/com/mrbastim/standby/extended/
 ├── MainActivity.kt                  Activity and window behavior
 ├── StandByDreamService.kt           System screen saver using shared StandBy UI
 ├── data/                           Settings and weather repositories
@@ -65,8 +67,8 @@ Requirements: Android Studio with JDK 17 and Android SDK 35 or newer.
 1. Open this directory in Android Studio.
 2. Allow Gradle sync to finish.
 3. Run the `app` configuration on a physical device or emulator running Android 9 (API 28) or later.
-4. Open StandBy, connect power, and rotate the device to landscape.
-5. For locked/timeout activation, use the in-app button to select StandBy as Android's charging screen saver.
+4. Open StandBy Extended, connect power, and rotate the device to landscape.
+5. For locked/timeout activation, use the in-app button to select StandBy Extended as Android's charging screen saver.
 
 From a terminal:
 

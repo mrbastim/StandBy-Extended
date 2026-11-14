@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.emretenoz.standby"
+    namespace = "com.mrbastim.standby.extended"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.emretenoz.standby"
+        applicationId = "com.mrbastim.standby.extended"
         minSdk = 28
         targetSdk = 35
         versionCode = 5
