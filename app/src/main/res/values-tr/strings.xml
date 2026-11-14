@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">StandBy</string>
+    <string name="app_name">StandBy Extended</string>
     <string name="screen_saver_settings_unavailable">Bu cihazda ekran koruyucu ayarları kullanılamıyor.</string>
     <string name="clock_face_digital">Dijital</string>
     <string name="clock_face_digital_split">Bölünmüş dijital</string>
