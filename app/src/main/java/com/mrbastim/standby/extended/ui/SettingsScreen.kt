@@ -284,7 +284,7 @@ private fun statusText(state: StandByUiState): String = when {
 }
 
 @Preview(name = "Настройки", showBackground = true, locale = "ru", widthDp = 412, heightDp = 915,
-    showSystemUi = false
+    showSystemUi = true
 )
 @Composable
 private fun SettingsScreenPreview() {

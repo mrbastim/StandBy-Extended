@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +42,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.annotation.StringRes
 import com.mrbastim.standby.extended.data.settings.BatteryWidgetStyle
 import com.mrbastim.standby.extended.data.settings.DateWidgetStyle
@@ -174,6 +174,7 @@ fun WidgetContent(
         StandByWidgetType.WORLD_CLOCK -> CompactWorldClockWidget(settings)
         StandByWidgetType.NEXT_ALARM -> CompactNextAlarmWidget(settings, nextAlarm)
         StandByWidgetType.WEATHER -> CompactWeatherWidget(settings, weather)
+        StandByWidgetType.MUSIC -> CompactMusicWidget()
     }
 }
 
@@ -189,7 +190,7 @@ private fun CompactClockWidget(settings: StandBySettings) {
         else -> "h:mm"
     }
     BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        val size = min(maxHeight.value * 0.36f, maxWidth.value * 0.25f).sp
+        val size = min(this.maxHeight.value * 0.36f, this.maxWidth.value * 0.25f).sp
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = now.format(DateTimeFormatter.ofPattern(pattern)),
@@ -517,7 +518,7 @@ fun CalendarPage(nextAlarm: NextAlarmState = NextAlarmState()) {
     val now = rememberStandByTime(showSeconds = false)
     val theme = LocalStandByTheme.current
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        val daySize = min(maxHeight.value * 0.52f, maxWidth.value * 0.24f).sp
+        val daySize = min(this.maxHeight.value * 0.52f, this.maxWidth.value * 0.24f).sp
         val monthSize = (daySize.value * 0.3f).coerceIn(28f, 48f).sp
         Row(
             modifier = Modifier
@@ -646,7 +647,7 @@ private fun CircularBatteryVisual(
 ) {
     val theme = LocalStandByTheme.current
     BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
-        val available = min(maxWidth.value, maxHeight.value)
+        val available = min(this.maxWidth.value, this.maxHeight.value)
         val ringSize = (available * if (compact) 0.72f else 0.78f)
             .coerceIn(if (compact) 112f else 150f, if (compact) 172f else 238f).dp
         val numberSize = (ringSize.value * 0.32f).sp
@@ -759,4 +760,86 @@ fun chargingLabelRes(charging: ChargingState): Int = when {
     charging.source == ChargingSource.WIRED -> R.string.charging_wired
     charging.isCharging -> R.string.charging
     else -> R.string.on_battery
+}
+
+@Composable
+private fun WidgetPreviewContent(widget: StandByWidgetType) {
+    val settings = StandBySettings(
+        weatherEnabled = true,
+        leftWidgets = listOf(widget),
+        rightWidgets = emptyList(),
+    )
+    Box(Modifier.size(420.dp, 190.dp)) {
+        StandByThemeProvider(settings) {
+            ThemedBackground(settings) {
+                WidgetContent(
+                    widget = widget,
+                    settings = settings,
+                    charging = ChargingState(
+                        isCharging = true,
+                        batteryPercent = 82,
+                        source = ChargingSource.AC,
+                    ),
+                    nextAlarm = NextAlarmState(
+                        triggerAtMillis = System.currentTimeMillis() + 3_600_000L,
+                    ),
+                    weather = WeatherState(
+                        enabled = true,
+                        temperatureCelsius = 18.0,
+                        apparentTemperatureCelsius = 17.0,
+                        windSpeedKmh = 12.0,
+                        kind = WeatherKind.PARTLY_CLOUDY,
+                    ),
+                )
+            }
+        }
+    }
+}
+
+@Preview(name = "Виджет часов", locale = "ru", showBackground = true)
+@Composable
+private fun ClockWidgetPreview() {
+    WidgetPreviewContent(StandByWidgetType.CLOCK)
+}
+
+@Preview(name = "Виджет даты", locale = "ru", showBackground = true)
+@Composable
+private fun DateWidgetPreview() {
+    WidgetPreviewContent(StandByWidgetType.DATE)
+}
+
+@Preview(name = "Виджет батареи", locale = "ru", showBackground = true)
+@Composable
+private fun BatteryWidgetPreview() {
+    WidgetPreviewContent(StandByWidgetType.BATTERY)
+}
+
+@Preview(name = "Виджет зарядки", locale = "ru", showBackground = true)
+@Composable
+private fun ChargingWidgetPreview() {
+    WidgetPreviewContent(StandByWidgetType.CHARGING)
+}
+
+@Preview(name = "Виджет мирового времени", locale = "ru", showBackground = true)
+@Composable
+private fun WorldClockWidgetPreview() {
+    WidgetPreviewContent(StandByWidgetType.WORLD_CLOCK)
+}
+
+@Preview(name = "Виджет будильника", locale = "ru", showBackground = true)
+@Composable
+private fun NextAlarmWidgetPreview() {
+    WidgetPreviewContent(StandByWidgetType.NEXT_ALARM)
+}
+
+@Preview(name = "Виджет погоды", locale = "ru", showBackground = true)
+@Composable
+private fun WeatherWidgetPreview() {
+    WidgetPreviewContent(StandByWidgetType.WEATHER)
+}
+
+@Preview(name = "Музыка", locale = "ru", showBackground = true)
+@Composable
+private fun MusicWidgetPreview() {
+    WidgetPreviewContent(StandByWidgetType.MUSIC)
 }

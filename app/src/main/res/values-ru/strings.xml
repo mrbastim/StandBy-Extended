@@ -156,4 +156,16 @@
     <string name="weather_rain">Дождь</string>
     <string name="weather_snow">Снег</string>
     <string name="weather_thunderstorm">Гроза</string>
+    <string name="widget_music">Музыка</string>
+    <string name="music_notification_access">Управление музыкой StandBy</string>
+    <string name="music_access_description">Разрешите доступ к уведомлениям, чтобы видеть музыку из других приложений и управлять ею.</string>
+    <string name="music_grant_access">Разрешить доступ</string>
+    <string name="music_nothing_playing">Ничего не играет</string>
+    <string name="music_start_in_player">Включите музыку в своём плеере</string>
+    <string name="music_unknown_track">Неизвестный трек</string>
+    <string name="music_previous">Предыдущий трек</string>
+    <string name="music_play">Воспроизвести</string>
+    <string name="music_pause">Пауза</string>
+    <string name="music_next">Следующий трек</string>
+    <string name="music_settings_unavailable">Настройки доступа к уведомлениям недоступны на этом устройстве.</string>
 </resources>

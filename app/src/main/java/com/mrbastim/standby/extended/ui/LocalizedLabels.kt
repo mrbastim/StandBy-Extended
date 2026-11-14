@@ -100,6 +100,7 @@ fun StandByWidgetType.labelRes(): Int = when (this) {
     StandByWidgetType.WORLD_CLOCK -> R.string.widget_world_clock
     StandByWidgetType.NEXT_ALARM -> R.string.widget_next_alarm
     StandByWidgetType.WEATHER -> R.string.widget_weather
+    StandByWidgetType.MUSIC -> R.string.widget_music
 }
 
 @StringRes

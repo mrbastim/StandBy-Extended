@@ -156,4 +156,16 @@
     <string name="weather_rain">Rain</string>
     <string name="weather_snow">Snow</string>
     <string name="weather_thunderstorm">Thunderstorm</string>
+    <string name="widget_music">Music</string>
+    <string name="music_notification_access">StandBy music controls</string>
+    <string name="music_access_description">Allow notification access to show and control music from other apps.</string>
+    <string name="music_grant_access">Allow access</string>
+    <string name="music_nothing_playing">Nothing playing</string>
+    <string name="music_start_in_player">Start music in your music app</string>
+    <string name="music_unknown_track">Unknown track</string>
+    <string name="music_previous">Previous track</string>
+    <string name="music_play">Play</string>
+    <string name="music_pause">Pause</string>
+    <string name="music_next">Next track</string>
+    <string name="music_settings_unavailable">Notification access settings are unavailable on this device.</string>
 </resources>

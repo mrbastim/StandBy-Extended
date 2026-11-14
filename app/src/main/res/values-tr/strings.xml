@@ -154,4 +154,16 @@
     <string name="weather_rain">Yağmurlu</string>
     <string name="weather_snow">Karlı</string>
     <string name="weather_thunderstorm">Gök gürültülü</string>
+    <string name="widget_music">Müzik</string>
+    <string name="music_notification_access">StandBy müzik denetimleri</string>
+    <string name="music_access_description">Diğer uygulamalardaki müziği göstermek ve denetlemek için bildirim erişimine izin verin.</string>
+    <string name="music_grant_access">Erişime izin ver</string>
+    <string name="music_nothing_playing">Müzik çalmıyor</string>
+    <string name="music_start_in_player">Müzik uygulamanızda bir parça başlatın</string>
+    <string name="music_unknown_track">Bilinmeyen parça</string>
+    <string name="music_previous">Önceki parça</string>
+    <string name="music_play">Oynat</string>
+    <string name="music_pause">Duraklat</string>
+    <string name="music_next">Sonraki parça</string>
+    <string name="music_settings_unavailable">Bu cihazda bildirim erişimi ayarları kullanılamıyor.</string>
 </resources>
