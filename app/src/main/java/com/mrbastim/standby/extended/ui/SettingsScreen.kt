@@ -32,6 +32,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
+import com.mrbastim.standby.extended.ui.theme.StandByTheme
+import com.mrbastim.standby.extended.data.settings.StandBySettings
+import com.mrbastim.standby.extended.system.ChargingState
 import com.mrbastim.standby.extended.BuildConfig
 import com.mrbastim.standby.extended.R
 import com.mrbastim.standby.extended.data.settings.ClockColor
@@ -277,4 +281,41 @@ private fun statusText(state: StandByUiState): String = when {
     !state.isLandscape -> stringResource(R.string.status_rotate_landscape)
     state.charging.source == ChargingSource.WIRELESS -> stringResource(R.string.status_wireless_ready)
     else -> stringResource(R.string.status_charging_ready)
+}
+
+@Preview(name = "Настройки", showBackground = true, locale = "ru", widthDp = 412, heightDp = 915,
+    showSystemUi = false
+)
+@Composable
+private fun SettingsScreenPreview() {
+    StandByTheme {
+        SettingsScreen(
+            state = StandByUiState(
+                settings = StandBySettings(),
+                charging = ChargingState(isCharging = true, batteryPercent = 82),
+                isLandscape = true,
+            ),
+            onAutomaticModeChanged = {},
+            on24HourChanged = {},
+            onShowSecondsChanged = {},
+            onScreenTimeoutChanged = {},
+            onKeepAwakeChanged = {},
+            onClockFaceChanged = {},
+            onClockColorChanged = {},
+            onShowDateChanged = {},
+            onNightModeChanged = {},
+            onBurnInProtectionChanged = {},
+            onDayThemeChanged = {},
+            onNightThemeChanged = {},
+            onBackgroundStyleChanged = {},
+            onTypographyStyleChanged = {},
+            onClockWidgetStyleChanged = {},
+            onDateWidgetStyleChanged = {},
+            onBatteryWidgetStyleChanged = {},
+            onWorldClockZoneChanged = {},
+            onWeatherEnabledChanged = {},
+            onPreview = {},
+            onOpenScreenSaverSettings = {},
+        )
+    }
 }

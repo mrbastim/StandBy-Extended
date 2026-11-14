@@ -39,13 +39,16 @@ import androidx.compose.ui.res.stringResource
 import com.mrbastim.standby.extended.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import com.mrbastim.standby.extended.data.settings.StandBySettings
+import com.mrbastim.standby.extended.data.weather.WeatherKind
 import com.mrbastim.standby.extended.data.settings.WidgetColumn
 import com.mrbastim.standby.extended.system.ChargingState
 import com.mrbastim.standby.extended.system.NextAlarmState
 import com.mrbastim.standby.extended.data.weather.WeatherState
 import com.mrbastim.standby.extended.ui.StandByUiState
 import kotlinx.coroutines.delay
+import java.time.LocalDateTime
 
 @Composable
 fun StandByRoot(
@@ -193,4 +196,32 @@ private fun StandByDisplayContent(
             )
         }
     }
+}
+
+@Preview(
+    name = "Экран ожидания",
+    locale = "ru",
+    device = "spec:width=915dp,height=412dp,dpi=240",
+)
+@Composable
+private fun StandByDisplayPreview() {
+    StandByDisplay(
+        settings = StandBySettings(weatherEnabled = true),
+        charging = ChargingState(
+            isCharging = true,
+            batteryPercent = 82,
+            source = com.mrbastim.standby.extended.system.ChargingSource.AC,
+        ),
+        nextAlarm = NextAlarmState(
+            triggerAtMillis = System.currentTimeMillis() + 3_600_000L,
+        ),
+        weather = WeatherState(
+            enabled = true,
+            temperatureCelsius = 18.0,
+            apparentTemperatureCelsius = 17.0,
+            windSpeedKmh = 12.0,
+            kind = WeatherKind.PARTLY_CLOUDY,
+            isDay = true,
+        ),
+    )
 }
