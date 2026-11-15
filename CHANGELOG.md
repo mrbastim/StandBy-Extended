@@ -6,6 +6,13 @@ All notable changes to StandBy are documented here.
 
 ### Added
 
+- AMOLED Protection 2.0 with independent per-window brightness (35% initial / 8% minimum), configurable inactivity delay (120 s) and fade duration (12 s).
+- Shared Activity/DreamService display policy, lifecycle cleanup, smooth touch recovery and optional filtered TYPE_LIGHT adaptation.
+- Optional inactivity deadline that releases Activity screen retention or finishes DreamService, subject to Android/OEM sleep behavior.
+- Collapsible Display & AMOLED Protection settings with persisted controls and English, Russian and Turkish strings.
+- Pure policy/filter tests plus Robolectric window, sensor and lifecycle checks for API 28 and 35.
+- Architecture notes and a manual device verification matrix; physical AMOLED protection is not guaranteed.
+
 - Android CI for unit tests, lint, and debug assembly.
 - Unit coverage for activation, widget-list invariants, and theme fallback behavior.
 - English and Turkish UI resources.
@@ -21,12 +28,18 @@ All notable changes to StandBy are documented here.
 
 ### Changed
 
+- Ambient uses a black night theme and limits clock/alarm countdown updates to minutes without changing saved appearance.
+- Pixel Shifting keeps its five-position ±3 dp / 60 s pattern and reserves edge space around all pager content, including music.
+- Keep Awake and Screen Timeout share the display policy; finite timeouts now restart on real interaction.
+
 - Application namespace and ID are now `com.emretenoz.standby`.
 - Release builds enable code and resource shrinking.
 - The stack editor and customization rows adapt better to compact landscape displays.
 - Night mode copy now reflects the selected night theme instead of promising a fixed red palette.
 
 ### Fixed
+
+- Rebind Activity-owned system-state observers after Activity recreation so a retained ViewModel does not keep stopped flows.
 
 - Missing OEM screen-saver settings no longer crash the app.
 - Recoverable DataStore read failures fall back to safe defaults.

@@ -21,9 +21,36 @@ Settings include automatic activation, screen timeout behavior, keeping the scre
 
 The widget page follows the dual-stack model: swipe either half vertically to change its widget, or long-press a stack to open an editor directly over StandBy. Clock, date, battery, charging, world-clock, next-alarm, and weather widgets can be independently added, removed, and reordered. The next-alarm widget reads Android’s system alarm schedule without an additional permission. Weather is opt-in and uses the selected world-clock city. At least one widget is retained in each stack. Clock widgets provide Minimal, Bold, Editorial, and Compact styles; date widgets provide Numeric, Editorial, Calendar, and Minimal styles; battery widgets provide Circular, Horizontal, Percentage, and Minimal styles. Tap the style label beside a widget in the stack editor to cycle its presentation, or select it from Settings.
 
-Night Mode switches between the independently selected day and night themes. Crimson Night provides the dim red, true-black OLED treatment; other night themes keep their own palettes. Burn-in protection is enabled by default and moves the static content through a subtle three-pixel pattern once per minute without continuously animating it.
+Night Mode switches between the independently selected day and night themes. Crimson Night provides the dim red, true-black OLED treatment; other night themes keep their own palettes. Pixel Shifting is enabled by default and moves page content through five positions at ±3 dp once per minute, with reserved edge space and no continuous movement animation.
 
-The settings and customization surfaces are available in English and Turkish. Interactive ambient controls expose accessibility labels and use enlarged touch targets.
+The settings and customization surfaces are available in English, Russian, and Turkish. Interactive ambient controls expose accessibility labels and use enlarged touch targets.
+
+## Display & AMOLED Protection
+
+Open **Settings → Display & AMOLED Protection → Show display controls**. Protection 2.0
+starts StandBy at 35% window brightness, waits for 2 minutes of inactivity, then fades
+to 8% over 12 seconds. Brightness limits, delay and fade duration are configurable
+and saved in DataStore. Touch restores active brightness smoothly and restarts inactivity;
+clock ticks, widget updates and recomposition do not restart it.
+
+Optional ambient-light adaptation uses TYPE_LIGHT with filtering, hysteresis and rate
+limiting. Without a sensor, configured brightness remains usable. Inactivity takes
+priority over illumination. Ambient uses a black Crimson Night theme and hides seconds,
+including the alarm countdown, without overwriting saved appearance settings.
+
+Keep Awake and Screen Timeout remain available in the same section. An optional
+additional inactivity deadline overrides Keep Awake: the Activity releases its screen
+hold and Android applies its normal timeout; DreamService ends the screen saver.
+This does not guarantee immediate screen-off. Each resumed window has an independent
+session; leaving StandBy restores its previous brightness and releases subscriptions.
+
+Protection uses per-window Android brightness, never global Settings.System writes
+or a dark overlay. Percentages are brightness requests, not calibrated nits. OEMs may
+restrict brightness and screen-saver behavior. These measures reduce OLED wear risk
+without guaranteeing prevention of burn-in.
+
+See [architecture and policy](docs/amoled-protection.md) and
+[automated and device testing](docs/testing.md).
 
 ## Activation and Android limitations
 
