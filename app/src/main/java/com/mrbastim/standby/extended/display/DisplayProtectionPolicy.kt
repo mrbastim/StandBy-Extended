@@ -13,6 +13,7 @@ data class DisplayDecision(
     val brightness: Float?,
     val keepAwake: Boolean,
     val releaseRequested: Boolean,
+    val automaticNightMode: Boolean = false,
 )
 
 /** Pure session policy. All times are monotonic milliseconds; a new session resets inactivity. */
@@ -86,6 +87,9 @@ class DisplayProtectionPolicy(startedAt: Long) {
             brightness,
             idle < deadline,
             released,
+            config.enabled && config.ambientLight && light.isDark(now) &&
+                target != null && target <= config.minimumPercent / 100f + 0.0001f &&
+                (brightness ?: 1f) <= config.minimumPercent / 100f + 0.0001f,
         )
     }
 
@@ -97,23 +101,52 @@ class DisplayProtectionPolicy(startedAt: Long) {
     }
 }
 
-/** Time-based low pass, bucket hysteresis, 5 s dwell and at most one accepted change / 10 s. */
+/** Time-based smoothing also advances between events from an on-change TYPE_LIGHT sensor. */
 class AmbientLightFilter {
+    private var measurement: Float? = null
     private var filtered: Float? = null
-    private var measuredAt = 0L
+    private var filteredAt = 0L
     private var candidate = 1f
     private var candidateSince = 0L
     private var accepted = 1f
     private var acceptedAt = Long.MIN_VALUE / 2
+    private var darkCandidate = false
+    private var darkCandidateSince = 0L
+    private var dark = false
 
     fun observe(now: Long, lux: Float) {
         if (!lux.isFinite() || lux < 0f) return
-        val previous = filtered
-        val dt = (now - measuredAt).coerceIn(0, 1000)
+        advance(now)
+        measurement = lux
+        if (filtered == null) {
+            filtered = lux
+            filteredAt = now
+        }
+        settle(now)
+    }
+
+    fun factor(now: Long): Float {
+        advance(now)
+        return if (dark) 0f else accepted
+    }
+
+    fun isDark(now: Long): Boolean {
+        advance(now)
+        return dark
+    }
+
+    private fun advance(now: Long) {
+        val raw = measurement ?: return
+        val previous = filtered ?: return
+        val dt = (now - filteredAt).coerceAtLeast(0)
         val alpha = (1.0 - exp(-dt / 5000.0)).toFloat()
-        val value = if (previous == null) lux else previous + alpha * (lux - previous)
-        filtered = value
-        measuredAt = now
+        filtered = previous + alpha * (raw - previous)
+        filteredAt = now
+        settle(now)
+    }
+
+    private fun settle(now: Long) {
+        val value = filtered ?: return
         val next = when {
             value < if (candidate == 0.45f) 18f else 12f -> 0.45f
             value > if (candidate == 1f) 200f else 300f -> 1f
@@ -123,14 +156,19 @@ class AmbientLightFilter {
             candidate = next
             candidateSince = now
         }
-    }
-
-    fun factor(now: Long): Float {
-        if (filtered != null && abs(candidate - accepted) > 0.01f &&
+        if (abs(candidate - accepted) > 0.01f &&
             now - candidateSince >= 5000 && now - acceptedAt >= 10_000) {
             accepted = candidate
             acceptedAt = now
         }
-        return accepted
+
+        // Near darkness is separate from the ordinary dim-room brightness bucket.
+        val nextDark = if (darkCandidate) value < 3f else value <= 1f
+        if (nextDark != darkCandidate) {
+            darkCandidate = nextDark
+            darkCandidateSince = now
+        }
+        val dwell = if (darkCandidate) 10_000L else 5000L
+        if (dark != darkCandidate && now - darkCandidateSince >= dwell) dark = darkCandidate
     }
 }

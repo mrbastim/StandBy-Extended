@@ -33,6 +33,66 @@ class DisplayProtectionPolicyTest {
         }
     }
 
+    @Test fun inactivityAtMinimumDoesNotEnableNightModeWithoutDarkness() {
+        val policy = DisplayProtectionPolicy(0)
+        val automatic = settings.copy(displayProtection = settings.displayProtection.copy(ambientLight = true))
+        policy.light.observe(0, 80f)
+        policy.evaluate(0, automatic)
+        val ambient = policy.evaluate(132_000, automatic)
+        brightness(0.08f, ambient)
+        assertFalse(ambient.automaticNightMode)
+        assertEquals(DisplayPhase.AMBIENT, ambient.phase)
+    }
+
+    @Test fun totalDarknessEnablesNightOnlyAfterTheFadeReachesMinimum() {
+        val policy = DisplayProtectionPolicy(0)
+        val automatic = settings.copy(displayProtection = settings.displayProtection.copy(ambientLight = true))
+        policy.light.observe(0, 0f)
+        policy.evaluate(0, automatic)
+        policy.evaluate(5000, automatic)
+        policy.evaluate(5800, automatic)
+        val beginning = policy.evaluate(10_000, automatic)
+        assertFalse(beginning.automaticNightMode)
+        val dimmest = policy.evaluate(10_800, automatic)
+        brightness(0.08f, dimmest)
+        assertTrue(dimmest.automaticNightMode)
+        policy.interact(11_000)
+        brightness(0.08f, policy.evaluate(11_000, automatic))
+        assertTrue(policy.evaluate(11_800, automatic).automaticNightMode)
+    }
+
+    @Test fun ordinaryDimRoomDoesNotEnableNightMode() {
+        val policy = DisplayProtectionPolicy(0)
+        val automatic = settings.copy(displayProtection = settings.displayProtection.copy(ambientLight = true))
+        policy.light.observe(0, 8f)
+        policy.evaluate(0, automatic)
+        assertFalse(policy.evaluate(120_000, automatic).automaticNightMode)
+        assertFalse(policy.evaluate(132_000, automatic).automaticNightMode)
+    }
+
+    @Test fun disablingAdaptationOrMissingSensorNeverSelectsNightMode() {
+        val policy = DisplayProtectionPolicy(0)
+        policy.light.observe(0, 0f)
+        policy.evaluate(0, settings)
+        assertFalse(policy.evaluate(132_000, settings).automaticNightMode)
+        val fresh = DisplayProtectionPolicy(0)
+        val automatic = settings.copy(displayProtection = settings.displayProtection.copy(ambientLight = true))
+        assertFalse(fresh.evaluate(132_000, automatic).automaticNightMode)
+    }
+
+    @Test fun returningLightExitsNightEvenWhileIdleBrightnessRemainsMinimum() {
+        val policy = DisplayProtectionPolicy(0)
+        val automatic = settings.copy(displayProtection = settings.displayProtection.copy(ambientLight = true))
+        policy.light.observe(0, 0f)
+        policy.evaluate(0, automatic)
+        assertTrue(policy.evaluate(132_000, automatic).automaticNightMode)
+        policy.light.observe(133_000, 100f)
+        for (second in 134..145) policy.evaluate(second * 1000L, automatic)
+        val lit = policy.evaluate(146_000, automatic)
+        brightness(0.08f, lit)
+        assertFalse(lit.automaticNightMode)
+    }
+
     @Test fun activeIdleAmbient() {
         val policy = DisplayProtectionPolicy(0)
         brightness(0.35f, policy.evaluate(0, settings))

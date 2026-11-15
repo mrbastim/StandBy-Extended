@@ -33,6 +33,8 @@ class DisplayProtectionController(
     private var released = false
     private val mutablePhase = MutableStateFlow(DisplayPhase.ACTIVE)
     val phase = mutablePhase.asStateFlow()
+    private val mutableAutomaticNightMode = MutableStateFlow(false)
+    val automaticNightMode = mutableAutomaticNightMode.asStateFlow()
 
     fun update(value: StandBySettings) {
         if (settings == value) return
@@ -78,6 +80,7 @@ class DisplayProtectionController(
     private fun render() {
         val decision = policy?.evaluate(SystemClock.elapsedRealtime(), settings) ?: return
         mutablePhase.value = decision.phase
+        mutableAutomaticNightMode.value = decision.automaticNightMode
         if (lastHold != decision.keepAwake) {
             onHoldChanged(decision.keepAwake)
             if (decision.keepAwake) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -100,6 +103,7 @@ class DisplayProtectionController(
         sensor.stop()
         policy = null
         mutablePhase.value = DisplayPhase.ACTIVE
+        mutableAutomaticNightMode.value = false
         if (lastHold != null) {
             onHoldChanged(savedKeepAwake)
             window.attributes = window.attributes.apply { screenBrightness = savedBrightness }

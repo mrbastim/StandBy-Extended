@@ -172,13 +172,13 @@
     <string name="protection_expand">Show display controls</string>
     <string name="protection_collapse">Hide display controls</string>
     <string name="protection_enabled">AMOLED Protection 2.0</string>
-    <string name="protection_description">Reduces OLED wear risk; prevention is not guaranteed. Ambient uses a black background and hides seconds.</string>
+    <string name="protection_description">Reduces OLED wear risk; prevention is not guaranteed. Ambient hides seconds without changing your selected theme.</string>
     <string name="protection_initial">Initial StandBy brightness</string>
     <string name="protection_minimum">Minimum brightness</string>
     <string name="protection_delay">Dim after inactivity</string>
     <string name="protection_transition">Fade duration</string>
     <string name="protection_light">Adapt to ambient light</string>
-    <string name="protection_light_description">Adjusts within your brightness range. Inactivity always takes priority.</string>
+    <string name="protection_light_description">Adjusts within your brightness range. Automatic Night Mode requires sustained near darkness and minimum brightness; inactivity alone does not enable it.</string>
     <string name="protection_no_sensor">No light sensor: uses your configured brightness.</string>
     <string name="protection_release">Allow screen sleep after inactivity</string>
     <string name="protection_disabled">Disabled</string>

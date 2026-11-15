@@ -31,7 +31,7 @@ fun DisplayProtectionHost(
     settings: StandBySettings,
     onHoldChanged: (Boolean) -> Unit = {},
     onRelease: () -> Unit = {},
-    content: @Composable (DisplayPhase) -> Unit,
+    content: @Composable (DisplayPhase, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
     val owner = LocalLifecycleOwner.current
@@ -59,6 +59,7 @@ fun DisplayProtectionHost(
         }
     }
     val phase by controller.phase.collectAsState()
+    val automaticNightMode by controller.automaticNightMode.collectAsState()
     Box(
         Modifier.fillMaxSize()
             .pointerInput(controller, active) {
@@ -73,5 +74,5 @@ fun DisplayProtectionHost(
                 if (active && it.type == KeyEventType.KeyDown) controller.interact()
                 false
             },
-    ) { content(phase) }
+    ) { content(phase, automaticNightMode) }
 }

@@ -99,10 +99,11 @@ class StandByDreamService : DreamService(), LifecycleOwner, ViewModelStoreOwner,
                         settings = settings,
                         onHoldChanged = { isScreenBright = it },
                         onRelease = { finish() },
-                    ) { phase ->
+                    ) { phase, automaticNightMode ->
                         if (isLandscape) {
                             StandByDisplay(
                                 settings = settings,
+                                automaticNightMode = automaticNightMode,
                                 charging = charging,
                                 ambient = settings.displayProtection.enabled &&
                                     (phase == DisplayPhase.AMBIENT || phase == DisplayPhase.RELEASED),

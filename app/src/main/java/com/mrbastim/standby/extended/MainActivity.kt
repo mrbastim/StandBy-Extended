@@ -60,9 +60,10 @@ class MainActivity : ComponentActivity() {
                 StandByWindowBehavior(
                     active = state.isStandByActive,
                 )
-                DisplayProtectionHost(window, state.isStandByActive, state.settings) { phase ->
+                DisplayProtectionHost(window, state.isStandByActive, state.settings) { phase, automaticNightMode ->
                     StandByRoot(
                         state = state,
+                        automaticNightMode = automaticNightMode,
                         ambient = state.settings.displayProtection.enabled &&
                             (phase == DisplayPhase.AMBIENT || phase == DisplayPhase.RELEASED),
                         actions = StandByActions(

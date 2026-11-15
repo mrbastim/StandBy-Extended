@@ -172,13 +172,13 @@
     <string name="protection_expand">Показать настройки экрана</string>
     <string name="protection_collapse">Скрыть настройки экрана</string>
     <string name="protection_enabled">Защита AMOLED 2.0</string>
-    <string name="protection_description">Снижает риск износа OLED, но не гарантирует защиту от выгорания. В Ambient используется чёрный фон и скрыты секунды.</string>
+    <string name="protection_description">Снижает риск износа OLED, но не гарантирует защиту от выгорания. Ambient скрывает секунды, сохраняя выбранную тему.</string>
     <string name="protection_initial">Начальная яркость StandBy</string>
     <string name="protection_minimum">Минимальная яркость</string>
     <string name="protection_delay">Затемнение после бездействия</string>
     <string name="protection_transition">Длительность перехода</string>
     <string name="protection_light">Адаптация к освещению</string>
-    <string name="protection_light_description">Коррекция в заданном диапазоне яркости. Бездействие всегда имеет приоритет.</string>
+    <string name="protection_light_description">Коррекция в заданном диапазоне яркости. Автоматический ночной режим включается только при устойчивой полной темноте и минимальной яркости; бездействия недостаточно.</string>
     <string name="protection_no_sensor">Датчик освещённости отсутствует: используется заданная яркость.</string>
     <string name="protection_release">Разрешить сон экрана после бездействия</string>
     <string name="protection_disabled">Отключено</string>

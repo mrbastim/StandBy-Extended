@@ -170,13 +170,13 @@
     <string name="protection_expand">Ekran ayarlarını göster</string>
     <string name="protection_collapse">Ekran ayarlarını gizle</string>
     <string name="protection_enabled">AMOLED Koruması 2.0</string>
-    <string name="protection_description">OLED aşınma riskini azaltır; yanmayı önleme garantisi vermez. Ambient siyah arka plan kullanır ve saniyeleri gizler.</string>
+    <string name="protection_description">OLED aşınma riskini azaltır; yanmayı önleme garantisi vermez. Ambient seçili temayı korur ve saniyeleri gizler.</string>
     <string name="protection_initial">Başlangıç StandBy parlaklığı</string>
     <string name="protection_minimum">En düşük parlaklık</string>
     <string name="protection_delay">Hareketsizlik sonrası karartma</string>
     <string name="protection_transition">Geçiş süresi</string>
     <string name="protection_light">Ortam ışığına uyarla</string>
-    <string name="protection_light_description">Belirlediğiniz parlaklık aralığında ayarlar. Hareketsizlik her zaman önceliklidir.</string>
+    <string name="protection_light_description">Parlaklığı belirlediğiniz aralıkta ayarlar. Otomatik Gece Modu için sürekli karanlık ve en düşük parlaklık gerekir; yalnızca hareketsizlik yeterli değildir.</string>
     <string name="protection_no_sensor">Işık sensörü yok: belirlediğiniz parlaklık kullanılır.</string>
     <string name="protection_release">Hareketsizlik sonrası ekran uykusuna izin ver</string>
     <string name="protection_disabled">Kapalı</string>

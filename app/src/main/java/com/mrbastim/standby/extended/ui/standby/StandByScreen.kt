@@ -55,6 +55,7 @@ fun StandByRoot(
     state: StandByUiState,
     actions: StandByActions,
     ambient: Boolean = false,
+    automaticNightMode: Boolean = false,
     settingsContent: @Composable () -> Unit,
 ) {
     AnimatedContent(
@@ -63,7 +64,7 @@ fun StandByRoot(
         label = "standby-mode",
     ) { active ->
         if (active) {
-            StandByDisplay(state.settings, state.charging, state.nextAlarm, state.weather, actions, ambient)
+            StandByDisplay(state.settings, state.charging, state.nextAlarm, state.weather, actions, ambient, automaticNightMode)
         } else {
             settingsContent()
         }
@@ -79,14 +80,9 @@ fun StandByDisplay(
     weather: WeatherState = WeatherState(),
     actions: StandByActions = StandByActions(),
     ambient: Boolean = false,
+    automaticNightMode: Boolean = false,
 ) {
-    // Ambient suppresses seconds/smooth clock updates, and uses a true-black background.
-    val displaySettings = if (ambient) settings.copy(
-        showSeconds = false,
-        backgroundStyle = com.mrbastim.standby.extended.data.settings.BackgroundStyle.SOLID,
-        dayTheme = com.mrbastim.standby.extended.data.settings.StandByThemeId.CRIMSON_NIGHT,
-        nightTheme = com.mrbastim.standby.extended.data.settings.StandByThemeId.CRIMSON_NIGHT,
-    ) else settings
+    val displaySettings = standByPresentationSettings(settings, ambient, automaticNightMode)
     androidx.compose.runtime.CompositionLocalProvider(LocalAmbientMode provides ambient) {
         StandByThemeProvider(displaySettings) {
             ThemedBackground(
