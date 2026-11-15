@@ -2,7 +2,7 @@
 
 [English](github-release-pipeline.md) | [Русский](github-release-pipeline.ru.md)
 
-Workflow `.github/workflows/release.yml` собирает подписанный release APK и прикрепляет его к GitHub Release для тега `v*`. Его также можно вручную запустить для существующего тега на вкладке Actions.
+Workflow `.github/workflows/release.yml` собирает подписанный release APK, называет файл `StandBy.apk` и прикрепляет его к GitHub Release для тега `v*`. Его также можно вручную запустить для существующего тега на вкладке Actions.
 
 ## APK из ветки dev
 
@@ -17,8 +17,8 @@ Workflow `.github/workflows/release.yml` собирает подписанный
 Идентификатор и версия приложения не меняются.
 
 Каждый успешный запуск создаёт отдельный prerelease `dev-<run>-<short-sha>`,
-привязывает его к точному исходному коммиту, прикрепляет `app-release.apk` и сохраняет
-его как артефакт Actions. Новые push не отменяют предыдущие запуски. Повтор того же
+привязывает его к точному исходному коммиту, прикрепляет `StandBy-dev.apk` и сохраняет
+его как артефакт Actions `StandBy-dev-<sha>`. Новые push не отменяют предыдущие запуски. Повтор того же
 запуска обновляет его собственный prerelease и APK. Явно заданы `--prerelease`
 и `--latest=false`, поэтому стабильный Latest-релиз сохраняется. Теги разработки не
 совпадают с `v*` из стабильного workflow. При ошибке секретов, тестов, Lint или сборки

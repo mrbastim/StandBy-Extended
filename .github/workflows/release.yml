@@ -84,8 +84,9 @@ jobs:
             exit 1
           fi
 
+          cp "$apk_path" StandBy.apk
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" "$apk_path" --clobber
+            gh release upload "$RELEASE_TAG" StandBy.apk --clobber
           else
-            gh release create "$RELEASE_TAG" "$apk_path" --generate-notes --verify-tag
+            gh release create "$RELEASE_TAG" StandBy.apk --generate-notes --verify-tag
           fi

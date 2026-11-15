@@ -2,7 +2,7 @@
 
 [English](github-release-pipeline.md) | [Русский](github-release-pipeline.ru.md)
 
-The workflow in `.github/workflows/release.yml` builds a signed release APK and attaches it to the GitHub Release for a `v*` tag. It can also be run manually for an existing tag from the Actions tab.
+The workflow in `.github/workflows/release.yml` builds a signed release APK, names the attached file `StandBy.apk`, and publishes it to the GitHub Release for a `v*` tag. It can also be run manually for an existing tag from the Actions tab.
 
 ## Development APKs from dev
 
@@ -17,8 +17,8 @@ It uses the same four signing secrets listed below to sign the release-variant A
 The application ID and version remain unchanged.
 
 Each successful run creates a separate prerelease named `dev-<run>-<short-sha>`,
-targets the exact triggering commit, attaches `app-release.apk`, and also saves it as an
-Actions artifact. Earlier runs are not cancelled by later pushes. Retrying the same run
+targets the exact triggering commit, attaches `StandBy-dev.apk`, and also saves it as an
+Actions artifact named `StandBy-dev-<sha>`. Earlier runs are not cancelled by later pushes. Retrying the same run
 updates its own prerelease and asset. The workflow explicitly sets `--prerelease`
 and `--latest=false`, so the stable Latest release is preserved. Development tags do not
 match the stable workflow's `v*` trigger. No unsigned fallback is published if secrets,

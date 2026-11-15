@@ -60,11 +60,14 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleRelease
 
+      - name: Name development APK
+        run: cp app/build/outputs/apk/release/app-release.apk StandBy-dev.apk
+
       - name: Save signed APK as workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: standby-dev-${{ github.sha }}
-          path: app/build/outputs/apk/release/app-release.apk
+          name: StandBy-dev-${{ github.sha }}
+          path: StandBy-dev.apk
           if-no-files-found: error
 
       - name: Publish development prerelease
@@ -72,7 +75,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          apk_path="app/build/outputs/apk/release/app-release.apk"
+          apk_path="StandBy-dev.apk"
           test -f "$apk_path"
           short_sha="${GITHUB_SHA:0:7}"
           tag="dev-${GITHUB_RUN_NUMBER}-$short_sha"
