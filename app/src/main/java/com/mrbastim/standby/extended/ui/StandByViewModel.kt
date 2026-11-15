@@ -54,6 +54,17 @@ class StandByViewModel(
     weatherRepository: WeatherRepository,
 ) : ViewModel() {
     private val previewMode = MutableStateFlow(false)
+    private val systemSources = MutableStateFlow(systemStateRepository)
+
+    // Activity-owned observers must be replaced when the retained ViewModel gets a new Activity.
+    fun bindSystemState(repository: SystemStateRepository) { systemSources.value = repository }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private val systemState = systemSources.flatMapLatest { repository ->
+        combine(repository.charging, repository.isLandscape, repository.nextAlarm) { charging, landscape, alarm ->
+            Triple(charging, landscape, alarm)
+        }
+    }
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     private val weatherState = settingsRepository.settings
@@ -63,11 +74,10 @@ class StandByViewModel(
 
     private val baseState = combine(
         settingsRepository.settings,
-        systemStateRepository.charging,
-        systemStateRepository.isLandscape,
-        systemStateRepository.nextAlarm,
+        systemState,
         weatherState,
-    ) { settings, charging, isLandscape, nextAlarm, weather ->
+    ) { settings, system, weather ->
+        val (charging, isLandscape, nextAlarm) = system
         StandByUiState(
             settings = settings,
             charging = charging,
@@ -89,6 +99,8 @@ class StandByViewModel(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StandByUiState())
 
+    fun setDisplayProtection(value: com.mrbastim.standby.extended.data.settings.DisplayProtectionSettings) =
+        update { setDisplayProtection(value) }
     fun setAutomaticModeEnabled(value: Boolean) = update { setAutomaticModeEnabled(value) }
     fun setUse24HourClock(value: Boolean) = update { setUse24HourClock(value) }
     fun setShowSeconds(value: Boolean) = update { setShowSeconds(value) }

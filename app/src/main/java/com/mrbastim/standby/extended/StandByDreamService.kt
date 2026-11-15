@@ -2,6 +2,8 @@ package com.mrbastim.standby.extended
 
 import android.content.res.Configuration
 import android.service.dreams.DreamService
+import com.mrbastim.standby.extended.display.DisplayProtectionHost
+import com.mrbastim.standby.extended.display.DisplayPhase
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -69,7 +71,7 @@ class StandByDreamService : DreamService(), LifecycleOwner, ViewModelStoreOwner,
         super.onAttachedToWindow()
         isInteractive = true
         isFullscreen = true
-        isScreenBright = true
+        isScreenBright = false
 
         val settingsRepository = SettingsRepository(applicationContext)
         val chargingObserver = ChargingObserver(applicationContext)
@@ -91,73 +93,83 @@ class StandByDreamService : DreamService(), LifecycleOwner, ViewModelStoreOwner,
                     Configuration.ORIENTATION_LANDSCAPE
 
                 StandByTheme {
-                    if (isLandscape) {
-                        StandByDisplay(
-                            settings = settings,
-                            charging = charging,
-                            nextAlarm = nextAlarm,
-                            weather = weather,
-                            actions = StandByActions(
-                                onToggleWidget = { column: WidgetColumn, widget: StandByWidgetType ->
-                                    serviceScope.launch { settingsRepository.toggleWidget(column, widget) }
-                                },
-                                onMoveWidget = { column, from, to ->
-                                    serviceScope.launch { settingsRepository.moveWidget(column, from, to) }
-                                },
-                                onClockFaceChanged = { face ->
-                                    serviceScope.launch { settingsRepository.setClockFace(face) }
-                                },
-                                onClockColorChanged = { color ->
-                                    serviceScope.launch { settingsRepository.setClockColor(color) }
-                                },
-                                onShowSecondsChanged = { value ->
-                                    serviceScope.launch { settingsRepository.setShowSeconds(value) }
-                                },
-                                on24HourChanged = { value ->
-                                    serviceScope.launch { settingsRepository.setUse24HourClock(value) }
-                                },
-                                onShowDateChanged = { value ->
-                                    serviceScope.launch { settingsRepository.setShowDate(value) }
-                                },
-                                onDayThemeChanged = { value ->
-                                    serviceScope.launch { settingsRepository.setDayTheme(value) }
-                                },
-                                onNightThemeChanged = { value ->
-                                    serviceScope.launch { settingsRepository.setNightTheme(value) }
-                                },
-                                onBackgroundStyleChanged = { value ->
-                                    serviceScope.launch { settingsRepository.setBackgroundStyle(value) }
-                                },
-                                onTypographyStyleChanged = { value ->
-                                    serviceScope.launch { settingsRepository.setTypographyStyle(value) }
-                                },
-                                onCustomColorsChanged = { background, primary, secondary, accent ->
-                                    serviceScope.launch {
-                                        settingsRepository.setCustomColors(background, primary, secondary, accent)
-                                    }
-                                },
-                                onClockWidgetStyleChanged = { value ->
-                                    serviceScope.launch { settingsRepository.setClockWidgetStyle(value) }
-                                },
-                                onDateWidgetStyleChanged = { value ->
-                                    serviceScope.launch { settingsRepository.setDateWidgetStyle(value) }
-                                },
-                                onBatteryWidgetStyleChanged = { value ->
-                                    serviceScope.launch { settingsRepository.setBatteryWidgetStyle(value) }
-                                },
-                            ),
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text(
-                                text = stringResource(R.string.rotate_to_landscape),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    DisplayProtectionHost(
+                        window = window,
+                        active = true,
+                        settings = settings,
+                        onHoldChanged = { isScreenBright = it },
+                        onRelease = { finish() },
+                    ) { phase ->
+                        if (isLandscape) {
+                            StandByDisplay(
+                                settings = settings,
+                                charging = charging,
+                                ambient = settings.displayProtection.enabled &&
+                                    (phase == DisplayPhase.AMBIENT || phase == DisplayPhase.RELEASED),
+                                nextAlarm = nextAlarm,
+                                weather = weather,
+                                actions = StandByActions(
+                                    onToggleWidget = { column: WidgetColumn, widget: StandByWidgetType ->
+                                        serviceScope.launch { settingsRepository.toggleWidget(column, widget) }
+                                    },
+                                    onMoveWidget = { column, from, to ->
+                                        serviceScope.launch { settingsRepository.moveWidget(column, from, to) }
+                                    },
+                                    onClockFaceChanged = { face ->
+                                        serviceScope.launch { settingsRepository.setClockFace(face) }
+                                    },
+                                    onClockColorChanged = { color ->
+                                        serviceScope.launch { settingsRepository.setClockColor(color) }
+                                    },
+                                    onShowSecondsChanged = { value ->
+                                        serviceScope.launch { settingsRepository.setShowSeconds(value) }
+                                    },
+                                    on24HourChanged = { value ->
+                                        serviceScope.launch { settingsRepository.setUse24HourClock(value) }
+                                    },
+                                    onShowDateChanged = { value ->
+                                        serviceScope.launch { settingsRepository.setShowDate(value) }
+                                    },
+                                    onDayThemeChanged = { value ->
+                                        serviceScope.launch { settingsRepository.setDayTheme(value) }
+                                    },
+                                    onNightThemeChanged = { value ->
+                                        serviceScope.launch { settingsRepository.setNightTheme(value) }
+                                    },
+                                    onBackgroundStyleChanged = { value ->
+                                        serviceScope.launch { settingsRepository.setBackgroundStyle(value) }
+                                    },
+                                    onTypographyStyleChanged = { value ->
+                                        serviceScope.launch { settingsRepository.setTypographyStyle(value) }
+                                    },
+                                    onCustomColorsChanged = { background, primary, secondary, accent ->
+                                        serviceScope.launch {
+                                            settingsRepository.setCustomColors(background, primary, secondary, accent)
+                                        }
+                                    },
+                                    onClockWidgetStyleChanged = { value ->
+                                        serviceScope.launch { settingsRepository.setClockWidgetStyle(value) }
+                                    },
+                                    onDateWidgetStyleChanged = { value ->
+                                        serviceScope.launch { settingsRepository.setDateWidgetStyle(value) }
+                                    },
+                                    onBatteryWidgetStyleChanged = { value ->
+                                        serviceScope.launch { settingsRepository.setBatteryWidgetStyle(value) }
+                                    },
+                                ),
                             )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.rotate_to_landscape),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
                     }
                 }
