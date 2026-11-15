@@ -1,114 +1,115 @@
 # AMOLED Protection 2.0
 
-## Исходная реализация и область изменений
+[English](amoled-protection.md) | [Русский](amoled-protection.ru.md)
 
-До изменения Activity удерживала экран через FLAG_KEEP_SCREEN_ON, отсчитывая конечный
-тайм-аут от запуска режима. Касания этот таймер не перезапускали. DreamService всегда
-включал isScreenBright, игнорируя Keep Awake и Screen Timeout. Яркость окна не задавалась,
-глобальная яркость Android не изменялась. Общая логика яркости отсутствовала.
+## Previous implementation and scope
 
-BurnInContainer уже перемещал всё содержимое HorizontalPager через пять позиций
-(центр и четыре диагонали ±3 dp) раз в 60 секунд. Включённый в стек музыкальный виджет
-находится внутри этого контейнера. Схема сохранена; добавлен запас 3 dp по всем краям.
-Это перераспределяет нагрузку на границах контрастных элементов, но не защищает большие
-заливки и не гарантирует отсутствие выгорания. Редакторы временно отключают смещение,
-индикатор страниц исчезает, а касания проходят через обычное Compose layout/hit testing.
+Previously, Activity held the screen with FLAG_KEEP_SCREEN_ON and measured finite
+timeouts from mode activation. Touch did not restart that timer. DreamService always
+enabled isScreenBright, ignoring Keep Awake and Screen Timeout. Neither host set
+window brightness or changed global Android brightness. There was no shared brightness policy.
 
-Изменения ограничены экранной политикой, настройками, тестами и связанным исправлением
-пересоздания Activity. Новых виджетов, разрешений, сетевых интеграций и фоновых сервисов нет.
+BurnInContainer already moved all HorizontalPager content through five positions
+(center and four diagonals at ±3 dp) every 60 seconds. A music widget added to a stack
+is inside this container. The pattern is retained, with 3 dp reserved along every edge.
+It redistributes exposure around high-contrast edges but does not protect large filled
+areas or guarantee prevention of burn-in. Editors temporarily disable shifting,
+the page indicator disappears, and touch uses ordinary Compose layout and hit testing.
 
-## Компоненты и время жизни
+Changes are limited to display policy, settings, tests and a related Activity recreation
+fix. No widgets, permissions, network integrations or background services were added.
 
-- DisplayProtectionSettings: нормализуемая конфигурация в существующем Preferences DataStore.
-- DisplayProtectionPolicy: чистая Kotlin-модель одной сессии, принимающая монотонное время.
-- AmbientLightFilter: фильтр lux, гистерезис, выдержка и ограничение частоты решений.
-- AmbientLightSource: подписка SensorManager / TYPE_LIGHT.
-- DisplayProtectionController: одна корутина на окно, StateFlow фазы, применение
-  screenBrightness, Keep Awake, восстановление исходных атрибутов.
-- DisplayProtectionHost: общая Compose-интеграция для Activity и DreamService;
-  запускает контроллер только при RESUMED, останавливает при паузе/выходе/удалении композиции.
+## Components and lifecycle
 
-Activity сохраняет управление immersive mode и keyguard. DreamService сохраняет свой
-LifecycleRegistry и управление системной заставкой; isScreenBright следует решению
-общей политики. Каждый Window получает собственный контроллер. При stop снимается
-сенсорная подписка, отменяется корутина и восстанавливаются сохранённые screenBrightness
-(обычно -1, следовать системе) и флаг удержания экрана.
+- DisplayProtectionSettings: normalized configuration in the existing Preferences DataStore.
+- DisplayProtectionPolicy: a pure Kotlin model of one session, receiving monotonic time.
+- AmbientLightFilter: lux filtering, hysteresis, dwell time and decision rate limiting.
+- AmbientLightSource: the SensorManager / TYPE_LIGHT subscription.
+- DisplayProtectionController: one coroutine per window, a phase StateFlow,
+  screenBrightness and Keep Awake application, and restoration of original attributes.
+- DisplayProtectionHost: shared Compose integration for Activity and DreamService;
+  starts the controller only while RESUMED and stops it on pause, exit or composition disposal.
 
-Новая сессия после resume, пересоздания окна или повторного запуска заставки начинается
-в Active. История освещения и таймер бездействия не переносятся между окнами.
-Сохранённый Activity ViewModel получает новые SystemStateRepository-потоки при
-пересоздании Activity: старый lifecycleScope больше не замораживает состояние зарядки
-и ориентации. Пользовательские настройки при этом остаются в DataStore.
+Activity retains immersive-mode and keyguard handling. DreamService retains its
+LifecycleRegistry and system screen-saver integration; isScreenBright follows the shared
+policy. Each Window has its own controller. Stopping unregisters the sensor listener,
+cancels the coroutine and restores the captured screenBrightness (normally -1, follow
+system) and screen-retention flag.
 
-## Приоритеты и состояния
+A new session after resume, window recreation or screen-saver restart begins in Active.
+Light history and inactivity timers are not shared between windows. The retained Activity
+ViewModel receives fresh SystemStateRepository flows after recreation, so the destroyed
+Activity's lifecycleScope cannot freeze charging or orientation updates. User preferences
+remain in DataStore.
 
-1. Нормализация: начальная яркость 1–100%, минимальная 1–начальная,
-   задержка 10–3600 секунд, переход 1–60 секунд, дополнительный таймер 0–720 минут.
-2. Active: начальная яркость пользователя (по умолчанию 35%).
-3. При включённом датчике Active корректируется внутри заданного диапазона:
-   minimum + (initial - minimum) × factor. Отсутствие/ошибка регистрации датчика
-   оставляет factor = 1 и не блокирует ручное управление.
-4. Idle: после 120 секунд бездействия линейное снижение к минимуму за 12 секунд.
-5. Ambient: минимум 8%, чёрная тема Crimson Night без секунд и плавного хода часов.
-   Основные данные, музыка и страницы остаются доступны; секундный отсчёт будильника
-   становится минутным. Исходные настройки оформления не перезаписываются.
-6. Released: истёк конечный таймер удержания. Это состояние политики,
-   а не подтверждение физического выключения дисплея.
-7. Ограничения Android, энергосбережения и OEM всегда имеют окончательное слово.
+## Priorities and states
 
-Касания (включая свайпы и долгие нажатия) наблюдаются в Initial pass без потребления
-pointer events; клавиши наблюдаются через preview key events. Они перезапускают таймер
-и плавно возвращают активную яркость за 800 мс с текущего значения. Частые события
-не перезапускают уже идущую анимацию к той же цели. Часы, погода, обновления музыки,
-смены данных и recomposition не считаются активностью.
+1. Normalize settings: initial brightness 1–100%, minimum 1–initial,
+   delay 10–3600 seconds, fade 1–60 seconds, additional deadline 0–720 minutes.
+2. Active: use the user's initial brightness, 35% by default.
+3. With the sensor enabled, adjust Active within the configured range:
+   minimum + (initial - minimum) × factor. A missing sensor or failed registration
+   leaves factor = 1 and does not block manual brightness.
+4. Idle: after 120 seconds of inactivity, fade linearly to the minimum over 12 seconds.
+5. Ambient: minimum brightness, 8% by default, and the black Crimson Night theme without
+   seconds or smooth clock movement. Basic data, music and pages remain available;
+   the alarm countdown changes to minute updates. Saved appearance settings are not overwritten.
+6. Released: a finite retention deadline has expired. This is a policy state,
+   not confirmation that the physical display has switched off.
+7. Android, power-saving and OEM restrictions always have the final say.
 
-Используется SystemClock.elapsedRealtime; настенные часы нужны только виджетам.
-Единственный цикл просыпается раз в секунду в спокойном состоянии и раз в 50 мс
-во время перехода. Ввод/изменение настроек немедленно будит цикл через conflated Channel;
-конкурирующих аниматоров нет.
+Touch, including swipes and long presses, is observed in the Initial pass without
+consuming pointer events; keys are observed through preview key events. Input restarts
+inactivity and restores active brightness over 800 ms from the current value. Repeated
+events do not restart an animation already heading toward the same target. Clock ticks,
+weather, music updates, data changes and recomposition do not count as user activity.
 
-## Датчик
+Timing uses SystemClock.elapsedRealtime; wall-clock time is used only by widgets.
+The single loop wakes every second while quiet and every 50 ms during a transition.
+Input and setting changes wake it immediately through a conflated Channel.
+There are no competing brightness animators.
 
-Автоматическая адаптация по умолчанию отключена. Запрашивается примерно одно измерение
-в секунду; реальную частоту определяет аппаратная реализация датчика. Экспоненциальный
-фильтр имеет постоянную времени 5 секунд и ограничивает влияние отдельного измерения.
-Для тёмной комнаты / помещения / яркого окружения используются коэффициенты
-0.45 / 0.7 / 1. Пороги гистерезиса: 12/18 lux и 200/300 lux; новая зона должна сохраняться
-5 секунд, принятые изменения разделены минимум 10 секундами. Невалидные lux игнорируются.
-Ни один световой сигнал не повышает яркость в Idle/Ambient выше цели бездействия.
+## Light sensor
 
-## Keep Awake и Screen Timeout
+Adaptation is off by default. A sample interval of roughly one second is requested;
+hardware determines the actual delivery rate. The exponential filter has a 5-second
+time constant and limits the influence of individual measurements. Dark-room, indoor
+and bright-environment factors are 0.45 / 0.7 / 1. Hysteresis thresholds are 12/18 lux
+and 200/300 lux. A new zone must persist for 5 seconds, and accepted changes are at least
+10 seconds apart. Invalid lux values are ignored. Light readings never raise
+Idle/Ambient brightness above the inactivity target.
 
-| Настройка | Activity | DreamService |
+## Keep Awake and Screen Timeout
+
+| Setting | Activity | DreamService |
 | --- | --- | --- |
-| Keep Awake включён либо Timeout = Never | Удерживает экран | isScreenBright включён |
-| Keep Awake выключен, Follow system | Сразу отпускает удержание | isScreenBright выключен; поведение сна определяет Android |
-| Keep Awake выключен, 1 / 5 минут | Удерживает до бездействия 1 / 5 минут, затем отпускает | По истечении завершает заставку через finish() |
-| Дополнительный таймер Protection | По истечении отпускает удержание даже при Keep Awake / Never | По истечении завершает заставку |
+| Keep Awake enabled, or Timeout = Never | Retains the screen | Enables isScreenBright |
+| Keep Awake disabled, Follow system | Releases retention immediately | Disables isScreenBright; Android controls sleep |
+| Keep Awake disabled, 1 / 5 minutes | Retains until 1 / 5 minutes of inactivity, then releases | Calls finish() when the deadline expires |
+| Additional Protection deadline | Releases retention even with Keep Awake / Never | Finishes the screen saver |
 
-Если действуют два конечных таймера, используется более ранний. Дополнительный таймер
-выключен по умолчанию; интерфейс предлагает 15–720 минут. Для тестов политика также
-принимает минутный интервал. При выключенной Protection 2.0 остаются прежние настройки
-удержания и отдельный переключатель Pixel Shifting.
+When two finite deadlines apply, the earlier one wins. The additional deadline is off
+by default; the UI offers 15–720 minutes. The policy also accepts a one-minute interval
+for tests. Disabling Protection 2.0 retains the existing retention settings and the
+independent Pixel Shifting switch.
 
-Activity после отпускания удержания ждёт системный тайм-аут. Android может запустить
-настроенную системную заставку; её сессия и таймер независимы. Finish DreamService
-также не гарантирует немедленный сон: результат зависит от Android/OEM, режима
-предпросмотра и настроек зарядки. Приложение не использует goToSleep, root,
-Device Admin, частичные wake lock или изменение Settings.System.
+After Activity releases retention, the system timeout still applies. Android may start
+the configured system screen saver, whose session and timer are independent. Finishing
+DreamService also does not guarantee immediate sleep: Android/OEM behavior, preview mode
+and charging settings affect the outcome. The app does not use goToSleep, root,
+Device Admin, partial wake locks or Settings.System changes.
 
-## Ограничения и проверка
+## Limitations and verification
 
-Проценты обозначают значения WindowManager.LayoutParams.screenBrightness, а не
-физические ниты. OEM может ограничивать минимальную яркость и переопределять поведение
-DreamService. Чёрная тема уменьшает светящуюся площадь, но не заменяет аппаратное
-снижение яркости. Полупрозрачный чёрный overlay не используется.
+Percentages are WindowManager.LayoutParams.screenBrightness requests, not physical nits.
+OEMs may limit minimum brightness and override DreamService behavior. The black theme
+reduces the lit area but does not replace hardware brightness reduction.
+No translucent black overlay is used.
 
-Результаты JVM/Robolectric не доказывают снижение выгорания реальной панели. Перед
-длительной эксплуатацией требуется проверка конкретного устройства по
-[плану тестирования](testing.md).
+JVM/Robolectric results do not prove reduced wear on a physical panel. Before prolonged
+use, verify the target device using the [test plan](testing.md).
 
-Официальные контракты:
+Official contracts:
 [screenBrightness](https://developer.android.com/reference/android/view/WindowManager.LayoutParams#screenBrightness),
 [DreamService](https://developer.android.com/reference/android/service/dreams/DreamService),
-[SensorManager и lifecycle](https://developer.android.com/develop/sensors-and-location/sensors/sensors_overview).
+[SensorManager and lifecycle](https://developer.android.com/develop/sensors-and-location/sensors/sensors_overview).

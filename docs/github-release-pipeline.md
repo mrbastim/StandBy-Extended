@@ -1,5 +1,7 @@
 # GitHub release pipeline
 
+[English](github-release-pipeline.md) | [Русский](github-release-pipeline.ru.md)
+
 The workflow in `.github/workflows/release.yml` builds a signed release APK and attaches it to the GitHub Release for a `v*` tag. It can also be run manually for an existing tag from the Actions tab.
 
 ## Required repository secrets

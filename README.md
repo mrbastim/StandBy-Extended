@@ -1,5 +1,7 @@
 # StandBy Extended
 
+[English](README.md) | [Русский](README.ru.md)
+
 This build uses application ID and namespace `com.mrbastim.standby.extended`, so it can be installed alongside the original StandBy (`com.emretenoz.standby`). Each app keeps its own settings; existing StandBy settings are not automatically transferred.
 
 A polished, native Android ambient display inspired by iPhone StandBy. While the app is open, it watches charging and orientation state. When automatic mode is enabled and the device is both charging and in landscape, it enters an immersive, AMOLED-black StandBy interface. An Android `DreamService` provides the same experience after display timeout on supported devices.
@@ -113,4 +115,4 @@ StandBy does not request notification, location, storage, calendar, or contacts 
 
 ## Project status
 
-The project is under active development. See [CHANGELOG.md](CHANGELOG.md) for unreleased changes and [CONTRIBUTING.md](CONTRIBUTING.md) for the verification and release checklist. The source is available under the [MIT License](LICENSE).
+The project is under active development. See [CHANGELOG.md](CHANGELOG.md) for unreleased changes and [CONTRIBUTING.md](CONTRIBUTING.md) for the verification and release checklist, and [release publishing instructions](docs/github-release-pipeline.md) for GitHub Release setup. The source is available under the [MIT License](LICENSE).

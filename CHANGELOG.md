@@ -1,10 +1,14 @@
 # Changelog
 
+[English](CHANGELOG.md) | [Русский](CHANGELOG.ru.md)
+
 All notable changes to StandBy are documented here.
 
 ## Unreleased
 
 ### Added
+
+- English and Russian versions of the README, contributor guide, architecture, testing and release documentation.
 
 - AMOLED Protection 2.0 with independent per-window brightness (35% initial / 8% minimum), configurable inactivity delay (120 s) and fade duration (12 s).
 - Shared Activity/DreamService display policy, lifecycle cleanup, smooth touch recovery and optional filtered TYPE_LIGHT adaptation.
