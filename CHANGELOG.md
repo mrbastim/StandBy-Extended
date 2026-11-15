@@ -8,6 +8,9 @@ All notable changes to StandBy are documented here.
 
 ### Added
 
+- A `dev` integration branch with a signed APK prerelease for every push/merge, uniquely tagged and excluded from stable Latest.
+- Sensor-confirmed automatic Night Mode only in sustained near darkness at the configured minimum brightness.
+
 - English and Russian versions of the README, contributor guide, architecture, testing and release documentation.
 
 - AMOLED Protection 2.0 with independent per-window brightness (35% initial / 8% minimum), configurable inactivity delay (120 s) and fade duration (12 s).
@@ -32,7 +35,7 @@ All notable changes to StandBy are documented here.
 
 ### Changed
 
-- Ambient uses a black night theme and limits clock/alarm countdown updates to minutes without changing saved appearance.
+- Ambient preserves the selected day/night palette and limits clock/alarm countdown updates to minutes without changing saved preferences.
 - Pixel Shifting keeps its five-position ±3 dp / 60 s pattern and reserves edge space around all pager content, including music.
 - Keep Awake and Screen Timeout share the display policy; finite timeouts now restart on real interaction.
 
@@ -42,6 +45,9 @@ All notable changes to StandBy are documented here.
 - Night mode copy now reflects the selected night theme instead of promising a fixed red palette.
 
 ### Fixed
+
+- Inactivity dimming no longer forces Crimson Night; manual Night Mode and sensor-confirmed darkness are independent of the inactivity timer.
+- Light filtering advances between on-change sensor events, allowing recovery when a new steady lux value produces no further events.
 
 - Rebind Activity-owned system-state observers after Activity recreation so a retained ViewModel does not keep stopped flows.
 

@@ -37,8 +37,10 @@ clock ticks, widget updates and recomposition do not restart it.
 
 Optional ambient-light adaptation uses TYPE_LIGHT with filtering, hysteresis and rate
 limiting. Without a sensor, configured brightness remains usable. Inactivity takes
-priority over illumination. Ambient uses a black Crimson Night theme and hides seconds,
-including the alarm countdown, without overwriting saved appearance settings.
+priority over illumination. Ambient hides seconds, including the alarm countdown, while
+preserving the selected theme. With light adaptation enabled, automatic Night Mode requires
+sustained near darkness (about 0–1 lux for 10 seconds) and the configured minimum brightness.
+Inactivity alone never changes the theme; manual Night Mode remains available.
 
 Keep Awake and Screen Timeout remain available in the same section. An optional
 additional inactivity deadline overrides Keep Awake: the Activity releases its screen
@@ -88,6 +90,13 @@ app/src/main/java/com/mrbastim/standby/extended/
 ```
 
 `ChargingObserver` reads the sticky `ACTION_BATTERY_CHANGED` broadcast, checks `BatteryManager.isCharging` as an OEM fallback, and continues listening for updates. `OrientationObserver` combines physical orientation-sensor readings with Android configuration callbacks. `SystemStateRepository` exposes both as `StateFlow`; `StandByViewModel` combines them with persisted settings into a single UI state.
+
+## Development branch
+
+`main` is the stable branch; merge feature branches into `dev` for integration.
+Every push to `dev`, including a merge, runs tests and lint, builds a signed APK and
+publishes a separate GitHub **prerelease** tagged `dev-<run>-<short-sha>`.
+The stable Latest release is retained. See [pipeline setup](docs/github-release-pipeline.md).
 
 ## Build and run
 

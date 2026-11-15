@@ -84,11 +84,17 @@ not claims of completed physical-panel testing.
    dimming after a new full inactivity period.
 3. Data sources: leave clock/music/weather updating without touch. Ambient must
    start on schedule; seconds and smooth movement disappear, and the alarm countdown
-   shows hours/minutes. Touch restores the saved appearance.
+   shows hours/minutes. The selected theme must remain unchanged in an illuminated room.
+   Touch restores the normal update frequency.
 4. Illumination: enable adaptation, change the light gradually, then briefly cover
    the sensor. A brief spike must not cause a jump. Sustained darkness lowers
    active brightness within the configured bounds. Bright light must not override
-   the Ambient minimum.
+   the Ambient minimum. In near total darkness (filtered ≤1 lux for 10 seconds), brightness
+   reaches the configured minimum before the selected night palette activates. In a dim room
+   above that threshold, inactivity must never select the night palette. Returning light
+   (filtered ≥3 lux for 5 seconds) restores the day palette even while idle brightness stays low.
+   Repeat with adaptation disabled and without a sensor: no automatic night switching.
+   Verify manual Night Mode still selects the configured night theme.
 5. Missing sensor: check the explanation and manual brightness. Disabling adaptation,
    backgrounding the app and stopping the screen saver must release the TYPE_LIGHT
    listener; inspect with Android Studio Profiler / dumpsys sensorservice if needed.

@@ -51,8 +51,8 @@ remain in DataStore.
    minimum + (initial - minimum) × factor. A missing sensor or failed registration
    leaves factor = 1 and does not block manual brightness.
 4. Idle: after 120 seconds of inactivity, fade linearly to the minimum over 12 seconds.
-5. Ambient: minimum brightness, 8% by default, and the black Crimson Night theme without
-   seconds or smooth clock movement. Basic data, music and pages remain available;
+5. Ambient: minimum brightness, 8% by default, without seconds or smooth clock movement.
+   The selected palette is preserved; inactivity does not enable Night Mode. Basic data, music and pages remain available;
    the alarm countdown changes to minute updates. Saved appearance settings are not overwritten.
 6. Released: a finite retention deadline has expired. This is a policy state,
    not confirmation that the physical display has switched off.
@@ -73,11 +73,19 @@ There are no competing brightness animators.
 
 Adaptation is off by default. A sample interval of roughly one second is requested;
 hardware determines the actual delivery rate. The exponential filter has a 5-second
-time constant and limits the influence of individual measurements. Dark-room, indoor
-and bright-environment factors are 0.45 / 0.7 / 1. Hysteresis thresholds are 12/18 lux
+time constant and advances between events, including on-change sensors that send only
+one reading for steady light. Dim-room, indoor and bright-environment factors are 0.45 / 0.7 / 1. Hysteresis thresholds are 12/18 lux
 and 200/300 lux. A new zone must persist for 5 seconds, and accepted changes are at least
 10 seconds apart. Invalid lux values are ignored. Light readings never raise
 Idle/Ambient brightness above the inactivity target.
+
+Automatic Night Mode is separate from inactivity. Filtered illumination at or below 1 lux
+must persist for 10 seconds. This requests the configured minimum brightness (factor = 0);
+the configured night palette is selected only after the brightness fade reaches that minimum.
+Exit requires filtered illumination at or above 3 lux for 5 seconds. These thresholds are
+conservative sensor readings, not a guarantee of room illumination or panel luminance.
+Without a sensor, with adaptation disabled, or with Protection disabled, there is no automatic
+night switch. Manual Night Mode remains in force independently. No saved theme is overwritten.
 
 ## Keep Awake and Screen Timeout
 
@@ -102,8 +110,8 @@ Device Admin, partial wake locks or Settings.System changes.
 ## Limitations and verification
 
 Percentages are WindowManager.LayoutParams.screenBrightness requests, not physical nits.
-OEMs may limit minimum brightness and override DreamService behavior. The black theme
-reduces the lit area but does not replace hardware brightness reduction.
+OEMs may limit minimum brightness and override DreamService behavior. A user-selected black
+theme reduces the lit area but does not replace hardware brightness reduction.
 No translucent black overlay is used.
 
 JVM/Robolectric results do not prove reduced wear on a physical panel. Before prolonged
