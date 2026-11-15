@@ -1,6 +1,7 @@
 package com.mrbastim.standby.extended.data.settings
 
 import android.content.Context
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
@@ -52,6 +53,13 @@ internal fun moveWidgetInList(
 
 class SettingsRepository(private val context: Context) {
     private object Keys {
+        val protectionEnabled = booleanPreferencesKey("display_protection_enabled")
+        val protectionInitialPercent = intPreferencesKey("display_protection_initial_percent")
+        val protectionMinimumPercent = intPreferencesKey("display_protection_minimum_percent")
+        val protectionDimDelaySeconds = intPreferencesKey("display_protection_dim_delay_seconds")
+        val protectionTransitionSeconds = intPreferencesKey("display_protection_transition_seconds")
+        val protectionAmbientLight = booleanPreferencesKey("display_protection_ambient_light")
+        val protectionReleaseAfterMinutes = intPreferencesKey("display_protection_release_after_minutes")
         val automaticMode = booleanPreferencesKey("automatic_mode")
         val use24Hour = booleanPreferencesKey("use_24_hour")
         val showSeconds = booleanPreferencesKey("show_seconds")
@@ -85,6 +93,15 @@ class SettingsRepository(private val context: Context) {
         }
         .map { preferences ->
             StandBySettings(
+                displayProtection = DisplayProtectionSettings(
+                    enabled = preferences[Keys.protectionEnabled] ?: true,
+                    initialPercent = preferences[Keys.protectionInitialPercent] ?: 35,
+                    minimumPercent = preferences[Keys.protectionMinimumPercent] ?: 8,
+                    dimDelaySeconds = preferences[Keys.protectionDimDelaySeconds] ?: 120,
+                    transitionSeconds = preferences[Keys.protectionTransitionSeconds] ?: 12,
+                    ambientLight = preferences[Keys.protectionAmbientLight] ?: false,
+                    releaseAfterMinutes = preferences[Keys.protectionReleaseAfterMinutes] ?: 0,
+                ).normalized(),
                 automaticModeEnabled = preferences[Keys.automaticMode] ?: true,
                 use24HourClock = preferences[Keys.use24Hour] ?: true,
                 showSeconds = preferences[Keys.showSeconds] ?: false,
@@ -121,6 +138,19 @@ class SettingsRepository(private val context: Context) {
                 rightWidgets = decodeWidgets(preferences[Keys.rightWidgets], defaultRightWidgets),
             )
         }
+
+    suspend fun setDisplayProtection(value: DisplayProtectionSettings) {
+        val normalized = value.normalized()
+        context.settingsDataStore.edit {
+            it[Keys.protectionEnabled] = normalized.enabled
+            it[Keys.protectionInitialPercent] = normalized.initialPercent
+            it[Keys.protectionMinimumPercent] = normalized.minimumPercent
+            it[Keys.protectionDimDelaySeconds] = normalized.dimDelaySeconds
+            it[Keys.protectionTransitionSeconds] = normalized.transitionSeconds
+            it[Keys.protectionAmbientLight] = normalized.ambientLight
+            it[Keys.protectionReleaseAfterMinutes] = normalized.releaseAfterMinutes
+        }
+    }
 
     suspend fun setAutomaticModeEnabled(enabled: Boolean) = update(Keys.automaticMode, enabled)
     suspend fun setUse24HourClock(enabled: Boolean) = update(Keys.use24Hour, enabled)

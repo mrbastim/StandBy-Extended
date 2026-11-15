@@ -54,6 +54,7 @@ import java.time.LocalDateTime
 fun StandByRoot(
     state: StandByUiState,
     actions: StandByActions,
+    ambient: Boolean = false,
     settingsContent: @Composable () -> Unit,
 ) {
     AnimatedContent(
@@ -62,7 +63,7 @@ fun StandByRoot(
         label = "standby-mode",
     ) { active ->
         if (active) {
-            StandByDisplay(state.settings, state.charging, state.nextAlarm, state.weather, actions)
+            StandByDisplay(state.settings, state.charging, state.nextAlarm, state.weather, actions, ambient)
         } else {
             settingsContent()
         }
@@ -77,13 +78,23 @@ fun StandByDisplay(
     nextAlarm: NextAlarmState = NextAlarmState(),
     weather: WeatherState = WeatherState(),
     actions: StandByActions = StandByActions(),
+    ambient: Boolean = false,
 ) {
-    StandByThemeProvider(settings) {
-        ThemedBackground(
-            settings = settings,
-            modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
-        ) {
-            StandByDisplayContent(settings, charging, nextAlarm, weather, actions)
+    // Ambient suppresses seconds/smooth clock updates, and uses a true-black background.
+    val displaySettings = if (ambient) settings.copy(
+        showSeconds = false,
+        backgroundStyle = com.mrbastim.standby.extended.data.settings.BackgroundStyle.SOLID,
+        dayTheme = com.mrbastim.standby.extended.data.settings.StandByThemeId.CRIMSON_NIGHT,
+        nightTheme = com.mrbastim.standby.extended.data.settings.StandByThemeId.CRIMSON_NIGHT,
+    ) else settings
+    androidx.compose.runtime.CompositionLocalProvider(LocalAmbientMode provides ambient) {
+        StandByThemeProvider(displaySettings) {
+            ThemedBackground(
+                settings = displaySettings,
+                modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
+            ) {
+                StandByDisplayContent(displaySettings, charging, nextAlarm, weather, actions)
+            }
         }
     }
 }

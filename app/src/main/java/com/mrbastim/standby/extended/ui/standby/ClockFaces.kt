@@ -75,6 +75,7 @@ fun FullClockPage(
         ClockFaceContent(settings, Modifier.fillMaxSize())
         AlarmCountdownCard(
             nextAlarm = nextAlarm,
+            showSeconds = !LocalAmbientMode.current,
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(start = 20.dp, bottom = 20.dp),
@@ -83,9 +84,9 @@ fun FullClockPage(
 }
 
 @Composable
-private fun AlarmCountdownCard(nextAlarm: NextAlarmState, modifier: Modifier = Modifier) {
+private fun AlarmCountdownCard(nextAlarm: NextAlarmState, showSeconds: Boolean, modifier: Modifier = Modifier) {
     val theme = LocalStandByTheme.current
-    val ticker = rememberStandByTime(showSeconds = true)
+    val ticker = rememberStandByTime(showSeconds = showSeconds)
     val nowMillis = ticker.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
     val remaining = nextAlarm.triggerAtMillis?.let { triggerAtMillis ->
         alarmCountdownParts(triggerAtMillis, nowMillis)
@@ -131,8 +132,9 @@ private fun AlarmCountdownCard(nextAlarm: NextAlarmState, modifier: Modifier = M
         Spacer(Modifier.width(8.dp))
         Text(
             text = remaining?.let {
-                String.format(Locale.ROOT, "%02d:%02d:%02d", it.hours, it.minutes, it.seconds)
-            } ?: "--:--:--",
+                if (showSeconds) String.format(Locale.ROOT, "%02d:%02d:%02d", it.hours, it.minutes, it.seconds)
+                else String.format(Locale.ROOT, "%02d:%02d", it.hours, it.minutes)
+            } ?: if (showSeconds) "--:--:--" else "--:--",
             color = theme.clockPrimary,
             fontSize = 20.sp,
             lineHeight = 22.sp,

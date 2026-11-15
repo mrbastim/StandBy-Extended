@@ -12,6 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Slider
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.mrbastim.standby.extended.data.settings.DisplayProtectionSettings
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -27,6 +32,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -53,6 +60,7 @@ import com.mrbastim.standby.extended.system.ChargingSource
 @Composable
 fun SettingsScreen(
     state: StandByUiState,
+    onDisplayProtectionChanged: (DisplayProtectionSettings) -> Unit = {},
     onAutomaticModeChanged: (Boolean) -> Unit,
     on24HourChanged: (Boolean) -> Unit,
     onShowSecondsChanged: (Boolean) -> Unit,
@@ -101,20 +109,63 @@ fun SettingsScreen(
                 state.settings.automaticModeEnabled,
                 onAutomaticModeChanged,
             )
-            SettingSwitch(
-                stringResource(R.string.keep_screen_awake),
-                stringResource(R.string.keep_screen_awake_description),
-                state.settings.keepScreenAwake,
-                onKeepAwakeChanged,
-            )
-            ChoiceSetting(
-                title = stringResource(R.string.screen_timeout),
-                value = context.localizedLabel(state.settings.screenTimeout),
-                enabled = !state.settings.keepScreenAwake,
-                choices = ScreenTimeout.entries,
-                label = context::localizedLabel,
-                onSelected = onScreenTimeoutChanged,
-            )
+            SettingsSection(stringResource(R.string.protection_section))
+            var protectionExpanded by rememberSaveable { mutableStateOf(false) }
+            TextButton(onClick = { protectionExpanded = !protectionExpanded }) {
+                Text(stringResource(if (protectionExpanded) R.string.protection_collapse else R.string.protection_expand))
+            }
+            if (protectionExpanded) {
+                SettingSwitch(
+                    stringResource(R.string.keep_screen_awake),
+                    stringResource(R.string.keep_screen_awake_description),
+                    state.settings.keepScreenAwake,
+                    onKeepAwakeChanged,
+                )
+                ChoiceSetting(
+                    title = stringResource(R.string.screen_timeout),
+                    value = context.localizedLabel(state.settings.screenTimeout),
+                    enabled = !state.settings.keepScreenAwake,
+                    choices = ScreenTimeout.entries,
+                    label = context::localizedLabel,
+                    onSelected = onScreenTimeoutChanged,
+                )
+                val protection = state.settings.displayProtection
+                SettingSwitch(stringResource(R.string.protection_enabled),
+                    stringResource(R.string.protection_description), protection.enabled,
+                    { onDisplayProtectionChanged(protection.copy(enabled = it)) })
+                if (protection.enabled) {
+                    ProtectionSlider(R.string.protection_initial, protection.initialPercent, 1..100, R.string.protection_percent) {
+                        onDisplayProtectionChanged(protection.copy(initialPercent = it).normalized())
+                    }
+                    ProtectionSlider(R.string.protection_minimum, protection.minimumPercent,
+                        1..protection.initialPercent, R.string.protection_percent) {
+                        onDisplayProtectionChanged(protection.copy(minimumPercent = it))
+                    }
+                    ProtectionSlider(R.string.protection_delay, protection.dimDelaySeconds, 10..3600,
+                        R.string.protection_seconds) { onDisplayProtectionChanged(protection.copy(dimDelaySeconds = it)) }
+                    ProtectionSlider(R.string.protection_transition, protection.transitionSeconds, 1..60,
+                        R.string.protection_seconds) { onDisplayProtectionChanged(protection.copy(transitionSeconds = it)) }
+                    val lightAvailable = remember(context) {
+                        context.getSystemService(SensorManager::class.java)?.getDefaultSensor(Sensor.TYPE_LIGHT) != null
+                    }
+                    SettingSwitch(stringResource(R.string.protection_light),
+                        stringResource(if (lightAvailable) R.string.protection_light_description else R.string.protection_no_sensor),
+                        protection.ambientLight,
+                        { onDisplayProtectionChanged(protection.copy(ambientLight = it)) })
+                    ChoiceSetting(stringResource(R.string.protection_release),
+                        if (protection.releaseAfterMinutes == 0) stringResource(R.string.protection_disabled)
+                        else stringResource(R.string.protection_minutes, protection.releaseAfterMinutes),
+                        choices = listOf(0, 15, 30, 60, 120, 240, 480, 720),
+                        label = { if (it == 0) context.getString(R.string.protection_disabled)
+                            else context.getString(R.string.protection_minutes, it) },
+                        onSelected = { onDisplayProtectionChanged(protection.copy(releaseAfterMinutes = it)) })
+                    Text(stringResource(R.string.protection_release_description),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+                }
+                SettingSwitch(stringResource(R.string.burn_in_protection),
+                    stringResource(R.string.burn_in_protection_description),
+                    state.settings.burnInProtection, onBurnInProtectionChanged)
+            }
 
             SettingsSection(stringResource(R.string.section_appearance))
             ChoiceSetting(stringResource(R.string.day_theme), context.localizedLabel(state.settings.dayTheme),
@@ -138,12 +189,6 @@ fun SettingsScreen(
                 stringResource(R.string.night_mode_description),
                 state.settings.nightMode,
                 onNightModeChanged,
-            )
-            SettingSwitch(
-                stringResource(R.string.burn_in_protection),
-                stringResource(R.string.burn_in_protection_description),
-                state.settings.burnInProtection,
-                onBurnInProtectionChanged,
             )
 
             SettingsSection(stringResource(R.string.section_widgets))
@@ -187,6 +232,25 @@ fun SettingsScreen(
             )
             Spacer(Modifier.height(24.dp))
         }
+    }
+}
+
+@Composable
+private fun ProtectionSlider(title: Int, value: Int, range: IntRange, unit: Int, onValue: (Int) -> Unit) {
+    var draft by remember(value) { mutableStateOf(value.toFloat()) }
+    val titleText = stringResource(title)
+    Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+        Text(titleText, fontSize = 16.sp)
+        Text(stringResource(unit, draft.toInt()), fontSize = 13.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Slider(
+            modifier = Modifier.semantics { contentDescription = titleText },
+            value = draft.coerceIn(range.first.toFloat(), range.last.toFloat()),
+            onValueChange = { draft = it },
+            onValueChangeFinished = { onValue(draft.toInt()) },
+            valueRange = range.first.toFloat()..range.last.coerceAtLeast(range.first + 1).toFloat(),
+            enabled = range.last > range.first,
+        )
     }
 }
 
