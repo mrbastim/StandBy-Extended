@@ -6,6 +6,10 @@
 
 ## Невыпущенные изменения
 
+### Исправлено
+
+- Падение release при запуске (`LocalLifecycleOwner not present`): R8 удалял мост reflection Compose 1.6, используемый Lifecycle 2.8.
+
 ### Добавлено
 
 - Интеграционная ветка `dev` с подписанным APK в отдельном prerelease на каждый push/merge; уникальные теги не заменяют стабильный Latest.

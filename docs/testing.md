@@ -47,6 +47,15 @@ Those integrations and physical brightness require separate device testing.
   Remote GitHub Actions results were not confirmed: gh was unavailable and the browser
   tool could not access the GitHub API. No publishing or remote CI run was performed.
 
+## Release startup regression check
+
+Install the signed APK downloaded from the GitHub prerelease, then launch MainActivity
+and confirm that it remains running without `LocalLifecycleOwner not present` in logcat.
+Repeat a cold start and open Settings. Debug startup and successful R8 assembly alone
+do not cover this reflection bridge. Release and prerelease use the same release key;
+a locally installed debug APK normally has a different certificate and cannot be updated
+with the published APK without migrating the installation.
+
 ## Automated commands
 
 From the repository root:

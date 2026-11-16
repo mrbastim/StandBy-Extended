@@ -6,6 +6,10 @@ All notable changes to StandBy are documented here.
 
 ## Unreleased
 
+### Fixed
+
+- Release startup crash (`LocalLifecycleOwner not present`) caused by R8 removing the Compose 1.6 reflection bridge used by Lifecycle 2.8.
+
 ### Added
 
 - A `dev` integration branch with a signed APK prerelease for every push/merge, uniquely tagged and excluded from stable Latest.
