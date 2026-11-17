@@ -49,6 +49,12 @@ Those integrations and physical brightness require separate device testing.
 
 ## Release startup regression check
 
+CI now signs the unsigned minified release artifact with a disposable test key and runs
+MainActivity twice on an API 28 emulator before the isolated production signing job.
+It fails if the process exits or AndroidRuntime reports a fatal exception. PR builds use
+the same smoke workflow. This catches the R8 lifecycle bridge regression, but does not
+replace physical-device brightness or production-certificate installation checks.
+
 Install the signed APK downloaded from the GitHub prerelease, then launch MainActivity
 and confirm that it remains running without `LocalLifecycleOwner not present` in logcat.
 Repeat a cold start and open Settings. Debug startup and successful R8 assembly alone

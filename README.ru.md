@@ -77,8 +77,10 @@ app/src/main/java/com/mrbastim/standby/extended/
 ## Ветка разработки
 
 `main` — стабильная ветка; feature-ветки объединяются в `dev` для интеграции.
-Каждый push в `dev`, включая merge, запускает тесты и Lint, собирает подписанный APK и
-публикует отдельный GitHub **prerelease** с тегом `dev-<run>-<short-sha>`.
+Каждый push в `dev`, включая merge, запускает тесты, Lint и проверку запуска minified APK.
+При запуске владельцем затем выполняются подпись в environment `release-signing` и публикация
+отдельного GitHub **prerelease** с тегом `dev-<run>-<short-sha>` после обязательной настройки
+доступа к environment и ветке.
 Стабильный Latest-релиз сохраняется. Подробнее: [настройка pipeline](docs/github-release-pipeline.ru.md).
 
 ## Сборка и запуск
