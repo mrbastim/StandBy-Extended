@@ -42,7 +42,10 @@ name alone does **not** create deployment restrictions or protect existing repos
    The admin bypass preserves automated owner pushes/merges without self-approval.
 2. Create **Settings → Environments → release-signing**. Under **Deployment branches
    and tags**, select **Selected branches and tags**, allow branch `dev`, branch `main`
-   (for manual stable publication), and tags `v*`. Do not choose unrestricted access.
+   (for manual stable publication), and tags `v*`. Before permitting stable refs,
+   apply the same owner-only branch rule to `main` and a tag ruleset restricting
+   creation, updates and deletion of `v*` tags to administrators. Until those are
+   protected, allow **only `dev`** in the environment. Do not choose unrestricted access.
    Keep reviews optional if every owner push should publish automatically; requiring
    approval will deliberately pause each signing job.
 3. Put these four secrets in that environment:
