@@ -60,6 +60,12 @@ jobs:
     permissions:
       contents: write
     uses: ./.github/workflows/publish-apk.yml
+    # Explicit forwarding is required even for secrets resolved by the callee's environment.
+    secrets:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
     with:
       development: false
       release-tag: ${{ needs.build.outputs.tag }}
