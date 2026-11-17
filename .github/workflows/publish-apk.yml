@@ -84,7 +84,11 @@ jobs:
           done
           keystore_path="$RUNNER_TEMP/release-key.jks"
           trap 'rm -f "$keystore_path"' EXIT
-          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore_path"
+          # Accept wrapped/CRLF clipboard input without ignoring other invalid characters.
+          if ! printf '%s' "$ANDROID_KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > "$keystore_path"; then
+            echo "ANDROID_KEYSTORE_BASE64 is not valid base64. Encode the original .jks/.keystore file, not its filename or password." >&2
+            exit 1
+          fi
           apk_name="standby-android-extended.apk"
           if [[ "$DEVELOPMENT" == "true" ]]; then apk_name="standby-android-extended-dev.apk"; fi
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks "$keystore_path" --ks-key-alias "$ANDROID_KEY_ALIAS" --ks-pass env:ANDROID_KEYSTORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD --out "$apk_name" incoming/app-release-unsigned.apk
