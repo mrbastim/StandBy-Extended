@@ -2,46 +2,63 @@
 
 [English](github-release-pipeline.md) | [Русский](github-release-pipeline.ru.md)
 
-The workflow in `.github/workflows/release.yml` builds a signed release APK, names the attached file `StandBy.apk`, and publishes it to the GitHub Release for a `v*` tag. It can also be run manually for an existing tag from the Actions tab.
+Stable tags `v*` use `release.yml` and publish `StandBy.apk`.
+Every push/merge to `dev` uses `dev-prerelease.yml` and publishes
+`StandBy-dev.apk` as `dev-<run>-<short-sha>`, with `--prerelease --latest=false`.
+One push builds its head commit; earlier runs are not cancelled. Retries update their
+own asset. App ID and version are unchanged. Automatic publication is limited to
+runs triggered by `mrbastim`; other actors can build but cannot sign/publish.
 
-## Development APKs from dev
+## Build, test and signing boundaries
 
-`main` remains stable. Feature branches are merged into `dev`. The separate
-`.github/workflows/dev-prerelease.yml` runs on every push to `dev`, including a merge.
-One push produces one build of its exact head commit; multiple commits pushed together
-produce one prerelease for the final commit.
+1. Build jobs check out source with `persist-credentials: false`, read-only token,
+   no signing secrets, and run tests, lint and debug/release assembly.
+   They upload `unsigned-release/app-release-unsigned.apk`.
+2. `release-smoke.yml` signs that same minified APK with a disposable key and launches
+   MainActivity twice on an API 28 emulator. The process must survive and have no fatal
+   AndroidRuntime error. This exercises the Compose/Lifecycle reflection path after R8.
+   PR CI runs the same check. Neither job receives the production key.
+3. `publish-apk.yml` runs on a fresh runner with environment `release-signing`.
+   It does not check out or execute repository build code, restore build caches or run
+   the APK. Android SDK apksigner signs the downloaded artifact, verifies its signature,
+   and deletes the temporary keystore. Only the publication step receives a write token.
+   The signed artifact is named `StandBy-signed-<sha>`.
 
-The workflow runs unit tests, Android Lint and debug/release assembly before publishing.
-It uses the same four signing secrets listed below to sign the release-variant APK;
-“prerelease” is its GitHub publication status, not an Android build type.
-The application ID and version remain unchanged.
+Both stable and dev APKs use the same release key. Local debug installs normally use
+another certificate and cannot be updated by these APKs directly.
+Release publication fails if any build/smoke/signing step fails; no unsigned fallback.
 
-Each successful run creates a separate prerelease named `dev-<run>-<short-sha>`,
-targets the exact triggering commit, attaches `StandBy-dev.apk`, and also saves it as an
-Actions artifact named `StandBy-dev-<sha>`. Earlier runs are not cancelled by later pushes. Retrying the same run
-updates its own prerelease and asset. The workflow explicitly sets `--prerelease`
-and `--latest=false`, so the stable Latest release is preserved. Development tags do not
-match the stable workflow's `v*` trigger. No unsigned fallback is published if secrets,
-tests, lint or assembly fail.
+## Required owner settings (not applied by committing YAML)
 
-See [development prereleases](https://github.com/mrbastim/StandBy-Extended/releases)
-and [workflow runs](https://github.com/mrbastim/StandBy-Extended/actions?query=branch%3Adev).
+The current GitHub App cannot administer branch protection or environments (HTTP 403).
+The following settings must be applied by the repository owner. A workflow's environment
+name alone does **not** create deployment restrictions or protect existing repository secrets.
 
-## Required repository secrets
+1. Open **Settings → Rules → Rulesets → Import a ruleset** and import
+   [.github/dev-branch-ruleset.json](../.github/dev-branch-ruleset.json).
+   Keep it **Active** and target only `dev`. It restricts updates, deletion and force
+   pushes to repository administrators. For this personal repository, keep admin access
+   with the owner only; remove unneeded collaborator write/admin access.
+   The admin bypass preserves automated owner pushes/merges without self-approval.
+2. Create **Settings → Environments → release-signing**. Under **Deployment branches
+   and tags**, select **Selected branches and tags**, allow branch `dev`, branch `main`
+   (for manual stable publication), and tags `v*`. Do not choose unrestricted access.
+   Keep reviews optional if every owner push should publish automatically; requiring
+   approval will deliberately pause each signing job.
+3. Put these four secrets in that environment:
+   `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
+   `ANDROID_KEY_PASSWORD`. Reuse the existing key and values.
+   Then remove their repository-level copies. Keeping them at repository scope allows
+   a modified workflow on another branch to request them and defeats isolation.
+4. Review changes to all workflows and Gradle files before allowing code into `dev`.
+   The owner/actor guard is defense in depth, not a replacement for branch protection.
 
-In GitHub, open **Settings → Secrets and variables → Actions → New repository secret** and add:
+Keep the original keystore/passwords outside Git. Base64-encode it with
+`base64 -w 0 release-key.jks` on Linux, or
+`base64 < release-key.jks | tr -d '\n'` on macOS.
 
-- `ANDROID_KEYSTORE_BASE64`: base64 encoding of the `.jks` or `.keystore` signing file.
-- `ANDROID_KEYSTORE_PASSWORD`: keystore password.
-- `ANDROID_KEY_ALIAS`: signing key alias.
-- `ANDROID_KEY_PASSWORD`: signing key password.
+These workflow changes take effect on `main` only after merging the PR.
+No stable release is created by this change.
 
-On Linux or macOS, encode the keystore without line breaks:
-
-```sh
-base64 -w 0 release-key.jks
-```
-
-On macOS, use `base64 < release-key.jks | tr -d '\n'` instead. Copy the output into the `ANDROID_KEYSTORE_BASE64` secret. Keep the original keystore and passwords somewhere safe; never commit them to the repository.
-
-To publish the existing `v1.0.5` tag after configuring secrets, run **Actions → Build and publish Android release → Run workflow**, select branch `main`, and enter `v1.0.5`. Future release tags trigger the workflow automatically when pushed.
+[GitHub branch protection](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches),
+[deployment environments](https://docs.github.com/en/actions/concepts/workflows-and-actions/deployment-environments).

@@ -1,0 +1,91 @@
+name: Sign and publish APK
+
+on:
+  workflow_call:
+    inputs:
+      development:
+        type: boolean
+        required: true
+      target-sha:
+        type: string
+        required: true
+      release-tag:
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: github.repository == 'mrbastim/StandBy-Extended' && github.actor == 'mrbastim'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: release-signing
+    permissions:
+      contents: write
+    steps:
+      # Deliberately no checkout, Gradle, project scripts, caches or APK execution here.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager "build-tools;35.0.0"
+      - uses: actions/download-artifact@v4
+        with:
+          name: unsigned-release
+          path: incoming
+      - name: Sign APK using the protected environment
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          DEVELOPMENT: ${{ inputs.development }}
+        run: |
+          for secret_name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [[ -z "${!secret_name}" ]]; then
+              echo "Required signing secret is missing: $secret_name" >&2
+              exit 1
+            fi
+          done
+          keystore_path="$RUNNER_TEMP/release-key.jks"
+          trap 'rm -f "$keystore_path"' EXIT
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore_path"
+          apk_name="StandBy.apk"
+          if [[ "$DEVELOPMENT" == "true" ]]; then apk_name="StandBy-dev.apk"; fi
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks "$keystore_path" --ks-key-alias "$ANDROID_KEY_ALIAS" --ks-pass env:ANDROID_KEYSTORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD --out "$apk_name" incoming/app-release-unsigned.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify "$apk_name"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: StandBy-signed-${{ github.sha }}
+          path: StandBy*.apk
+          if-no-files-found: error
+      - name: Publish signed APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          DEVELOPMENT: ${{ inputs.development }}
+          TARGET_SHA: ${{ inputs.target-sha }}
+          RELEASE_TAG: ${{ inputs.release-tag }}
+        run: |
+          if [[ "$DEVELOPMENT" == "true" ]]; then
+            short_sha="${TARGET_SHA:0:7}"
+            tag="dev-${GITHUB_RUN_NUMBER}-$short_sha"
+            title="Development build #${GITHUB_RUN_NUMBER} ($short_sha)"
+            notes="Automated development build. Commit: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$TARGET_SHA. Tests, lint and minified startup smoke check passed."
+            if gh release view "$tag" >/dev/null 2>&1; then
+              gh release edit "$tag" --prerelease --latest=false --title "$title" --notes "$notes"
+              gh release upload "$tag" StandBy-dev.apk --clobber
+            else
+              gh release create "$tag" StandBy-dev.apk --target "$TARGET_SHA" --prerelease --latest=false --title "$title" --notes "$notes"
+            fi
+          else
+            [[ "$RELEASE_TAG" == v* ]]
+            if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+              gh release upload "$RELEASE_TAG" StandBy.apk --clobber
+            else
+              gh release create "$RELEASE_TAG" StandBy.apk --generate-notes --verify-tag
+            fi
+          fi

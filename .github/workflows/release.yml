@@ -2,8 +2,7 @@ name: Build and publish Android release
 
 on:
   push:
-    tags:
-      - "v*"
+    tags: ["v*"]
   workflow_dispatch:
     inputs:
       tag:
@@ -12,81 +11,56 @@ on:
         default: v1.0.5
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  release:
+  build:
+    if: github.repository == 'mrbastim/StandBy-Extended' && github.actor == 'mrbastim'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      sha: ${{ steps.commit.outputs.sha }}
     steps:
       - name: Select release tag
         id: release
-        shell: bash
         env:
           INPUT_TAG: ${{ inputs.tag }}
         run: |
-          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
-            echo "tag=$INPUT_TAG" >> "$GITHUB_OUTPUT"
-          else
-            echo "tag=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Check out source
-        uses: actions/checkout@v4
+          tag="$GITHUB_REF_NAME"
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then tag="$INPUT_TAG"; fi
+          [[ "$tag" == v* ]]
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
         with:
           ref: ${{ steps.release.outputs.tag }}
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
+          persist-credentials: false
+      - name: Record source commit
+        id: commit
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Test, lint and assemble without release secrets
+        run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-release
+          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          if-no-files-found: error
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+  smoke:
+    needs: build
+    uses: ./.github/workflows/release-smoke.yml
 
-      - name: Check signing secrets
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          for secret_name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
-            if [[ -z "${!secret_name}" ]]; then
-              echo "Required GitHub secret is missing: $secret_name" >&2
-              exit 1
-            fi
-          done
-
-      - name: Decode signing keystore
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        run: |
-          keystore_path="$RUNNER_TEMP/release-key.jks"
-          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore_path"
-          echo "ANDROID_KEYSTORE_PATH=$keystore_path" >> "$GITHUB_ENV"
-
-      - name: Build signed release APK
-        env:
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew --no-daemon :app:assembleRelease
-
-      - name: Publish APK to GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ steps.release.outputs.tag }}
-        run: |
-          apk_path="app/build/outputs/apk/release/app-release.apk"
-          if [[ ! -f "$apk_path" ]]; then
-            echo "Signed APK not found at $apk_path" >&2
-            exit 1
-          fi
-
-          cp "$apk_path" StandBy.apk
-          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" StandBy.apk --clobber
-          else
-            gh release create "$RELEASE_TAG" StandBy.apk --generate-notes --verify-tag
-          fi
+  publish:
+    needs: [build, smoke]
+    permissions:
+      contents: write
+    uses: ./.github/workflows/publish-apk.yml
+    with:
+      development: false
+      release-tag: ${{ needs.build.outputs.tag }}
+      target-sha: ${{ needs.build.outputs.sha }}

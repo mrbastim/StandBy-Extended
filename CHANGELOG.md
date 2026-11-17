@@ -8,6 +8,11 @@ All notable changes to StandBy are documented here.
 
 ### Fixed
 
+- Shortened inactivity delays keep elapsed time after recent frames and during dimming.
+- Ambient-light adaptation is disabled in Settings when TYPE_LIGHT is unavailable.
+- Release signing runs separately from Gradle with an owner-only publication guard and an environment; owner setup is required for branch/secret protection.
+- CI launches the minified release APK twice on an API 28 emulator before publication.
+
 - Release startup crash (`LocalLifecycleOwner not present`) caused by R8 removing the Compose 1.6 reflection bridge used by Lifecycle 2.8.
 
 ### Added
@@ -43,7 +48,7 @@ All notable changes to StandBy are documented here.
 - Pixel Shifting keeps its five-position ±3 dp / 60 s pattern and reserves edge space around all pager content, including music.
 - Keep Awake and Screen Timeout share the display policy; finite timeouts now restart on real interaction.
 
-- Application namespace and ID are now `com.emretenoz.standby`.
+- Application namespace and ID are now `com.mrbastim.standby.extended`.
 - Release builds enable code and resource shrinking.
 - The stack editor and customization rows adapt better to compact landscape displays.
 - Night mode copy now reflects the selected night theme instead of promising a fixed red palette.
