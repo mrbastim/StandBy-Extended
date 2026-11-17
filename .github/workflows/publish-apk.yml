@@ -22,6 +22,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: release-signing
+    concurrency:
+      group: apk-publish-${{ github.repository }}-${{ inputs.development && 'dev' || inputs.release-tag }}
+      cancel-in-progress: false
     permissions:
       contents: write
     steps:
@@ -38,7 +41,25 @@ jobs:
         with:
           name: unsigned-release
           path: incoming
+      - name: Skip outdated development builds
+        id: current
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          DEVELOPMENT: ${{ inputs.development }}
+          TARGET_SHA: ${{ inputs.target-sha }}
+        run: |
+          if [[ "$DEVELOPMENT" == "true" ]]; then
+            head_sha="$(gh api "repos/$GH_REPO/git/ref/heads/dev" --jq '.object.sha')"
+            if [[ "$head_sha" != "$TARGET_SHA" ]]; then
+              echo "Skipping superseded development commit $TARGET_SHA"
+              echo "publish=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          echo "publish=true" >> "$GITHUB_OUTPUT"
       - name: Sign APK using the protected environment
+        if: steps.current.outputs.publish == 'true'
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -55,16 +76,18 @@ jobs:
           keystore_path="$RUNNER_TEMP/release-key.jks"
           trap 'rm -f "$keystore_path"' EXIT
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore_path"
-          apk_name="StandBy.apk"
-          if [[ "$DEVELOPMENT" == "true" ]]; then apk_name="StandBy-dev.apk"; fi
+          apk_name="standby-android-extended.apk"
+          if [[ "$DEVELOPMENT" == "true" ]]; then apk_name="standby-android-extended-dev.apk"; fi
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks "$keystore_path" --ks-key-alias "$ANDROID_KEY_ALIAS" --ks-pass env:ANDROID_KEYSTORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD --out "$apk_name" incoming/app-release-unsigned.apk
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify "$apk_name"
       - uses: actions/upload-artifact@v4
+        if: steps.current.outputs.publish == 'true'
         with:
-          name: StandBy-signed-${{ github.sha }}
-          path: StandBy*.apk
+          name: standby-android-extended-signed-${{ github.sha }}
+          path: standby-android-extended*.apk
           if-no-files-found: error
       - name: Publish signed APK
+        if: steps.current.outputs.publish == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -73,21 +96,40 @@ jobs:
           RELEASE_TAG: ${{ inputs.release-tag }}
         run: |
           if [[ "$DEVELOPMENT" == "true" ]]; then
-            short_sha="${TARGET_SHA:0:7}"
-            tag="dev-${GITHUB_RUN_NUMBER}-$short_sha"
-            title="Development build #${GITHUB_RUN_NUMBER} ($short_sha)"
-            notes="Automated development build. Commit: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$TARGET_SHA. Tests, lint and minified startup smoke check passed."
-            if gh release view "$tag" >/dev/null 2>&1; then
-              gh release edit "$tag" --prerelease --latest=false --title "$title" --notes "$notes"
-              gh release upload "$tag" StandBy-dev.apk --clobber
-            else
-              gh release create "$tag" StandBy-dev.apk --target "$TARGET_SHA" --prerelease --latest=false --title "$title" --notes "$notes"
+            # Recheck after SDK setup/signing: a newer push may have arrived meanwhile.
+            head_sha="$(gh api "repos/$GH_REPO/git/ref/heads/dev" --jq '.object.sha')"
+            if [[ "$head_sha" != "$TARGET_SHA" ]]; then
+              echo "Skipping superseded development commit $TARGET_SHA"
+              exit 0
             fi
+            short_sha="${TARGET_SHA:0:7}"
+            tag="dev"
+            title="Development build ($short_sha)"
+            notes="Rolling development prerelease; its APK and tag are replaced after successful checks. Commit: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$TARGET_SHA. Build: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID. Tests, lint and minified startup smoke check passed."
+            if gh api "repos/$GH_REPO/git/ref/tags/dev" --silent; then
+              gh api --method PATCH "repos/$GH_REPO/git/refs/tags/dev" -f sha="$TARGET_SHA" -F force=true --silent
+            else
+              gh api --method POST "repos/$GH_REPO/git/refs" -f ref="refs/tags/dev" -f sha="$TARGET_SHA" --silent
+            fi
+            if gh release view "$tag" >/dev/null 2>&1; then
+              gh release upload "$tag" standby-android-extended-dev.apk --clobber
+              gh release edit "$tag" --target "$TARGET_SHA" --prerelease --latest=false --title "$title" --notes "$notes"
+            else
+              gh release create "$tag" standby-android-extended-dev.apk --verify-tag --prerelease --latest=false --title "$title" --notes "$notes"
+            fi
+            # Owner-approved migration: remove only these four old prereleases.
+            # Keep source tags, stable releases and any unrelated publications.
+            for legacy_tag in dev-1-ffae1ad dev-2-f5a5cd5 dev-3-03a3f22 dev-4-40441d0; do
+              legacy_prerelease="$(gh release view "$legacy_tag" --json isPrerelease --jq '.isPrerelease' 2>/dev/null || true)"
+              if [[ "$legacy_prerelease" == "true" ]]; then
+                gh release delete "$legacy_tag" --yes
+              fi
+            done
           else
             [[ "$RELEASE_TAG" == v* ]]
             if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-              gh release upload "$RELEASE_TAG" StandBy.apk --clobber
+              gh release upload "$RELEASE_TAG" standby-android-extended.apk --clobber
             else
-              gh release create "$RELEASE_TAG" StandBy.apk --generate-notes --verify-tag
+              gh release create "$RELEASE_TAG" standby-android-extended.apk --generate-notes --verify-tag
             fi
           fi

@@ -78,9 +78,10 @@ app/src/main/java/com/mrbastim/standby/extended/
 
 `main` — стабильная ветка; feature-ветки объединяются в `dev` для интеграции.
 Каждый push в `dev`, включая merge, запускает тесты, Lint и проверку запуска minified APK.
-При запуске владельцем затем выполняются подпись в environment `release-signing` и публикация
-отдельного GitHub **prerelease** с тегом `dev-<run>-<short-sha>` после обязательной настройки
-доступа к environment и ветке.
+При запуске владельцем выполняются подпись в environment `release-signing` и обновление
+одного GitHub **prerelease** с тегом `dev` после обязательной настройки доступа к environment
+и ветке. APK разработки — `standby-android-extended-dev.apk`, стабильный —
+`standby-android-extended.apk`. Запоздавшая сборка не заменит свежий dev APK.
 Стабильный Latest-релиз сохраняется. Подробнее: [настройка pipeline](docs/github-release-pipeline.ru.md).
 
 ## Сборка и запуск

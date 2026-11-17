@@ -95,9 +95,10 @@ app/src/main/java/com/mrbastim/standby/extended/
 
 `main` is the stable branch; merge feature branches into `dev` for integration.
 Every push to `dev`, including a merge, runs tests, lint and a minified APK startup check.
-Owner-triggered runs then sign in the `release-signing` environment and publish a separate
-GitHub **prerelease** tagged `dev-<run>-<short-sha>`, after the required environment/branch
-settings are configured.
+Owner-triggered runs sign in the `release-signing` environment and update one rolling
+GitHub **prerelease** tagged `dev`, after the required environment/branch settings are
+configured. Its APK is `standby-android-extended-dev.apk`; stable releases use
+`standby-android-extended.apk`. Superseded builds cannot replace the current dev APK.
 The stable Latest release is retained. See [pipeline setup](docs/github-release-pipeline.md).
 
 ## Build and run

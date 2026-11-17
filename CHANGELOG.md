@@ -17,7 +17,7 @@ All notable changes to StandBy are documented here.
 
 ### Added
 
-- A `dev` integration branch with a signed APK prerelease for every push/merge, uniquely tagged and excluded from stable Latest.
+- A `dev` integration branch with one rolling prerelease (`dev`), refreshed after successful checks and excluded from stable Latest. APKs use `standby-android-extended.apk` for stable and `standby-android-extended-dev.apk` for development.
 - Sensor-confirmed automatic Night Mode only in sustained near darkness at the configured minimum brightness.
 
 - English and Russian versions of the README, contributor guide, architecture, testing and release documentation.

@@ -2,12 +2,25 @@
 
 [English](github-release-pipeline.md) | [Русский](github-release-pipeline.ru.md)
 
-Stable tags `v*` use `release.yml` and publish `StandBy.apk`.
-Every push/merge to `dev` uses `dev-prerelease.yml` and publishes
-`StandBy-dev.apk` as `dev-<run>-<short-sha>`, with `--prerelease --latest=false`.
-One push builds its head commit; earlier runs are not cancelled. Retries update their
-own asset. App ID and version are unchanged. Automatic publication is limited to
-runs triggered by `mrbastim`; other actors can build but cannot sign/publish.
+Stable tags `v*` use `release.yml` and publish `standby-android-extended.apk`.
+Every push/merge to `dev` uses `dev-prerelease.yml`. After successful checks it updates
+one prerelease tagged `dev`, with `--prerelease --latest=false`, replacing
+`standby-android-extended-dev.apk`. The existing release is edited in place, keeping
+its ID and download URL. The lightweight tag moves to the exact tested commit.
+The title/notes identify that commit and its CI run; stable Latest is preserved.
+
+Builds run independently. Publication is serialized; it checks the current dev head
+before signing and again before publication, skipping superseded commits. Pending
+publication jobs may be coalesced by GitHub concurrency; there is only one dev channel.
+Retries replace the same asset. App ID/version are unchanged. Publication is limited
+to runs triggered by `mrbastim`; other actors can build but cannot sign/publish.
+
+Permanent dev download:
+[standby-android-extended-dev.apk](https://github.com/mrbastim/StandBy-Extended/releases/download/dev/standby-android-extended-dev.apk).
+After the first successful rolling publication, the four old automatic prereleases
+`dev-1-ffae1ad`, `dev-2-f5a5cd5`, `dev-3-03a3f22`, `dev-4-40441d0` are removed
+with owner authorization. Their Git tags remain; old APK download URLs stop working.
+This cleanup only removes those exact tags' releases if they are marked prerelease.
 
 ## Build, test and signing boundaries
 
@@ -22,7 +35,8 @@ runs triggered by `mrbastim`; other actors can build but cannot sign/publish.
    It does not check out or execute repository build code, restore build caches or run
    the APK. Android SDK apksigner signs the downloaded artifact, verifies its signature,
    and deletes the temporary keystore. Only the publication step receives a write token.
-   The signed artifact is named `StandBy-signed-<sha>`.
+   The signed artifact is named `standby-android-extended-signed-<sha>`. The moving
+   `dev` tag must remain mutable; apply stable tag protection to `v*` only.
 
 Both stable and dev APKs use the same release key. Local debug installs normally use
 another certificate and cannot be updated by these APKs directly.
