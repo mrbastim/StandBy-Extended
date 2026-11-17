@@ -36,17 +36,19 @@ jobs:
           arch: x86_64
           target: google_apis
           disable-animations: true
-          script: |
-            adb install smoke.apk
+          # The action executes each physical script line in its own shell.
+          # Fold the loop into one command so its variables and control flow share a shell.
+          script: >-
+            set -eu;
+            adb install smoke.apk;
             for attempt in 1 2; do
-              adb shell am force-stop com.mrbastim.standby.extended
-              adb shell am start -W -n com.mrbastim.standby.extended/.MainActivity
-              sleep 5
-              app_pid="$(adb shell pidof com.mrbastim.standby.extended | tr -d '\r')"
-              test -n "$app_pid"
-              adb logcat -d --pid="$app_pid" -s AndroidRuntime:E > runtime.log
-              if grep -Eq 'FATAL EXCEPTION|LocalLifecycleOwner not present' runtime.log; then
-                cat runtime.log
-                exit 1
-              fi
+            adb shell am force-stop com.mrbastim.standby.extended;
+            adb shell am start -W -n com.mrbastim.standby.extended/.MainActivity;
+            sleep 5;
+            app_pid="$(adb shell pidof com.mrbastim.standby.extended | tr -d '\r')";
+            test -n "$app_pid";
+            adb logcat -d --pid="$app_pid" -s AndroidRuntime:E > runtime.log;
+            if grep -Eq 'FATAL EXCEPTION|LocalLifecycleOwner not present' runtime.log; then
+            cat runtime.log; exit 1;
+            fi;
             done
