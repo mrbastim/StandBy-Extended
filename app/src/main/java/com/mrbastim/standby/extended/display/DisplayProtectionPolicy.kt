@@ -53,9 +53,12 @@ class DisplayProtectionPolicy(startedAt: Long) {
         brightness = sample(now)
         val durationChanged = phase != DisplayPhase.ACTIVE && isFading(now) &&
             previousConfig?.transitionSeconds != config.transitionSeconds
-        if (target != destination || durationChanged) {
+        val delayChanged = previousConfig != null && previousConfig?.dimDelaySeconds != config.dimDelaySeconds
+        if (target != destination || durationChanged || (delayChanged && phase != DisplayPhase.ACTIVE && isFading(now))) {
             fadeFrom = brightness ?: target ?: 0f
-            fadeStarted = if (!durationChanged && phase != DisplayPhase.ACTIVE && lastFrame < lastInteraction + dimAt) {
+            // A changed delay still uses the last real interaction, even after a recent frame.
+            fadeStarted = if (!durationChanged && phase != DisplayPhase.ACTIVE &&
+                (delayChanged || lastFrame < lastInteraction + dimAt)) {
                 lastInteraction + dimAt
             } else now
             fadeDuration = if (phase != DisplayPhase.ACTIVE) config.transitionSeconds * 1000L else 800L

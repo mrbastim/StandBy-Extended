@@ -201,6 +201,27 @@ class DisplayProtectionPolicyTest {
         brightness(0.08f, policy.evaluate(40_000, changed))
     }
 
+    @Test fun shorteningDelayAfterRecentFrameKeepsElapsedInactivity() {
+        val policy = DisplayProtectionPolicy(0)
+        policy.evaluate(0, settings)
+        policy.evaluate(40_000, settings)
+        val changed = settings.copy(displayProtection = settings.displayProtection.copy(dimDelaySeconds = 20))
+        val result = policy.evaluate(40_000, changed)
+        assertEquals(DisplayPhase.AMBIENT, result.phase)
+        brightness(0.08f, result)
+    }
+
+    @Test fun shorteningDelayWhileAlreadyFadingDoesNotRestartFullFade() {
+        val policy = DisplayProtectionPolicy(0)
+        policy.evaluate(0, settings)
+        policy.evaluate(120_000, settings)
+        policy.evaluate(126_000, settings)
+        val changed = settings.copy(displayProtection = settings.displayProtection.copy(dimDelaySeconds = 100))
+        val result = policy.evaluate(126_000, changed)
+        assertEquals(DisplayPhase.AMBIENT, result.phase)
+        brightness(0.08f, result)
+    }
+
     @Test fun disabledProtectionReturnsWindowControlAndKeepsLegacyTimeout() {
         val policy = DisplayProtectionPolicy(0)
         val disabled = settings.copy(keepScreenAwake = false, screenTimeout = ScreenTimeout.ONE_MINUTE,

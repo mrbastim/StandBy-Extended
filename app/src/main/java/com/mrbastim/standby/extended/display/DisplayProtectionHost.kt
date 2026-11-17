@@ -36,16 +36,16 @@ fun DisplayProtectionHost(
     val context = LocalContext.current
     val owner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
-    val currentSettings by rememberUpdatedState(settings)
-    val hold by rememberUpdatedState(onHoldChanged)
-    val release by rememberUpdatedState(onRelease)
+    val currentSettings = rememberUpdatedState(settings)
+    val hold = rememberUpdatedState(onHoldChanged)
+    val release = rememberUpdatedState(onRelease)
     val controller = remember(window, context) {
-        DisplayProtectionController(context, window, scope, { hold(it) }, { release() })
+        DisplayProtectionController(context, window, scope, { hold.value(it) }, { release.value() })
     }
     SideEffect { controller.update(settings) }
     DisposableEffect(controller, owner, active) {
         fun sync() {
-            controller.update(currentSettings)
+            controller.update(currentSettings.value)
             if (active && owner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
                 controller.start()
             } else controller.stop()

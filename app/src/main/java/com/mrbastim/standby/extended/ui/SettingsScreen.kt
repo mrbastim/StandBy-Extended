@@ -150,8 +150,9 @@ fun SettingsScreen(
                     }
                     SettingSwitch(stringResource(R.string.protection_light),
                         stringResource(if (lightAvailable) R.string.protection_light_description else R.string.protection_no_sensor),
-                        protection.ambientLight,
-                        { onDisplayProtectionChanged(protection.copy(ambientLight = it)) })
+                        protection.ambientLight && lightAvailable,
+                        { onDisplayProtectionChanged(protection.copy(ambientLight = it)) },
+                        enabled = lightAvailable)
                     ChoiceSetting(stringResource(R.string.protection_release),
                         if (protection.releaseAfterMinutes == 0) stringResource(R.string.protection_disabled)
                         else stringResource(R.string.protection_minutes, protection.releaseAfterMinutes),
@@ -272,11 +273,12 @@ private fun SettingSwitch(
     description: String?,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onCheckedChange(!checked) }
+            .clickable(enabled = enabled) { onCheckedChange(!checked) }
             .padding(vertical = 13.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -289,7 +291,7 @@ private fun SettingSwitch(
                     fontSize = 13.sp, lineHeight = 18.sp)
             }
         }
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
     }
     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
 }
