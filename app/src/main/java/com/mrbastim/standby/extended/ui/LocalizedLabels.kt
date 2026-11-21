@@ -124,6 +124,12 @@ fun WorldClockZone.labelRes(): Int = when (this) {
     WorldClockZone.SINGAPORE -> R.string.city_singapore
     WorldClockZone.TOKYO -> R.string.city_tokyo
     WorldClockZone.SYDNEY -> R.string.city_sydney
+    WorldClockZone.MOSCOW -> R.string.city_moscow
+    WorldClockZone.SAINT_PETERSBURG -> R.string.city_saint_petersburg
+    WorldClockZone.KAZAN -> R.string.city_kazan
+    WorldClockZone.YEKATERINBURG -> R.string.city_yekaterinburg
+    WorldClockZone.NOVOSIBIRSK -> R.string.city_novosibirsk
+    WorldClockZone.VLADIVOSTOK -> R.string.city_vladivostok
 }
 
 fun Context.localizedLabel(value: Any): String = getString(

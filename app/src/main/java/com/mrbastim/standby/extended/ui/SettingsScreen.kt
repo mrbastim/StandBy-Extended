@@ -97,7 +97,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 28.dp),
+                .padding(horizontal = 24.dp, vertical = 38.dp),
         ) {
             Text(stringResource(R.string.app_name), fontSize = 36.sp, fontWeight = FontWeight.Light)
             Text(

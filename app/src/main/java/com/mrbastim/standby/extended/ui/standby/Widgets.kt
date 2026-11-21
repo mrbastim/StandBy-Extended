@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -37,6 +38,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -45,6 +47,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.annotation.StringRes
 import com.mrbastim.standby.extended.data.settings.BatteryWidgetStyle
+import com.mrbastim.standby.extended.data.settings.ClockFace
+import com.mrbastim.standby.extended.data.settings.ClockWidgetStyle
 import com.mrbastim.standby.extended.data.settings.DateWidgetStyle
 import com.mrbastim.standby.extended.data.settings.StandBySettings
 import com.mrbastim.standby.extended.data.settings.StandByWidgetType
@@ -182,34 +186,62 @@ fun WidgetContent(
 private fun CompactClockWidget(settings: StandBySettings) {
     val now = rememberStandByTime(settings.showSeconds)
     val theme = LocalStandByTheme.current
-    val typography = resolveTypography(settings, com.mrbastim.standby.extended.data.settings.ClockFace.DIGITAL)
+    val typography = resolveTypography(settings, ClockFace.DIGITAL)
     val pattern = when {
         settings.use24HourClock && settings.showSeconds -> "HH:mm:ss"
         settings.use24HourClock -> "HH:mm"
         settings.showSeconds -> "h:mm:ss"
         else -> "h:mm"
     }
-    BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        val size = min(this.maxHeight.value * 0.36f, this.maxWidth.value * 0.25f).sp
+    val time = now.format(DateTimeFormatter.ofPattern(pattern))
+    val style = TextStyle(
+        fontFeatureSettings = "tnum",
+        fontWeight = if (settings.clockWidgetStyle == ClockWidgetStyle.BOLD) FontWeight.Bold
+            else typography.weight,
+        fontFamily = when (settings.clockWidgetStyle) {
+            ClockWidgetStyle.EDITORIAL -> FontFamily.Serif
+            ClockWidgetStyle.COMPACT -> FontFamily.Monospace
+            else -> typography.family
+        },
+        textAlign = TextAlign.Center,
+    )
+    val textMeasurer = rememberTextMeasurer()
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        val preferredSize = min(maxHeight.value * 0.36f, maxWidth.value * 0.25f)
+        val width = constraints.maxWidth
+        val fontSize = remember(time, style, preferredSize, width, textMeasurer) {
+            fun fits(size: Float): Boolean = textMeasurer.measure(
+                text = time,
+                style = style.copy(fontSize = size.sp),
+                maxLines = 1,
+                softWrap = false,
+            ).size.width <= width
+
+            if (fits(preferredSize)) {
+                preferredSize.sp
+            } else {
+                var low = 0f
+                var high = preferredSize
+                repeat(8) {
+                    val candidate = (low + high) / 2
+                    if (fits(candidate)) low = candidate else high = candidate
+                }
+                low.sp
+            }
+        }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = now.format(DateTimeFormatter.ofPattern(pattern)),
+                text = time,
                 modifier = Modifier.fillMaxWidth(),
                 color = theme.clockPrimary,
-                fontSize = size,
-                lineHeight = size,
-                fontWeight = when (settings.clockWidgetStyle) {
-                    com.mrbastim.standby.extended.data.settings.ClockWidgetStyle.BOLD -> FontWeight.Bold
-                    else -> typography.weight
-                },
-                fontFamily = when (settings.clockWidgetStyle) {
-                    com.mrbastim.standby.extended.data.settings.ClockWidgetStyle.EDITORIAL -> FontFamily.Serif
-                    com.mrbastim.standby.extended.data.settings.ClockWidgetStyle.COMPACT -> FontFamily.Monospace
-                    else -> typography.family
-                },
-                textAlign = TextAlign.Center,
+                style = style,
+                fontSize = fontSize,
+                lineHeight = fontSize,
                 maxLines = 1,
-                style = TextStyle(fontFeatureSettings = "tnum"),
+                softWrap = false,
             )
             if (!settings.use24HourClock) {
                 Text(
@@ -792,6 +824,18 @@ private fun WidgetPreviewContent(widget: StandByWidgetType) {
                     ),
                 )
             }
+        }
+    }
+}
+
+@Preview(name = "Два виджета с секундами", locale = "ru", widthDp = 600, heightDp = 280)
+@Preview(name = "Два виджета со шрифтом 200%", locale = "ru", widthDp = 600, heightDp = 280, fontScale = 2f)
+@Composable
+private fun DualWidgetSecondsPreview() {
+    val settings = StandBySettings(showSeconds = true)
+    StandByThemeProvider(settings) {
+        ThemedBackground(settings) {
+            DualWidgetPage(settings, ChargingState(), NextAlarmState(), WeatherState()) {}
         }
     }
 }

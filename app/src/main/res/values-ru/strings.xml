@@ -127,7 +127,7 @@
     <string name="charging">Заряжается</string>
     <string name="on_battery">Питание от батареи</string>
     <string name="local_time">МЕСТНОЕ</string>
-    <string name="world_clock_city">Город для мировых часов</string>
+    <string name="world_clock_city">Город для часов и погоды</string>
     <string name="city_utc">UTC</string>
     <string name="city_istanbul">Стамбул</string>
     <string name="city_london">Лондон</string>
@@ -139,12 +139,18 @@
     <string name="city_singapore">Сингапур</string>
     <string name="city_tokyo">Токио</string>
     <string name="city_sydney">Сидней</string>
+    <string name="city_moscow">Москва</string>
+    <string name="city_saint_petersburg">Санкт-Петербург</string>
+    <string name="city_kazan">Казань</string>
+    <string name="city_yekaterinburg">Екатеринбург</string>
+    <string name="city_novosibirsk">Новосибирск</string>
+    <string name="city_vladivostok">Владивосток</string>
     <string name="no_alarm_set">Будильник не установлен</string>
     <string name="next_alarm">СЛЕДУЮЩИЙ БУДИЛЬНИК</string>
     <string name="alarm_countdown_accessibility">До будильника: %1$d ч, %2$d мин, %3$d сек</string>
     <string name="widget_weather">Погода</string>
     <string name="weather_enabled">Погода онлайн</string>
-    <string name="weather_enabled_description">Загружает текущую погоду для выбранного города из мировых часов через Open-Meteo. По умолчанию выключено.</string>
+    <string name="weather_enabled_description">Загружает текущую погоду из Open-Meteo для города, выбранного выше.</string>
     <string name="weather_disabled">Включите погоду онлайн в настройках</string>
     <string name="weather_loading">Обновление погоды…</string>
     <string name="weather_unavailable">Погода недоступна</string>
@@ -179,7 +185,7 @@
     <string name="protection_initial_description">Яркость при запуске StandBy и после касания. Если включена адаптация к освещению, экран может быть тусклее.</string>
     <string name="protection_minimum">Яркость в режиме ожидания</string>
     <string name="protection_minimum_description">Такой яркость будет после затемнения. Чем ниже значение, тем меньше света от экрана.</string>
-    <string name="protection_delay">Когда затемнять экран</string>
+    <string name="protection_delay">Через какое время затемнять экран</string>
     <string name="protection_delay_description">Сколько времени экран остаётся ярким после последнего действия.</string>
     <string name="protection_transition">Плавность затемнения</string>
     <string name="protection_transition_description">Сколько времени экран будет тускнеть. Чем больше время, тем плавнее переход.</string>
