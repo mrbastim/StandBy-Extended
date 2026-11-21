@@ -1,6 +1,7 @@
 package com.mrbastim.standby.extended.data.settings
 
 data class StandBySettings(
+    val displayProtection: DisplayProtectionSettings = DisplayProtectionSettings(),
     val automaticModeEnabled: Boolean = true,
     val use24HourClock: Boolean = true,
     val showSeconds: Boolean = false,

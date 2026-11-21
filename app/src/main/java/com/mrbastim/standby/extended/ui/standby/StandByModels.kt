@@ -3,6 +3,7 @@ package com.mrbastim.standby.extended.ui.standby
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -27,6 +28,8 @@ import com.mrbastim.standby.extended.data.settings.TypographyStyle
 import com.mrbastim.standby.extended.data.settings.WidgetColumn
 import java.time.LocalDateTime
 import kotlinx.coroutines.delay
+
+val LocalAmbientMode = androidx.compose.runtime.staticCompositionLocalOf { false }
 
 data class StandByActions(
     val onExitPreview: (() -> Unit)? = null,
@@ -88,6 +91,7 @@ fun BurnInContainer(enabled: Boolean, content: @Composable () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .padding(if (enabled) 3.dp else 0.dp)
             .offset { if (enabled) offsets[position] else IntOffset.Zero },
     ) {
         content()

@@ -168,4 +168,22 @@
     <string name="music_pause">Пауза</string>
     <string name="music_next">Следующий трек</string>
     <string name="music_settings_unavailable">Настройки доступа к уведомлениям недоступны на этом устройстве.</string>
+    <string name="protection_section">Экран и защита AMOLED</string>
+    <string name="protection_expand">Показать настройки экрана</string>
+    <string name="protection_collapse">Скрыть настройки экрана</string>
+    <string name="protection_enabled">Защита AMOLED 2.0</string>
+    <string name="protection_description">Снижает риск износа OLED, но не гарантирует защиту от выгорания. Ambient скрывает секунды, сохраняя выбранную тему.</string>
+    <string name="protection_initial">Начальная яркость StandBy</string>
+    <string name="protection_minimum">Минимальная яркость</string>
+    <string name="protection_delay">Затемнение после бездействия</string>
+    <string name="protection_transition">Длительность перехода</string>
+    <string name="protection_light">Адаптация к освещению</string>
+    <string name="protection_light_description">Коррекция в заданном диапазоне яркости. Автоматический ночной режим включается только при устойчивой полной темноте и минимальной яркости; бездействия недостаточно.</string>
+    <string name="protection_no_sensor">Датчик освещённости отсутствует: используется заданная яркость.</string>
+    <string name="protection_release">Разрешить сон экрана после бездействия</string>
+    <string name="protection_disabled">Отключено</string>
+    <string name="protection_minutes">%1$d мин</string>
+    <string name="protection_seconds">%1$d с</string>
+    <string name="protection_percent">%1$d%%</string>
+    <string name="protection_release_description">По истечении таймера отменяет Keep Awake. В Activity экран передаётся системному тайм-ауту; заставка завершается. Момент выключения экрана определяет Android.</string>
 </resources>

@@ -54,6 +54,8 @@ import java.time.LocalDateTime
 fun StandByRoot(
     state: StandByUiState,
     actions: StandByActions,
+    ambient: Boolean = false,
+    automaticNightMode: Boolean = false,
     settingsContent: @Composable () -> Unit,
 ) {
     AnimatedContent(
@@ -62,7 +64,7 @@ fun StandByRoot(
         label = "standby-mode",
     ) { active ->
         if (active) {
-            StandByDisplay(state.settings, state.charging, state.nextAlarm, state.weather, actions)
+            StandByDisplay(state.settings, state.charging, state.nextAlarm, state.weather, actions, ambient, automaticNightMode)
         } else {
             settingsContent()
         }
@@ -77,13 +79,18 @@ fun StandByDisplay(
     nextAlarm: NextAlarmState = NextAlarmState(),
     weather: WeatherState = WeatherState(),
     actions: StandByActions = StandByActions(),
+    ambient: Boolean = false,
+    automaticNightMode: Boolean = false,
 ) {
-    StandByThemeProvider(settings) {
-        ThemedBackground(
-            settings = settings,
-            modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
-        ) {
-            StandByDisplayContent(settings, charging, nextAlarm, weather, actions)
+    val displaySettings = standByPresentationSettings(settings, ambient, automaticNightMode)
+    androidx.compose.runtime.CompositionLocalProvider(LocalAmbientMode provides ambient) {
+        StandByThemeProvider(displaySettings) {
+            ThemedBackground(
+                settings = displaySettings,
+                modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
+            ) {
+                StandByDisplayContent(displaySettings, charging, nextAlarm, weather, actions)
+            }
         }
     }
 }
