@@ -95,6 +95,8 @@
     <string name="status_charging_ready">Şarj oluyor — StandBy hazır</string>
     <string name="rotate_to_landscape">YATAY KONUMA ÇEVİRİN</string>
     <string name="exit_preview">Önizlemeden çık</string>
+    <string name="exit_dream">Çık</string>
+    <string name="exit_dream_label">Ekran koruyucudan çık</string>
     <string name="clock_customize_hint">Saat. Özelleştirmek için uzun basın.</string>
     <string name="widget_stack_edit_hint">%1$s araç yığını. Düzenlemek için uzun basın.</string>
     <string name="left">Sol</string>
@@ -171,10 +173,14 @@
     <string name="protection_collapse">Ekran ayarlarını gizle</string>
     <string name="protection_enabled">AMOLED Koruması 2.0</string>
     <string name="protection_description">OLED aşınma riskini azaltır; yanmayı önleme garantisi vermez. Ambient seçili temayı korur ve saniyeleri gizler.</string>
-    <string name="protection_initial">Başlangıç StandBy parlaklığı</string>
-    <string name="protection_minimum">En düşük parlaklık</string>
-    <string name="protection_delay">Hareketsizlik sonrası karartma</string>
-    <string name="protection_transition">Geçiş süresi</string>
+    <string name="protection_initial">Başlangıç parlaklığı</string>
+    <string name="protection_initial_description">StandBy açıldığında ve ekrana dokunduğunuzda bu parlaklığı kullanır. Işığa uyarlama parlaklığı azaltabilir.</string>
+    <string name="protection_minimum">Bekleme parlaklığı</string>
+    <string name="protection_minimum_description">Ekran karardıktan sonraki parlaklık. Düşük değerlerde ekran daha az ışık yayar.</string>
+    <string name="protection_delay">Ekran ne zaman kararsın</string>
+    <string name="protection_delay_description">Son etkileşimden sonra ekranın ne kadar süre parlak kalacağını belirler.</string>
+    <string name="protection_transition">Karartma geçişi</string>
+    <string name="protection_transition_description">Ekranın ne kadar sürede kararacağını belirler. Süre uzadıkça geçiş daha yumuşak olur.</string>
     <string name="protection_light">Ortam ışığına uyarla</string>
     <string name="protection_light_description">Parlaklığı belirlediğiniz aralıkta ayarlar. Otomatik Gece Modu için sürekli karanlık ve en düşük parlaklık gerekir; yalnızca hareketsizlik yeterli değildir.</string>
     <string name="protection_no_sensor">Işık sensörü yok: belirlediğiniz parlaklık kullanılır.</string>
@@ -182,6 +188,11 @@
     <string name="protection_disabled">Kapalı</string>
     <string name="protection_minutes">%1$d dk</string>
     <string name="protection_seconds">%1$d sn</string>
+    <string name="protection_minutes_seconds">%1$d dk %2$d sn</string>
+    <string name="protection_custom_delay">Özel süre</string>
+    <string name="protection_delay_input">Saniye cinsinden süre</string>
+    <string name="protection_delay_range">%1$d ile %2$d saniye arasında bir değer girin.</string>
+    <string name="protection_apply">Uygula</string>
     <string name="protection_percent">%1$d%%</string>
     <string name="protection_release_description">Seçilen süre sonunda Ekranı Açık Tut ayarını geçersiz kılar. Activity sistem zaman aşımına izin verir; ekran koruyucu kapanır. Ekranın ne zaman kapanacağını Android belirler.</string>
 </resources>
