@@ -53,10 +53,9 @@ Release и dev используют один релизный ключ. Лока
 
 1. Откройте **Settings → Rules → Rulesets → Import a ruleset** и импортируйте
    [.github/dev-branch-ruleset.json](../.github/dev-branch-ruleset.json).
-   Оставьте **Active**, цель — только `dev`. Обновление, удаление и force push
-   ограничены администраторами репозитория. В этом личном репозитории оставьте
-   административный доступ только владельцу; уберите лишний write/admin у участников.
-   Admin bypass сохраняет автоматические push/merge владельца без самоодобрения.
+   Оставьте **Active**, цель — только `dev`. Только аккаунт GitHub `mrbastim`
+   (ID `78547482`) может обойти ограничения на создание, обновление, удаление
+   и force push ветки. Исключение действует для прямых push и слияния PR.
 2. Создайте **Settings → Environments → release-signing**. В **Deployment branches
    and tags** выберите **Selected branches and tags**: ветки `dev`, `main`
    (для ручной стабильной публикации), теги `v*`. До разрешения стабильных ссылок

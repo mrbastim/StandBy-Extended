@@ -50,10 +50,9 @@ name alone does **not** create deployment restrictions or protect existing repos
 
 1. Open **Settings → Rules → Rulesets → Import a ruleset** and import
    [.github/dev-branch-ruleset.json](../.github/dev-branch-ruleset.json).
-   Keep it **Active** and target only `dev`. It restricts updates, deletion and force
-   pushes to repository administrators. For this personal repository, keep admin access
-   with the owner only; remove unneeded collaborator write/admin access.
-   The admin bypass preserves automated owner pushes/merges without self-approval.
+   Keep it **Active** and target only `dev`. Only the GitHub user `mrbastim`
+   (ID `78547482`) can bypass restrictions on creating, updating, deleting or
+   force-pushing this branch. The bypass applies to direct pushes and PR merges.
 2. Create **Settings → Environments → release-signing**. Under **Deployment branches
    and tags**, select **Selected branches and tags**, allow branch `dev`, branch `main`
    (for manual stable publication), and tags `v*`. Before permitting stable refs,
