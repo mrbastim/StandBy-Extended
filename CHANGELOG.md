@@ -1,10 +1,33 @@
 # Changelog
 
+[English](CHANGELOG.md) | [Русский](CHANGELOG.ru.md)
+
 All notable changes to StandBy are documented here.
 
 ## Unreleased
 
+### Fixed
+
+- Shortened inactivity delays keep elapsed time after recent frames and during dimming.
+- Ambient-light adaptation is disabled in Settings when TYPE_LIGHT is unavailable.
+- Release signing runs separately from Gradle with an owner-only publication guard and an environment; owner setup is required for branch/secret protection.
+- CI launches the minified release APK twice on an API 28 emulator before publication.
+
+- Release startup crash (`LocalLifecycleOwner not present`) caused by R8 removing the Compose 1.6 reflection bridge used by Lifecycle 2.8.
+
 ### Added
+
+- A `dev` integration branch with one rolling prerelease (`dev`), refreshed after successful checks and excluded from stable Latest. APKs use `standby-android-extended.apk` for stable and `standby-android-extended-dev.apk` for development.
+- Sensor-confirmed automatic Night Mode only in sustained near darkness at the configured minimum brightness.
+
+- English and Russian versions of the README, contributor guide, architecture, testing and release documentation.
+
+- AMOLED Protection 2.0 with independent per-window brightness (35% initial / 8% minimum), configurable inactivity delay (120 s) and fade duration (12 s).
+- Shared Activity/DreamService display policy, lifecycle cleanup, smooth touch recovery and optional filtered TYPE_LIGHT adaptation.
+- Optional inactivity deadline that releases Activity screen retention or finishes DreamService, subject to Android/OEM sleep behavior.
+- Collapsible Display & AMOLED Protection settings with persisted controls and English, Russian and Turkish strings.
+- Pure policy/filter tests plus Robolectric window, sensor and lifecycle checks for API 28 and 35.
+- Architecture notes and a manual device verification matrix; physical AMOLED protection is not guaranteed.
 
 - Android CI for unit tests, lint, and debug assembly.
 - Unit coverage for activation, widget-list invariants, and theme fallback behavior.
@@ -21,12 +44,21 @@ All notable changes to StandBy are documented here.
 
 ### Changed
 
-- Application namespace and ID are now `com.emretenoz.standby`.
+- Ambient preserves the selected day/night palette and limits clock/alarm countdown updates to minutes without changing saved preferences.
+- Pixel Shifting keeps its five-position ±3 dp / 60 s pattern and reserves edge space around all pager content, including music.
+- Keep Awake and Screen Timeout share the display policy; finite timeouts now restart on real interaction.
+
+- Application namespace and ID are now `com.mrbastim.standby.extended`.
 - Release builds enable code and resource shrinking.
 - The stack editor and customization rows adapt better to compact landscape displays.
 - Night mode copy now reflects the selected night theme instead of promising a fixed red palette.
 
 ### Fixed
+
+- Inactivity dimming no longer forces Crimson Night; manual Night Mode and sensor-confirmed darkness are independent of the inactivity timer.
+- Light filtering advances between on-change sensor events, allowing recovery when a new steady lux value produces no further events.
+
+- Rebind Activity-owned system-state observers after Activity recreation so a retained ViewModel does not keep stopped flows.
 
 - Missing OEM screen-saver settings no longer crash the app.
 - Recoverable DataStore read failures fall back to safe defaults.

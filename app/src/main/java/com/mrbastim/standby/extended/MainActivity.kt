@@ -4,7 +4,6 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
-import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,7 +18,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.mrbastim.standby.extended.data.settings.ScreenTimeout
 import com.mrbastim.standby.extended.data.settings.SettingsRepository
 import com.mrbastim.standby.extended.data.weather.WeatherRepository
 import com.mrbastim.standby.extended.system.ChargingObserver
@@ -31,7 +29,8 @@ import com.mrbastim.standby.extended.ui.StandByViewModel
 import com.mrbastim.standby.extended.ui.standby.StandByActions
 import com.mrbastim.standby.extended.ui.standby.StandByRoot
 import com.mrbastim.standby.extended.ui.theme.StandByTheme
-import kotlinx.coroutines.delay
+import com.mrbastim.standby.extended.display.DisplayProtectionHost
+import com.mrbastim.standby.extended.display.DisplayPhase
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,59 +53,64 @@ class MainActivity : ComponentActivity() {
                 WeatherRepository(),
             ),
         )[StandByViewModel::class.java]
+        viewModel.bindSystemState(systemStateRepository)
         setContent {
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             StandByTheme {
                 StandByWindowBehavior(
                     active = state.isStandByActive,
-                    keepAwake = state.settings.keepScreenAwake,
-                    timeout = state.settings.screenTimeout,
                 )
-                StandByRoot(
-                    state = state,
-                    actions = StandByActions(
-                        onExitPreview = if (state.isPreviewMode) viewModel::stopPreview else null,
-                        onToggleWidget = viewModel::toggleWidget,
-                        onMoveWidget = viewModel::moveWidget,
-                        onClockFaceChanged = viewModel::setClockFace,
-                        onClockColorChanged = viewModel::setClockColor,
-                        onShowSecondsChanged = viewModel::setShowSeconds,
-                        on24HourChanged = viewModel::setUse24HourClock,
-                        onShowDateChanged = viewModel::setShowDate,
-                        onDayThemeChanged = viewModel::setDayTheme,
-                        onNightThemeChanged = viewModel::setNightTheme,
-                        onBackgroundStyleChanged = viewModel::setBackgroundStyle,
-                        onTypographyStyleChanged = viewModel::setTypographyStyle,
-                        onCustomColorsChanged = viewModel::setCustomColors,
-                        onClockWidgetStyleChanged = viewModel::setClockWidgetStyle,
-                        onDateWidgetStyleChanged = viewModel::setDateWidgetStyle,
-                        onBatteryWidgetStyleChanged = viewModel::setBatteryWidgetStyle,
-                    ),
-                ) {
-                    SettingsScreen(
+                DisplayProtectionHost(window, state.isStandByActive, state.settings) { phase, automaticNightMode ->
+                    StandByRoot(
                         state = state,
-                        onAutomaticModeChanged = viewModel::setAutomaticModeEnabled,
-                        on24HourChanged = viewModel::setUse24HourClock,
-                        onShowSecondsChanged = viewModel::setShowSeconds,
-                        onScreenTimeoutChanged = viewModel::setScreenTimeout,
-                        onKeepAwakeChanged = viewModel::setKeepScreenAwake,
-                        onClockFaceChanged = viewModel::setClockFace,
-                        onClockColorChanged = viewModel::setClockColor,
-                        onShowDateChanged = viewModel::setShowDate,
-                        onNightModeChanged = viewModel::setNightMode,
-                        onBurnInProtectionChanged = viewModel::setBurnInProtection,
-                        onDayThemeChanged = viewModel::setDayTheme,
-                        onNightThemeChanged = viewModel::setNightTheme,
-                        onBackgroundStyleChanged = viewModel::setBackgroundStyle,
-                        onTypographyStyleChanged = viewModel::setTypographyStyle,
-                        onClockWidgetStyleChanged = viewModel::setClockWidgetStyle,
-                        onDateWidgetStyleChanged = viewModel::setDateWidgetStyle,
-                        onBatteryWidgetStyleChanged = viewModel::setBatteryWidgetStyle,
-                        onWorldClockZoneChanged = viewModel::setWorldClockZone,
-                        onWeatherEnabledChanged = viewModel::setWeatherEnabled,
-                        onPreview = viewModel::startPreview,
-                        onOpenScreenSaverSettings = ::openScreenSaverSettings,
-                    )
+                        automaticNightMode = automaticNightMode,
+                        ambient = state.settings.displayProtection.enabled &&
+                            (phase == DisplayPhase.AMBIENT || phase == DisplayPhase.RELEASED),
+                        actions = StandByActions(
+                            onExitPreview = if (state.isPreviewMode) viewModel::stopPreview else null,
+                            onToggleWidget = viewModel::toggleWidget,
+                            onMoveWidget = viewModel::moveWidget,
+                            onClockFaceChanged = viewModel::setClockFace,
+                            onClockColorChanged = viewModel::setClockColor,
+                            onShowSecondsChanged = viewModel::setShowSeconds,
+                            on24HourChanged = viewModel::setUse24HourClock,
+                            onShowDateChanged = viewModel::setShowDate,
+                            onDayThemeChanged = viewModel::setDayTheme,
+                            onNightThemeChanged = viewModel::setNightTheme,
+                            onBackgroundStyleChanged = viewModel::setBackgroundStyle,
+                            onTypographyStyleChanged = viewModel::setTypographyStyle,
+                            onCustomColorsChanged = viewModel::setCustomColors,
+                            onClockWidgetStyleChanged = viewModel::setClockWidgetStyle,
+                            onDateWidgetStyleChanged = viewModel::setDateWidgetStyle,
+                            onBatteryWidgetStyleChanged = viewModel::setBatteryWidgetStyle,
+                        ),
+                    ) {
+                        SettingsScreen(
+                            state = state,
+                            onDisplayProtectionChanged = viewModel::setDisplayProtection,
+                            onAutomaticModeChanged = viewModel::setAutomaticModeEnabled,
+                            on24HourChanged = viewModel::setUse24HourClock,
+                            onShowSecondsChanged = viewModel::setShowSeconds,
+                            onScreenTimeoutChanged = viewModel::setScreenTimeout,
+                            onKeepAwakeChanged = viewModel::setKeepScreenAwake,
+                            onClockFaceChanged = viewModel::setClockFace,
+                            onClockColorChanged = viewModel::setClockColor,
+                            onShowDateChanged = viewModel::setShowDate,
+                            onNightModeChanged = viewModel::setNightMode,
+                            onBurnInProtectionChanged = viewModel::setBurnInProtection,
+                            onDayThemeChanged = viewModel::setDayTheme,
+                            onNightThemeChanged = viewModel::setNightTheme,
+                            onBackgroundStyleChanged = viewModel::setBackgroundStyle,
+                            onTypographyStyleChanged = viewModel::setTypographyStyle,
+                            onClockWidgetStyleChanged = viewModel::setClockWidgetStyle,
+                            onDateWidgetStyleChanged = viewModel::setDateWidgetStyle,
+                            onBatteryWidgetStyleChanged = viewModel::setBatteryWidgetStyle,
+                            onWorldClockZoneChanged = viewModel::setWorldClockZone,
+                            onWeatherEnabledChanged = viewModel::setWeatherEnabled,
+                            onPreview = viewModel::startPreview,
+                            onOpenScreenSaverSettings = ::openScreenSaverSettings,
+                        )
+                    }
                 }
             }
         }
@@ -127,8 +131,6 @@ class MainActivity : ComponentActivity() {
     @androidx.compose.runtime.Composable
     private fun StandByWindowBehavior(
         active: Boolean,
-        keepAwake: Boolean,
-        timeout: ScreenTimeout,
     ) {
         val insetsController = WindowCompat.getInsetsController(window, window.decorView)
 
@@ -145,33 +147,10 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        LaunchedEffect(active, keepAwake, timeout) {
-            if (!active) {
-                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                return@LaunchedEffect
-            }
-            val holdDuration = when {
-                keepAwake || timeout == ScreenTimeout.NEVER -> null
-                timeout == ScreenTimeout.ONE_MINUTE -> 60_000L
-                timeout == ScreenTimeout.FIVE_MINUTES -> 300_000L
-                else -> 0L
-            }
-            if (holdDuration == 0L) {
-                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            } else {
-                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                if (holdDuration != null) {
-                    delay(holdDuration)
-                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                }
-            }
-        }
-
         DisposableEffect(Unit) {
             onDispose {
                 setShowWhenLocked(false)
                 setTurnScreenOn(false)
-                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 WindowCompat.setDecorFitsSystemWindows(window, true)
                 insetsController.show(WindowInsetsCompat.Type.systemBars())
             }
