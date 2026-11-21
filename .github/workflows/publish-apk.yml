@@ -26,16 +26,15 @@ permissions:
   contents: read
 
 jobs:
-  publish:
+  sign:
     if: github.repository == 'mrbastim/StandBy-Extended' && github.actor == 'mrbastim'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: release-signing
-    concurrency:
-      group: apk-publish-${{ github.repository }}-${{ inputs.development && 'dev' || inputs.release-tag }}
-      cancel-in-progress: false
     permissions:
-      contents: write
+      contents: read
+    outputs:
+      publish: ${{ steps.current.outputs.publish }}
     steps:
       # Deliberately no checkout, Gradle, project scripts, caches or APK execution here.
       - uses: actions/setup-java@v4
@@ -99,8 +98,22 @@ jobs:
           name: standby-android-extended-signed-${{ github.sha }}
           path: standby-android-extended*.apk
           if-no-files-found: error
+  publish:
+    needs: sign
+    if: needs.sign.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: apk-publish-${{ github.repository }}-${{ inputs.development && 'dev' || inputs.release-tag }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      # Only the signed artifact crosses the job boundary.
+      - uses: actions/download-artifact@v4
+        with:
+          name: standby-android-extended-signed-${{ github.sha }}
       - name: Publish signed APK
-        if: steps.current.outputs.publish == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -119,15 +132,23 @@ jobs:
             tag="dev"
             title="Development build ($short_sha)"
             notes="Rolling development prerelease; its APK and tag are replaced after successful checks. Commit: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$TARGET_SHA. Build: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID. Tests, lint and minified startup smoke check passed."
-            if gh api "repos/$GH_REPO/git/ref/tags/dev" --silent; then
-              gh api --method PATCH "repos/$GH_REPO/git/refs/tags/dev" -f sha="$TARGET_SHA" -F force=true --silent
-            else
-              gh api --method POST "repos/$GH_REPO/git/refs" -f ref="refs/tags/dev" -f sha="$TARGET_SHA" --silent
-            fi
-            if gh release view "$tag" >/dev/null 2>&1; then
+            if existing_prerelease="$(gh release view "$tag" --json isPrerelease --jq '.isPrerelease' 2>/dev/null)"; then
+              if [[ "$existing_prerelease" != "true" ]]; then
+                echo "Refusing to replace a stable release tagged $tag" >&2
+                exit 1
+              fi
+              # Keep the last tested tag if uploading the new APK fails.
               gh release upload "$tag" standby-android-extended-dev.apk --clobber
-              gh release edit "$tag" --target "$TARGET_SHA" --prerelease --latest=false --title "$title" --notes "$notes"
+              gh api --method PATCH "repos/$GH_REPO/git/refs/tags/dev" -f sha="$TARGET_SHA" -F force=true --silent
+              gh release edit "$tag" --prerelease --latest=false --title "$title" --notes "$notes"
             else
+              if tag_sha="$(gh api "repos/$GH_REPO/git/ref/tags/dev" --jq '.object.sha' 2>/dev/null)"; then
+                if [[ "$tag_sha" != "$TARGET_SHA" ]]; then
+                  gh api --method PATCH "repos/$GH_REPO/git/refs/tags/dev" -f sha="$TARGET_SHA" -F force=true --silent
+                fi
+              else
+                gh api --method POST "repos/$GH_REPO/git/refs" -f ref="refs/tags/dev" -f sha="$TARGET_SHA" --silent
+              fi
               gh release create "$tag" standby-android-extended-dev.apk --verify-tag --prerelease --latest=false --title "$title" --notes "$notes"
             fi
             # Owner-approved migration: remove only these four old prereleases.

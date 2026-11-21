@@ -31,12 +31,12 @@ This cleanup only removes those exact tags' releases if they are marked prerelea
    MainActivity twice on an API 28 emulator. The process must survive and have no fatal
    AndroidRuntime error. This exercises the Compose/Lifecycle reflection path after R8.
    PR CI runs the same check. Neither job receives the production key.
-3. `publish-apk.yml` runs on a fresh runner with environment `release-signing`.
-   It does not check out or execute repository build code, restore build caches or run
-   the APK. Android SDK apksigner signs the downloaded artifact, verifies its signature,
-   and deletes the temporary keystore. Only the publication step receives a write token.
-   The signed artifact is named `standby-android-extended-signed-<sha>`. The moving
-   `dev` tag must remain mutable; apply stable tag protection to `v*` only.
+3. The signing job in `publish-apk.yml` has `contents: read` and uses the
+   `release-signing` environment. It signs and verifies the APK using apksigner,
+   removes the temporary keystore and uploads `standby-android-extended-signed-<sha>`.
+4. A separate job downloads the signed APK and publishes it with `contents: write`.
+   The job does not use the signing environment or check out the repository.
+   The moving `dev` tag must stay mutable. Apply stable tag protection to `v*` only.
 
 Both stable and dev APKs use the same release key. Local debug installs normally use
 another certificate and cannot be updated by these APKs directly.
