@@ -204,4 +204,7 @@
     <string name="protection_apply">Применить</string>
     <string name="protection_percent">%1$d%%</string>
     <string name="protection_release_description">По истечении таймера отменяет Keep Awake. В Activity экран передаётся системному тайм-ауту; заставка завершается. Момент выключения экрана определяет Android.</string>
+    <string name="display_group_brightness">Яркость</string>
+    <string name="display_group_behavior">Поведение экрана</string>
+    <string name="display_group_anti_burn_in">Защита дисплея</string>
 </resources>
