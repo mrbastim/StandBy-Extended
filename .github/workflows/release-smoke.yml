@@ -9,7 +9,11 @@ permissions:
 jobs:
   startup:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        api-level: [28, 35]
     steps:
       # No checkout and no production signing secrets in the APK execution job.
       - uses: actions/setup-java@v4
@@ -31,19 +35,20 @@ jobs:
           rm -f "$RUNNER_TEMP/smoke.jks"
       - name: Enable emulator acceleration
         run: sudo chmod a+rw /dev/kvm
-      - name: Launch minified Activity twice on minSdk
+      - name: Launch minified Activity and DreamService (API ${{ matrix.api-level }})
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 28
+          api-level: ${{ matrix.api-level }}
           arch: x86_64
           target: google_apis
           disable-animations: true
           # The action executes each physical script line in its own shell.
-          # Fold the loop into one command so its variables and control flow share a shell.
+          # Keep the complete test in one folded command.
           script: >-
             set -eu;
             adb install smoke.apk;
             for attempt in 1 2; do
+            adb logcat -c;
             adb shell am force-stop com.mrbastim.standby.extended;
             adb shell am start -W -n com.mrbastim.standby.extended/.MainActivity;
             sleep 5;
@@ -53,4 +58,23 @@ jobs:
             if grep -Eq 'FATAL EXCEPTION|LocalLifecycleOwner not present' runtime.log; then
             cat runtime.log; exit 1;
             fi;
-            done
+            done;
+            if [ "${{ matrix.api-level }}" -ge 35 ]; then
+            adb shell am force-stop com.mrbastim.standby.extended;
+            adb shell settings put secure screensaver_enabled 1;
+            adb shell settings put secure screensaver_components com.mrbastim.standby.extended/.StandByDreamService;
+            adb shell settings put system accelerometer_rotation 0;
+            adb shell settings put system user_rotation 1;
+            adb logcat -c;
+            adb shell cmd dreams start-dreaming;
+            sleep 8;
+            adb shell dumpsys dreams > dream-state.log;
+            if ! grep -E 'mCurrentDream=DreamRecord.*StandByDreamService' dream-state.log; then
+            cat dream-state.log; adb logcat -d -s AndroidRuntime:E; exit 1;
+            fi;
+            test -n "$(adb shell pidof com.mrbastim.standby.extended | tr -d '\r')";
+            adb logcat -d -s AndroidRuntime:E > dream-runtime.log;
+            if grep -Eq 'FATAL EXCEPTION|LocalLifecycleOwner not present' dream-runtime.log; then
+            cat dream-runtime.log; exit 1;
+            fi;
+            fi

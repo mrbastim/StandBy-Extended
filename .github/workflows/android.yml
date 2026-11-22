@@ -27,6 +27,8 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Verify release metadata checks
+        run: python3 -m unittest discover -s .github/scripts -p 'test_*.py'
       - name: Verify, lint, and assemble
         run: ./gradlew testDebugUnitTest lintDebug assembleDebug assembleRelease
 
