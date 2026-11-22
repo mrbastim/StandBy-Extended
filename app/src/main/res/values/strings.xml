@@ -29,7 +29,7 @@
     <string name="background_vignette">Darkened edges</string>
     <string name="background_aura">Color aura</string>
     <string name="background_grain">Subtle texture</string>
-    <string name="typography_auto">Theme &amp; face</string>
+    <string name="typography_auto">Automatic</string>
     <string name="typography_modern">Modern</string>
     <string name="typography_editorial">Editorial</string>
     <string name="typography_rounded">Rounded</string>
