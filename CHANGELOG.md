@@ -4,7 +4,23 @@
 
 All notable changes to StandBy are documented here.
 
-## Unreleased
+## 1.0.6
+
+### Added
+
+- Exit controls for the system screen saver and automatic StandBy inside the app. Touch reveals the button for five seconds. Exiting automatic StandBy returns to Settings until the next activation session.
+- Moscow, Saint Petersburg, Kazan, Yekaterinburg, Novosibirsk and Vladivostok in the shared clock and weather city list.
+
+### Changed
+
+- Clearer Protection 2.0 setting names and descriptions, current values next to titles, readable durations, dim-delay presets and custom input.
+- Updated English, Russian and Turkish labels, with previews for compact landscape screens and larger system text.
+
+### Fixed
+
+- Clock seconds fit inside a two-widget column, including at increased font sizes.
+- Brightness controls keep standby brightness at or below startup brightness.
+
 
 ### Fixed
 
@@ -63,6 +79,6 @@ All notable changes to StandBy are documented here.
 - Missing OEM screen-saver settings no longer crash the app.
 - Recoverable DataStore read failures fall back to safe defaults.
 
-### Removed
+### Known installation limitation
 
-- Notification-listener and media-control access from the GitHub build to avoid sensitive-access blocking during sideloading.
+- Google Play Protect may block installation from a downloaded APK because music controls use notification-listener access. The signed development APK was installed and launched through Android Studio debugging on realme XT with Android 13.
