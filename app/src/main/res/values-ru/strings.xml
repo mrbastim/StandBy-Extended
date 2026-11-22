@@ -29,7 +29,7 @@
     <string name="background_vignette">Затемнение по краям</string>
     <string name="background_aura">Цветное свечение</string>
     <string name="background_grain">Лёгкая текстура</string>
-    <string name="typography_auto">Тема и циферблат</string>
+    <string name="typography_auto">Автоматически</string>
     <string name="typography_modern">Современный</string>
     <string name="typography_editorial">Редакционный</string>
     <string name="typography_rounded">Округлый</string>
