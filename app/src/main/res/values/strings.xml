@@ -204,4 +204,7 @@
     <string name="protection_apply">Apply</string>
     <string name="protection_percent">%1$d%%</string>
     <string name="protection_release_description">After the selected time, StandBy stops keeping the screen on. Your phone settings determine when the display actually turns off.</string>
+    <string name="display_group_brightness">Brightness</string>
+    <string name="display_group_behavior">Screen behavior</string>
+    <string name="display_group_anti_burn_in">Display protection</string>
 </resources>

@@ -204,4 +204,7 @@
     <string name="protection_apply">Применить</string>
     <string name="protection_percent">%1$d%%</string>
     <string name="protection_release_description">По истечении выбранного времени StandBy перестаёт удерживать экран включённым. Когда он погаснет, зависит от настроек телефона.</string>
+    <string name="display_group_brightness">Яркость</string>
+    <string name="display_group_behavior">Поведение экрана</string>
+    <string name="display_group_anti_burn_in">Защита дисплея</string>
 </resources>

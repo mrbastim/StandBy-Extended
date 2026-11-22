@@ -123,6 +123,38 @@ fun SettingsScreen(
                 Text(stringResource(if (protectionExpanded) R.string.protection_collapse else R.string.protection_expand))
             }
             if (protectionExpanded) {
+                val protection = state.settings.displayProtection
+                val lightAvailable = remember(context) {
+                    context.getSystemService(SensorManager::class.java)?.getDefaultSensor(Sensor.TYPE_LIGHT) != null
+                }
+
+                // The main switch determines which brightness/dimming controls are available.
+                SettingSwitch(
+                    stringResource(R.string.protection_enabled),
+                    stringResource(R.string.protection_description),
+                    protection.enabled,
+                    { onDisplayProtectionChanged(protection.copy(enabled = it)) },
+                )
+
+                if (protection.enabled) {
+                    DisplaySettingsGroup(stringResource(R.string.display_group_brightness))
+                    BrightnessControls(protection, onDisplayProtectionChanged)
+                    SettingSwitch(
+                        stringResource(R.string.protection_light),
+                        stringResource(
+                            if (lightAvailable) R.string.protection_light_description
+                            else R.string.protection_no_sensor
+                        ),
+                        protection.ambientLight && lightAvailable,
+                        { onDisplayProtectionChanged(protection.copy(ambientLight = it)) },
+                        enabled = lightAvailable,
+                    )
+                }
+
+                DisplaySettingsGroup(stringResource(R.string.display_group_behavior))
+                if (protection.enabled) {
+                    DimmingControls(protection, onDisplayProtectionChanged)
+                }
                 SettingSwitch(
                     stringResource(R.string.keep_screen_awake),
                     stringResource(R.string.keep_screen_awake_description),
@@ -137,33 +169,31 @@ fun SettingsScreen(
                     label = context::localizedLabel,
                     onSelected = onScreenTimeoutChanged,
                 )
-                val protection = state.settings.displayProtection
-                SettingSwitch(stringResource(R.string.protection_enabled),
-                    stringResource(R.string.protection_description), protection.enabled,
-                    { onDisplayProtectionChanged(protection.copy(enabled = it)) })
                 if (protection.enabled) {
-                    ProtectionControls(protection, onDisplayProtectionChanged)
-                    val lightAvailable = remember(context) {
-                        context.getSystemService(SensorManager::class.java)?.getDefaultSensor(Sensor.TYPE_LIGHT) != null
-                    }
-                    SettingSwitch(stringResource(R.string.protection_light),
-                        stringResource(if (lightAvailable) R.string.protection_light_description else R.string.protection_no_sensor),
-                        protection.ambientLight && lightAvailable,
-                        { onDisplayProtectionChanged(protection.copy(ambientLight = it)) },
-                        enabled = lightAvailable)
-                    ChoiceSetting(stringResource(R.string.protection_release),
-                        if (protection.releaseAfterMinutes == 0) stringResource(R.string.protection_disabled)
+                    ChoiceSetting(
+                        title = stringResource(R.string.protection_release),
+                        value = if (protection.releaseAfterMinutes == 0)
+                            stringResource(R.string.protection_disabled)
                         else stringResource(R.string.protection_minutes, protection.releaseAfterMinutes),
                         choices = listOf(0, 15, 30, 60, 120, 240, 480, 720),
-                        label = { if (it == 0) context.getString(R.string.protection_disabled)
-                            else context.getString(R.string.protection_minutes, it) },
-                        onSelected = { onDisplayProtectionChanged(protection.copy(releaseAfterMinutes = it)) })
-                    Text(stringResource(R.string.protection_release_description),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+                        label = {
+                            if (it == 0) context.getString(R.string.protection_disabled)
+                            else context.getString(R.string.protection_minutes, it)
+                        },
+                        onSelected = {
+                            onDisplayProtectionChanged(protection.copy(releaseAfterMinutes = it))
+                        },
+                        description = stringResource(R.string.protection_release_description),
+                    )
                 }
-                SettingSwitch(stringResource(R.string.burn_in_protection),
+
+                DisplaySettingsGroup(stringResource(R.string.display_group_anti_burn_in))
+                SettingSwitch(
+                    stringResource(R.string.burn_in_protection),
                     stringResource(R.string.burn_in_protection_description),
-                    state.settings.burnInProtection, onBurnInProtectionChanged)
+                    state.settings.burnInProtection,
+                    onBurnInProtectionChanged,
+                )
             }
 
             SettingsSection(stringResource(R.string.section_appearance))
@@ -235,7 +265,18 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun ProtectionControls(
+private fun DisplaySettingsGroup(title: String) {
+    Text(
+        title,
+        modifier = Modifier.padding(top = 20.dp, bottom = 6.dp),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.SemiBold,
+    )
+}
+
+@Composable
+private fun BrightnessControls(
     protection: DisplayProtectionSettings,
     onChanged: (DisplayProtectionSettings) -> Unit,
 ) {
@@ -250,7 +291,13 @@ private fun ProtectionControls(
         protection.minimumPercent, 1..protection.initialPercent,
         formatValue = { stringResource(R.string.protection_percent, it) },
     ) { onChanged(protection.copy(minimumPercent = it)) }
+}
 
+@Composable
+private fun DimmingControls(
+    protection: DisplayProtectionSettings,
+    onChanged: (DisplayProtectionSettings) -> Unit,
+) {
     ProtectionDelaySetting(protection.dimDelaySeconds) {
         onChanged(protection.copy(dimDelaySeconds = it))
     }
@@ -410,7 +457,10 @@ private fun ProtectionControlsPreview() {
         Surface {
             var protection by remember { mutableStateOf(DisplayProtectionSettings(dimDelaySeconds = 90)) }
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp)) {
-                ProtectionControls(protection) { protection = it }
+                DisplaySettingsGroup(stringResource(R.string.display_group_brightness))
+                BrightnessControls(protection) { protection = it }
+                DisplaySettingsGroup(stringResource(R.string.display_group_behavior))
+                DimmingControls(protection) { protection = it }
             }
         }
     }
