@@ -28,7 +28,7 @@
     <string name="background_vignette">Koyu kenarlar</string>
     <string name="background_aura">Renk halesi</string>
     <string name="background_grain">Hafif doku</string>
-    <string name="typography_auto">Tema ve saat yüzü</string>
+    <string name="typography_auto">Otomatik</string>
     <string name="typography_modern">Modern</string>
     <string name="typography_editorial">Editoryal</string>
     <string name="typography_rounded">Yuvarlak</string>
