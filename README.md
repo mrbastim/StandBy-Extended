@@ -1,14 +1,37 @@
-# StandBy Extended
+<p align="center">
+  <strong>English</strong> · <a href="README.ru.md">Русский</a>
+</p>
 
-**Turn your Android phone into a beautiful desk clock and ambient dashboard.** Place your phone horizontally on a stand to see clocks, music, a calendar, weather, and useful widgets—all with a customizable look.
+<h1 align="center">StandBy Extended</h1>
 
-**Android 9+ · No root required · Free · Open source**
+<p align="center">
+  Turn your Android phone into an elegant desk clock and ambient dashboard.
+</p>
 
-**[⬇ Download the latest stable APK](https://github.com/mrbastim/StandBy-Extended/releases/latest/download/standby-android-extended.apk)** · [All releases](https://github.com/mrbastim/StandBy-Extended/releases) · [Русский](README.ru.md)
+<p align="center">
+  <img alt="Android 9+" src="https://img.shields.io/badge/Android-9%2B-3DDC84?logo=android&logoColor=white">
+  <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-Jetpack%20Compose-7F52FF?logo=kotlin&logoColor=white">
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-blue"></a>
+  <a href="https://github.com/mrbastim/StandBy-Extended/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/mrbastim/StandBy-Extended?label=stable"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/mrbastim/StandBy-Extended/releases/latest/download/standby-android-extended.apk"><strong>⬇ Download APK</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/mrbastim/StandBy-Extended/releases">All releases</a>
+  &nbsp;·&nbsp;
+  <a href="#get-started">Get started</a>
+</p>
+
+---
+
+Place your phone horizontally on a stand to see **clocks, music, a calendar, weather and useful widgets** in a customizable, AMOLED-friendly interface.
+
+**Free · Open source · No root required.**
 
 > StandBy Extended is an independent version of [StandBy-Android](https://github.com/emretenoz/StandBy-Android). It can be installed alongside the original app; settings are not automatically transferred.
 
-## Get started
+## 🚀 Get started
 
 1. **Install the app.** Download the APK above and open it on your phone. Android may ask you to allow installation from the chosen source.
 2. **Try it without a charger.** Launch StandBy Extended and tap **Preview StandBy** to explore the interface and customize its appearance.
@@ -17,7 +40,7 @@
 
 **What's the difference?** Automatic activation works while the app is open. The **Android screen saver** can start after the display timeout if your device supports it. The app does not bypass Android's restrictions to launch itself from the background whenever a charger is connected.
 
-## Features
+## ✨ Features
 
 - **Four pages:** two independently scrollable widget columns, a full-screen clock, a calendar, and battery information.
 - **Five clock faces:** Digital, Digital Split, Analog, Solar / Orbit, and World Clock with a selectable second city.
@@ -25,7 +48,7 @@
 - **Personalization:** preset themes, independent day and night palettes, custom colors, clock styles, and backgrounds.
 - **AMOLED Protection 2.0:** idle dimming, optional light-sensor adaptation, and subtle periodic pixel shifting.
 
-### Controls
+### 👆 Controls
 
 | Gesture | Action |
 | --- | --- |
@@ -37,13 +60,13 @@
 
 Use the **×** button to leave **Preview**. Regular StandBy mode also provides a way back to the app's settings. To close the Android screen saver, use its **Exit** control; Android decides which screen appears afterward.
 
-## Music and weather
+## 🎵 Music and weather
 
 **Music:** The optional widget displays the currently playing track from a compatible media app and can control playback. Android requires you to explicitly enable **notification access** so StandBy can discover other apps' media sessions. You can leave this permission disabled if you don't use the widget.
 
 **Weather:** Off by default. When enabled, it requests current conditions for your selected World Clock city from [Open-Meteo](https://open-meteo.com/). It does not need your device location.
 
-## AMOLED protection
+## 🌙 AMOLED protection
 
 By default, StandBy starts at **35% requested brightness**, waits **2 minutes** without interaction, then fades to **8%** over **12 seconds**. Touching the display restores the active brightness. You can change these values under **Display & AMOLED Protection**.
 
@@ -51,31 +74,55 @@ You can also enable ambient-light adaptation (if the device has a light sensor),
 
 [How AMOLED protection works](docs/amoled-protection.md)
 
-## FAQ
+## ❓ FAQ
 
-**Why doesn't StandBy appear when I plug in my phone?**  
+<details>
+<summary><strong>Why doesn't StandBy appear when I plug in my phone?</strong></summary>
+
 Make sure the app is open, Automatic activation is enabled, Android reports the device is charging, and the phone is in landscape. To start StandBy after display timeout, configure the system screen saver.
 
-**Can I use it without charging?**  
+</details>
+
+<details>
+<summary><strong>Can I use it without charging?</strong></summary>
+
 Yes, in Preview. Automatic activation in normal mode requires charging.
 
-**Why doesn't the screen saver start after locking the phone?**  
+</details>
+
+<details>
+<summary><strong>Why doesn't the screen saver start after locking the phone?</strong></summary>
+
 Check Android's screen-saver settings. Some manufacturers disable or change screen-saver support.
 
-**Why can't I see my music?**  
+</details>
+
+<details>
+<summary><strong>Why can't I see my music?</strong></summary>
+
 Start playback in another app and enable notification access for StandBy Extended if prompted. Not every media app exposes every control.
 
-**Why doesn't the screen turn off at the exact timeout?**  
+</details>
+
+<details>
+<summary><strong>Why doesn't the screen turn off at the exact timeout?</strong></summary>
+
 StandBy can release its screen-awake request or finish the screen saver, but Android controls when the physical display turns off.
 
-**Can I install it alongside the original StandBy?**  
+</details>
+
+<details>
+<summary><strong>Can I install it alongside the original StandBy?</strong></summary>
+
 Yes. Extended has a different application ID and maintains separate settings.
 
-## Privacy
+</details>
+
+## 🔒 Privacy
 
 StandBy Extended has no advertising or analytics SDKs. Internet access is used for the optional weather widget. Notification access is an optional, user-enabled feature for music controls. The described features do not need your location, contacts, files, or calendar. Preferences are stored on-device.
 
-## For developers
+## 🛠️ For developers
 
 Built with **Kotlin and Jetpack Compose**. Building requires JDK 17 and Android SDK 35 or newer:
 
