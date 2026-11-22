@@ -2,6 +2,12 @@ package com.mrbastim.standby.extended.ui
 
 import android.content.Context
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.RadioButton
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
@@ -97,7 +103,9 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 38.dp),
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 24.dp),
         ) {
             Text(stringResource(R.string.app_name), fontSize = 36.sp, fontWeight = FontWeight.Light)
             Text(
@@ -229,8 +237,10 @@ fun SettingsScreen(
                 choices = DateWidgetStyle.entries, label = context::localizedLabel, onSelected = onDateWidgetStyleChanged)
             ChoiceSetting(stringResource(R.string.battery_widget_style), context.localizedLabel(state.settings.batteryWidgetStyle),
                 choices = BatteryWidgetStyle.entries, label = context::localizedLabel, onSelected = onBatteryWidgetStyleChanged)
-            ChoiceSetting(stringResource(R.string.world_clock_city), context.localizedLabel(state.settings.worldClockZone),
-                choices = WorldClockZone.entries, label = context::localizedLabel, onSelected = onWorldClockZoneChanged)
+            CityPickerSetting(
+                selected = state.settings.worldClockZone,
+                onSelected = onWorldClockZoneChanged,
+            )
             SettingSwitch(
                 stringResource(R.string.weather_enabled),
                 stringResource(R.string.weather_enabled_description),
@@ -542,6 +552,72 @@ private fun <T> ChoiceSetting(
         }
     }
     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+}
+
+@Composable
+private fun CityPickerSetting(
+    selected: WorldClockZone,
+    onSelected: (WorldClockZone) -> Unit,
+) {
+    val context = LocalContext.current
+    var dialogOpen by rememberSaveable { mutableStateOf(false) }
+    val title = stringResource(R.string.world_clock_city)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { dialogOpen = true }
+            .padding(vertical = 13.dp),
+    ) {
+        Text(title, fontSize = 16.sp)
+        Text(
+            context.localizedLabel(selected),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 13.sp,
+        )
+    }
+    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+
+    if (dialogOpen) {
+        AlertDialog(
+            onDismissRequest = { dialogOpen = false },
+            title = { Text(title) },
+            text = {
+                LazyColumn(Modifier.fillMaxWidth().heightIn(max = 420.dp)) {
+                    items(WorldClockZone.entries, key = { it.name }) { zone ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onSelected(zone)
+                                    dialogOpen = false
+                                }
+                                .padding(vertical = 9.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Text(
+                                context.localizedLabel(zone),
+                                modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                            RadioButton(
+                                selected = zone == selected,
+                                onClick = {
+                                    onSelected(zone)
+                                    dialogOpen = false
+                                },
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { dialogOpen = false }) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+            },
+        )
+    }
 }
 
 @Composable
