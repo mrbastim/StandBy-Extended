@@ -87,7 +87,7 @@
     <string name="widget_edit_hint">Araç eklemek, kaldırmak veya sıralamak için bir araç paneline uzun basın.</string>
     <string name="open_screen_saver_settings">Android ekran koruyucu ayarlarını aç</string>
     <string name="version">Sürüm</string>
-    <string name="background_launch_explanation">Ekran zaman aşımından sonra StandBy'ı göstermek için Android ekran koruyucu ayarlarından seçin. Kullanılabilirlik cihazınıza bağlıdır.</string>
+    <string name="background_launch_explanation">Ekran zaman aşımından sonra StandBy’ı göstermek için Android ekran koruyucu ayarlarından seçin. Kullanılabilirlik cihazınıza bağlıdır.</string>
     <string name="status_automatic_off">Otomatik etkinleştirme kapalı</string>
     <string name="status_connect_power">Gücü bağlayın ve telefonu yatay konuma getirin</string>
     <string name="status_rotate_landscape">Şarj oluyor — yatay konuma çevirin</string>
