@@ -1,16 +1,26 @@
 package com.mrbastim.standby.extended
 
 import android.content.res.Configuration
+import android.os.Handler
+import android.os.Looper
 import android.service.dreams.DreamService
+import android.view.KeyEvent
+import android.view.MotionEvent
 import com.mrbastim.standby.extended.display.DisplayProtectionHost
 import com.mrbastim.standby.extended.display.DisplayPhase
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -39,6 +50,7 @@ import com.mrbastim.standby.extended.system.ChargingObserver
 import com.mrbastim.standby.extended.system.ChargingState
 import com.mrbastim.standby.extended.system.NextAlarmObserver
 import com.mrbastim.standby.extended.system.NextAlarmState
+import com.mrbastim.standby.extended.ui.standby.StandByExitButton
 import com.mrbastim.standby.extended.ui.standby.StandByActions
 import com.mrbastim.standby.extended.ui.standby.StandByDisplay
 import com.mrbastim.standby.extended.ui.theme.StandByTheme
@@ -55,6 +67,11 @@ class StandByDreamService : DreamService(), LifecycleOwner, ViewModelStoreOwner,
     private val store = ViewModelStore()
     private val savedStateController = SavedStateRegistryController.create(this)
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    private val exitHandler = Handler(Looper.getMainLooper())
+    private val hideExitButton = Runnable { exitButtonVisible = false }
+    private var exitButtonVisible by mutableStateOf(false)
+    private var endingDream = false
 
     override val lifecycle: Lifecycle get() = lifecycleRegistry
     override val viewModelStore: ViewModelStore get() = store
@@ -98,7 +115,9 @@ class StandByDreamService : DreamService(), LifecycleOwner, ViewModelStoreOwner,
                         active = true,
                         settings = settings,
                         onHoldChanged = { isScreenBright = it },
-                        onRelease = { finish() },
+                        onRelease = {
+                            if (beginEndingDream()) finish()
+                        },
                     ) { phase, automaticNightMode ->
                         if (isLandscape) {
                             StandByDisplay(
@@ -110,6 +129,7 @@ class StandByDreamService : DreamService(), LifecycleOwner, ViewModelStoreOwner,
                                 nextAlarm = nextAlarm,
                                 weather = weather,
                                 actions = StandByActions(
+                                    onDismissDream = if (exitButtonVisible) ::wakeUp else null,
                                     onToggleWidget = { column: WidgetColumn, widget: StandByWidgetType ->
                                         serviceScope.launch { settingsRepository.toggleWidget(column, widget) }
                                     },
@@ -163,13 +183,20 @@ class StandByDreamService : DreamService(), LifecycleOwner, ViewModelStoreOwner,
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Color.Black),
+                                    .background(Color.Black)
+                                    .windowInsetsPadding(WindowInsets.safeDrawing),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Text(
                                     text = stringResource(R.string.rotate_to_landscape),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
+                                if (exitButtonVisible) {
+                                    StandByExitButton(
+                                        onClick = ::wakeUp,
+                                        modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+                                    )
+                                }
                             }
                         }
                     }
@@ -179,19 +206,58 @@ class StandByDreamService : DreamService(), LifecycleOwner, ViewModelStoreOwner,
         setContentView(content)
     }
 
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (!endingDream && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
+            event.actionMasked != MotionEvent.ACTION_CANCEL
+        ) {
+            if (event.actionMasked == MotionEvent.ACTION_DOWN) exitButtonVisible = true
+            if (exitButtonVisible) extendExitButtonTimeout()
+        }
+        return super.dispatchTouchEvent(event)
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (exitButtonVisible && event.keyCode != KeyEvent.KEYCODE_BACK) extendExitButtonTimeout()
+        return super.dispatchKeyEvent(event)
+    }
+
+    private fun extendExitButtonTimeout() {
+        exitHandler.removeCallbacks(hideExitButton)
+        exitHandler.postDelayed(hideExitButton, 5_000L)
+    }
+
+    private fun clearExitButton() {
+        exitHandler.removeCallbacks(hideExitButton)
+        exitButtonVisible = false
+    }
+
+    private fun beginEndingDream(): Boolean {
+        if (endingDream) return false
+        endingDream = true
+        clearExitButton()
+        return true
+    }
+
+    override fun onWakeUp() {
+        if (beginEndingDream()) super.onWakeUp()
+    }
+
     override fun onDreamingStarted() {
         super.onDreamingStarted()
+        endingDream = false
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
     }
 
     override fun onDreamingStopped() {
+        clearExitButton()
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         super.onDreamingStopped()
     }
 
     override fun onDestroy() {
+        clearExitButton()
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         store.clear()
         serviceScope.cancel()

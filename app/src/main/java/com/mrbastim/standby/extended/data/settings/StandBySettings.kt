@@ -122,6 +122,12 @@ enum class WorldClockZone(
     SINGAPORE("Singapore", "Asia/Singapore", 1.3521, 103.8198),
     TOKYO("Tokyo", "Asia/Tokyo", 35.6762, 139.6503),
     SYDNEY("Sydney", "Australia/Sydney", -33.8688, 151.2093),
+    MOSCOW("Moscow", "Europe/Moscow", 55.752, 37.618),
+    SAINT_PETERSBURG("Saint Petersburg", "Europe/Moscow", 59.939, 30.314),
+    KAZAN("Kazan", "Europe/Moscow", 55.789, 49.122),
+    YEKATERINBURG("Yekaterinburg", "Asia/Yekaterinburg", 56.857, 60.615),
+    NOVOSIBIRSK("Novosibirsk", "Asia/Novosibirsk", 55.023, 82.932),
+    VLADIVOSTOK("Vladivostok", "Asia/Vladivostok", 43.106, 131.874),
 }
 
 enum class WidgetColumn { LEFT, RIGHT }

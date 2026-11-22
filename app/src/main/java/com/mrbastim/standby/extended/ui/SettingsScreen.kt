@@ -1,6 +1,14 @@
 package com.mrbastim.standby.extended.ui
 
+import android.content.Context
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
+import kotlin.math.roundToInt
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -89,7 +97,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 28.dp),
+                .padding(horizontal = 24.dp, vertical = 38.dp),
         ) {
             Text(stringResource(R.string.app_name), fontSize = 36.sp, fontWeight = FontWeight.Light)
             Text(
@@ -134,17 +142,7 @@ fun SettingsScreen(
                     stringResource(R.string.protection_description), protection.enabled,
                     { onDisplayProtectionChanged(protection.copy(enabled = it)) })
                 if (protection.enabled) {
-                    ProtectionSlider(R.string.protection_initial, protection.initialPercent, 1..100, R.string.protection_percent) {
-                        onDisplayProtectionChanged(protection.copy(initialPercent = it).normalized())
-                    }
-                    ProtectionSlider(R.string.protection_minimum, protection.minimumPercent,
-                        1..protection.initialPercent, R.string.protection_percent) {
-                        onDisplayProtectionChanged(protection.copy(minimumPercent = it))
-                    }
-                    ProtectionSlider(R.string.protection_delay, protection.dimDelaySeconds, 10..3600,
-                        R.string.protection_seconds) { onDisplayProtectionChanged(protection.copy(dimDelaySeconds = it)) }
-                    ProtectionSlider(R.string.protection_transition, protection.transitionSeconds, 1..60,
-                        R.string.protection_seconds) { onDisplayProtectionChanged(protection.copy(transitionSeconds = it)) }
+                    ProtectionControls(protection, onDisplayProtectionChanged)
                     val lightAvailable = remember(context) {
                         context.getSystemService(SensorManager::class.java)?.getDefaultSensor(Sensor.TYPE_LIGHT) != null
                     }
@@ -237,21 +235,184 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun ProtectionSlider(title: Int, value: Int, range: IntRange, unit: Int, onValue: (Int) -> Unit) {
-    var draft by remember(value) { mutableStateOf(value.toFloat()) }
+private fun ProtectionControls(
+    protection: DisplayProtectionSettings,
+    onChanged: (DisplayProtectionSettings) -> Unit,
+) {
+    ProtectionSlider(
+        R.string.protection_initial, R.string.protection_initial_description,
+        protection.initialPercent, protection.minimumPercent..100,
+        formatValue = { stringResource(R.string.protection_percent, it) },
+    ) { onChanged(protection.copy(initialPercent = it)) }
+
+    ProtectionSlider(
+        R.string.protection_minimum, R.string.protection_minimum_description,
+        protection.minimumPercent, 1..protection.initialPercent,
+        formatValue = { stringResource(R.string.protection_percent, it) },
+    ) { onChanged(protection.copy(minimumPercent = it)) }
+
+    ProtectionDelaySetting(protection.dimDelaySeconds) {
+        onChanged(protection.copy(dimDelaySeconds = it))
+    }
+
+    ProtectionSlider(
+        R.string.protection_transition, R.string.protection_transition_description,
+        protection.transitionSeconds, 1..60,
+        formatValue = { protectionTime(it) },
+    ) { onChanged(protection.copy(transitionSeconds = it)) }
+}
+
+@Composable
+private fun ProtectionSlider(
+    title: Int,
+    description: Int,
+    value: Int,
+    range: IntRange,
+    formatValue: @Composable (Int) -> String,
+    onValue: (Int) -> Unit,
+) {
+    var draft by remember(value, range) { mutableStateOf(value.toFloat()) }
     val titleText = stringResource(title)
+    val descriptionText = stringResource(description)
+    val current = draft.roundToInt().coerceIn(range)
+    val formattedValue = formatValue(current)
     Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-        Text(titleText, fontSize = 16.sp)
-        Text(stringResource(unit, draft.toInt()), fontSize = 13.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
+        ProtectionSettingLabel(titleText, formattedValue, descriptionText)
         Slider(
-            modifier = Modifier.semantics { contentDescription = titleText },
-            value = draft.coerceIn(range.first.toFloat(), range.last.toFloat()),
+            modifier = Modifier.semantics {
+                contentDescription = listOf(titleText, descriptionText).joinToString(". ")
+                stateDescription = formattedValue
+            },
+            value = current.toFloat(),
             onValueChange = { draft = it },
-            onValueChangeFinished = { onValue(draft.toInt()) },
+            onValueChangeFinished = {
+                val selected = draft.roundToInt().coerceIn(range)
+                if (selected != value) onValue(selected)
+            },
             valueRange = range.first.toFloat()..range.last.coerceAtLeast(range.first + 1).toFloat(),
             enabled = range.last > range.first,
         )
+        if (range.first != range.last) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(formatValue(range.first), style = MaterialTheme.typography.bodySmall)
+                Text(formatValue(range.last), style = MaterialTheme.typography.bodySmall)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProtectionSettingLabel(title: String, value: String, description: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+        Text(
+            value,
+            style = MaterialTheme.typography.labelLarge,
+            textAlign = TextAlign.End,
+            color = MaterialTheme.colorScheme.primary,
+        )
+    }
+    Text(
+        description,
+        modifier = Modifier.padding(top = 4.dp),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+private val protectionDelayPresets = listOf(15, 30, 60, 120, 300, 600)
+private val protectionDelayRange = 10..3600
+
+@Composable
+private fun ProtectionDelaySetting(delaySeconds: Int, onValue: (Int) -> Unit) {
+    val title = stringResource(R.string.protection_delay)
+    val context = LocalContext.current
+    var customSeconds by rememberSaveable { mutableStateOf<String?>(null) }
+    ChoiceSetting(
+        title = title,
+        value = protectionTime(delaySeconds),
+        description = stringResource(R.string.protection_delay_description),
+        choices = protectionDelayPresets + listOf(null),
+        label = { seconds ->
+            if (seconds == null) context.getString(R.string.protection_custom_delay)
+            else protectionTime(context, seconds)
+        },
+        onSelected = { seconds ->
+            if (seconds == null) customSeconds = delaySeconds.toString()
+            else onValue(seconds)
+        },
+    )
+    customSeconds?.let { input ->
+        val seconds = input.toIntOrNull()?.takeIf { it in protectionDelayRange }
+        AlertDialog(
+            onDismissRequest = { customSeconds = null },
+            title = { Text(stringResource(R.string.protection_custom_delay)) },
+            text = {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    OutlinedTextField(
+                        value = input,
+                        onValueChange = { customSeconds = it.filter(Char::isDigit).take(4) },
+                        label = { Text(stringResource(R.string.protection_delay_input)) },
+                        supportingText = {
+                            Text(stringResource(
+                                R.string.protection_delay_range,
+                                protectionDelayRange.first,
+                                protectionDelayRange.last,
+                            ))
+                        },
+                        isError = input.isNotEmpty() && seconds == null,
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = seconds != null,
+                    onClick = {
+                        seconds?.let(onValue)
+                        customSeconds = null
+                    },
+                ) { Text(stringResource(R.string.protection_apply)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { customSeconds = null }) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun protectionTime(seconds: Int): String = protectionTime(LocalContext.current, seconds)
+
+private fun protectionTime(context: Context, seconds: Int): String {
+    val minutes = seconds / 60
+    val remaining = seconds % 60
+    return when {
+        minutes == 0 -> context.getString(R.string.protection_seconds, remaining)
+        remaining == 0 -> context.getString(R.string.protection_minutes, minutes)
+        else -> context.getString(R.string.protection_minutes_seconds, minutes, remaining)
+    }
+}
+
+@Preview(name = "Protection 2.0", locale = "ru", widthDp = 400, heightDp = 620)
+@Preview(name = "Protection 2.0 • Large text", locale = "tr", widthDp = 560, heightDp = 300, fontScale = 2f)
+@Composable
+private fun ProtectionControlsPreview() {
+    StandByTheme {
+        Surface {
+            var protection by remember { mutableStateOf(DisplayProtectionSettings(dimDelaySeconds = 90)) }
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp)) {
+                ProtectionControls(protection) { protection = it }
+            }
+        }
     }
 }
 
@@ -304,6 +465,7 @@ private fun <T> ChoiceSetting(
     choices: List<T>,
     label: (T) -> String,
     onSelected: (T) -> Unit,
+    description: String? = null,
 ) {
     var expanded by remember { mutableStateOf(false) }
     Column(
@@ -312,10 +474,14 @@ private fun <T> ChoiceSetting(
             .clickable(enabled = enabled) { expanded = true }
             .padding(vertical = 13.dp),
     ) {
-        Text(title, fontSize = 16.sp)
-        Text(value,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else 0.4f),
-            fontSize = 13.sp)
+        if (description == null) {
+            Text(title, fontSize = 16.sp)
+            Text(value,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else 0.4f),
+                fontSize = 13.sp)
+        } else {
+            ProtectionSettingLabel(title, value, description)
+        }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             choices.forEach { choice ->
                 DropdownMenuItem(

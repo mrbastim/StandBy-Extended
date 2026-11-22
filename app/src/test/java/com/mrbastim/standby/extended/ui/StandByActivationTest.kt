@@ -18,6 +18,16 @@ class StandByActivationTest {
     }
 
     @Test
+    fun dismissedAutomaticModeStaysInSettings() {
+        assertFalse(shouldActivateStandBy(true, true, true, false, automaticModeDismissed = true))
+    }
+
+    @Test
+    fun explicitPreviewWorksAfterDismissingAutomaticMode() {
+        assertTrue(shouldActivateStandBy(true, true, true, true, automaticModeDismissed = true))
+    }
+
+    @Test
     fun automaticModeRequiresChargingAndLandscape() {
         assertTrue(shouldActivateStandBy(true, true, true, false))
         assertFalse(shouldActivateStandBy(true, false, true, false))

@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,18 +22,28 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import android.os.SystemClock
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
@@ -109,6 +120,17 @@ private fun StandByDisplayContent(
     var editingClock by remember { mutableStateOf(false) }
     var indicatorVisible by remember { mutableStateOf(false) }
     val theme = LocalStandByTheme.current
+    var lastInteraction by remember { mutableLongStateOf(0L) }
+    var activityExitVisible by remember { mutableStateOf(false) }
+    val canExitStandBy = actions.onExitStandBy != null
+
+    LaunchedEffect(lastInteraction, canExitStandBy) {
+        if (canExitStandBy && lastInteraction != 0L) {
+            activityExitVisible = true
+            delay(5_000L)
+        }
+        activityExitVisible = false
+    }
 
     LaunchedEffect(pagerState.isScrollInProgress, pagerState.currentPage) {
         indicatorVisible = true
@@ -118,7 +140,18 @@ private fun StandByDisplayContent(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier.fillMaxSize().pointerInput(canExitStandBy) {
+            if (canExitStandBy) awaitPointerEventScope {
+                while (true) {
+                    val event = awaitPointerEvent(PointerEventPass.Initial)
+                    if (event.changes.any { it.pressed || it.previousPressed }) {
+                        lastInteraction = SystemClock.uptimeMillis()
+                    }
+                }
+            }
+        },
+    ) {
         BurnInContainer(settings.burnInProtection && editingStack == null && !editingClock) {
             HorizontalPager(
                 state = pagerState,
@@ -171,6 +204,20 @@ private fun StandByDisplayContent(
             )
         }
 
+        val exit = actions.onDismissDream ?: actions.onExitStandBy?.takeIf { activityExitVisible }
+        exit?.let { dismiss ->
+            StandByExitButton(
+                onClick = dismiss,
+                modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+                background = theme.background,
+                foreground = theme.primary,
+                label = stringResource(
+                    if (actions.onDismissDream != null) R.string.exit_dream_label
+                    else R.string.exit_standby_label,
+                ),
+            )
+        }
+
         AnimatedVisibility(
             visible = editingStack != null,
             enter = fadeIn(tween(220)),
@@ -201,6 +248,43 @@ private fun StandByDisplayContent(
                 actions = actions,
                 onDone = { editingClock = false },
             )
+        }
+    }
+}
+
+@Composable
+internal fun StandByExitButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    background: Color = androidx.compose.material3.MaterialTheme.colorScheme.surface,
+    foreground: Color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
+    label: String = stringResource(R.string.exit_dream_label),
+) {
+    TextButton(
+        onClick = onClick,
+        modifier = modifier
+            // Leave space for system indicators drawn over the dream window.
+            .windowInsetsPadding(WindowInsets(top = 36.dp))
+            .semantics { contentDescription = label },
+        colors = ButtonDefaults.textButtonColors(
+            containerColor = background.copy(alpha = 0.82f),
+            contentColor = foreground,
+        ),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Canvas(Modifier.size(12.dp)) {
+                val inset = 2.dp.toPx()
+                val stroke = 1.5.dp.toPx()
+                drawLine(foreground, Offset(inset, inset), Offset(size.width - inset, size.height - inset),
+                    stroke, StrokeCap.Round)
+                drawLine(foreground, Offset(size.width - inset, inset), Offset(inset, size.height - inset),
+                    stroke, StrokeCap.Round)
+            }
+            Text(stringResource(R.string.exit_dream), modifier = Modifier.clearAndSetSemantics {})
         }
     }
 }
