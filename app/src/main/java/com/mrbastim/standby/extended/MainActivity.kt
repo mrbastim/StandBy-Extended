@@ -68,6 +68,7 @@ class MainActivity : ComponentActivity() {
                             (phase == DisplayPhase.AMBIENT || phase == DisplayPhase.RELEASED),
                         actions = StandByActions(
                             onExitPreview = if (state.isPreviewMode) viewModel::stopPreview else null,
+                            onExitStandBy = if (!state.isPreviewMode) viewModel::dismissStandBy else null,
                             onToggleWidget = viewModel::toggleWidget,
                             onMoveWidget = viewModel::moveWidget,
                             onClockFaceChanged = viewModel::setClockFace,

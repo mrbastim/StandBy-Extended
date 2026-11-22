@@ -99,6 +99,7 @@
     <string name="exit_preview">Exit preview</string>
     <string name="exit_dream">Exit</string>
     <string name="exit_dream_label">Exit screen saver</string>
+    <string name="exit_standby_label">Exit StandBy and return to settings</string>
     <string name="clock_customize_hint">Clock. Long press to customize.</string>
     <string name="widget_stack_edit_hint">%1$s widget stack. Long press to edit.</string>
     <string name="left">Left</string>

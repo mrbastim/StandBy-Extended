@@ -97,6 +97,7 @@
     <string name="exit_preview">Önizlemeden çık</string>
     <string name="exit_dream">Çık</string>
     <string name="exit_dream_label">Ekran koruyucudan çık</string>
+    <string name="exit_standby_label">StandBy’dan çık ve ayarlara dön</string>
     <string name="clock_customize_hint">Saat. Özelleştirmek için uzun basın.</string>
     <string name="widget_stack_edit_hint">%1$s araç yığını. Düzenlemek için uzun basın.</string>
     <string name="left">Sol</string>

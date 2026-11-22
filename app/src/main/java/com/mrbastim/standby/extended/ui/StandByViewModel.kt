@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -46,7 +47,9 @@ internal fun shouldActivateStandBy(
     isCharging: Boolean,
     isLandscape: Boolean,
     isPreviewMode: Boolean,
-): Boolean = isPreviewMode || (automaticModeEnabled && isCharging && isLandscape)
+    automaticModeDismissed: Boolean = false,
+): Boolean = isPreviewMode ||
+    (automaticModeEnabled && isCharging && isLandscape && !automaticModeDismissed)
 
 class StandByViewModel(
     private val settingsRepository: SettingsRepository,
@@ -54,6 +57,7 @@ class StandByViewModel(
     weatherRepository: WeatherRepository,
 ) : ViewModel() {
     private val previewMode = MutableStateFlow(false)
+    private val automaticModeDismissed = MutableStateFlow(false)
     private val systemSources = MutableStateFlow(systemStateRepository)
 
     // Activity-owned observers must be replaced when the retained ViewModel gets a new Activity.
@@ -87,13 +91,29 @@ class StandByViewModel(
         )
     }
 
-    val uiState: StateFlow<StandByUiState> = combine(baseState, previewMode) { state, isPreviewMode ->
+    // A new charging/landscape session can activate again after the user leaves StandBy.
+    private val activationState = baseState.onEach { state ->
+        val automaticActivationAllowed = shouldActivateStandBy(
+            automaticModeEnabled = state.settings.automaticModeEnabled,
+            isCharging = state.charging.isCharging,
+            isLandscape = state.isLandscape,
+            isPreviewMode = false,
+        )
+        if (!automaticActivationAllowed) {
+            automaticModeDismissed.value = false
+        }
+    }
+
+    val uiState: StateFlow<StandByUiState> = combine(
+        activationState, previewMode, automaticModeDismissed,
+    ) { state, isPreviewMode, dismissed ->
         state.copy(
             isStandByActive = shouldActivateStandBy(
                 automaticModeEnabled = state.settings.automaticModeEnabled,
                 isCharging = state.charging.isCharging,
                 isLandscape = state.isLandscape,
                 isPreviewMode = isPreviewMode,
+                automaticModeDismissed = dismissed,
             ),
             isPreviewMode = isPreviewMode,
         )
@@ -124,6 +144,7 @@ class StandByViewModel(
     fun setScreenTimeout(value: ScreenTimeout) = update { setScreenTimeout(value) }
     fun startPreview() { previewMode.value = true }
     fun stopPreview() { previewMode.value = false }
+    fun dismissStandBy() { automaticModeDismissed.value = true }
     fun toggleWidget(column: WidgetColumn, widget: StandByWidgetType) =
         update { toggleWidget(column, widget) }
     fun moveWidget(column: WidgetColumn, fromIndex: Int, toIndex: Int) =

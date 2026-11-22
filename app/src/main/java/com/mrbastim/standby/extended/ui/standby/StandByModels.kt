@@ -49,6 +49,7 @@ data class StandByActions(
     val onDateWidgetStyleChanged: ((DateWidgetStyle) -> Unit)? = null,
     val onBatteryWidgetStyleChanged: ((BatteryWidgetStyle) -> Unit)? = null,
     val onDismissDream: (() -> Unit)? = null,
+    val onExitStandBy: (() -> Unit)? = null,
 )
 
 @Composable

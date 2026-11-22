@@ -99,6 +99,7 @@
     <string name="exit_preview">Выйти из предпросмотра</string>
     <string name="exit_dream">Выйти</string>
     <string name="exit_dream_label">Выйти из заставки</string>
+    <string name="exit_standby_label">Выйти из StandBy в настройки</string>
     <string name="clock_customize_hint">Часы. Нажмите и удерживайте, чтобы настроить.</string>
     <string name="widget_stack_edit_hint">Панель виджетов: %1$s. Нажмите и удерживайте для редактирования.</string>
     <string name="left">Слева</string>

@@ -50,7 +50,7 @@ import com.mrbastim.standby.extended.system.ChargingObserver
 import com.mrbastim.standby.extended.system.ChargingState
 import com.mrbastim.standby.extended.system.NextAlarmObserver
 import com.mrbastim.standby.extended.system.NextAlarmState
-import com.mrbastim.standby.extended.ui.standby.DreamExitButton
+import com.mrbastim.standby.extended.ui.standby.StandByExitButton
 import com.mrbastim.standby.extended.ui.standby.StandByActions
 import com.mrbastim.standby.extended.ui.standby.StandByDisplay
 import com.mrbastim.standby.extended.ui.theme.StandByTheme
@@ -192,7 +192,7 @@ class StandByDreamService : DreamService(), LifecycleOwner, ViewModelStoreOwner,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                                 if (exitButtonVisible) {
-                                    DreamExitButton(
+                                    StandByExitButton(
                                         onClick = ::wakeUp,
                                         modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
                                     )
