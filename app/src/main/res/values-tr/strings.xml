@@ -202,4 +202,7 @@
     <string name="protection_apply">Uygula</string>
     <string name="protection_percent">%1$d%%</string>
     <string name="protection_release_description">Seçilen süre sonunda Ekranı Açık Tut ayarını geçersiz kılar. Activity sistem zaman aşımına izin verir; ekran koruyucu kapanır. Ekranın ne zaman kapanacağını Android belirler.</string>
+    <string name="display_group_brightness">Parlaklık</string>
+    <string name="display_group_behavior">Ekran davranışı</string>
+    <string name="display_group_anti_burn_in">Ekran koruması</string>
 </resources>
