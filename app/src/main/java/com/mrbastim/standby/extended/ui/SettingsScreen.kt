@@ -278,10 +278,11 @@ fun SettingsScreen(
 private fun DisplaySettingsGroup(title: String) {
     Text(
         title,
-        modifier = Modifier.padding(top = 20.dp, bottom = 6.dp),
+        modifier = Modifier.padding(start = 12.dp, top = 20.dp, bottom = 6.dp),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.SemiBold,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.Medium,
+        letterSpacing = 0.sp,
     )
 }
 
@@ -480,11 +481,13 @@ private fun ProtectionControlsPreview() {
 private fun SettingsSection(title: String) {
     Text(
         title,
-        modifier = Modifier.padding(top = 30.dp, bottom = 8.dp),
-        color = MaterialTheme.colorScheme.primary,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Medium,
-        letterSpacing = 1.5.sp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 34.dp, bottom = 12.dp),
+        color = MaterialTheme.colorScheme.onSurface,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = 0.2.sp,
     )
 }
 
