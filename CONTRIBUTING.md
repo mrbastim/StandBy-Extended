@@ -25,10 +25,18 @@ On Windows, use `gradlew.bat`.
 
 ## Release checklist
 
-1. Update `versionCode`, `versionName`, and both versions of `CHANGELOG`.
+1. Set `standbyVersionName` and increase `standbyVersionCode` in `gradle.properties`. Update both changelogs.
 2. Run unit tests, lint, and both debug and release builds.
 3. Test foreground activation, preview mode, and DreamService on a physical device.
 4. Verify upgrade behavior and DataStore settings migration.
-5. Sign the release with credentials stored outside the repository.
+5. Once the release changes are on `main`, run these commands in Bash (Git Bash on Windows). Pushing the tag starts the release workflow.
+
+```bash
+git switch main && git pull --ff-only &&
+  tag="v$(git show HEAD:gradle.properties | sed -n 's/^standbyVersionName=//p')" &&
+  git tag "$tag" && git push origin "refs/tags/$tag"
+```
+
+Both README badges and download links follow the latest published stable release.
 
 See [amoled-protection.md](docs/amoled-protection.md) for architecture, [testing.md](docs/testing.md) for verification, and [github-release-pipeline.md](docs/github-release-pipeline.md) for publishing setup.
