@@ -27,7 +27,12 @@ data class NextAlarmState(
 
 private const val ALARM_REFRESH_INTERVAL_MILLIS = 60_000L
 
-class NextAlarmObserver(private val context: Context) {
+class NextAlarmObserver internal constructor(
+    private val context: Context,
+    private val currentTimeMillis: () -> Long,
+) {
+    constructor(context: Context) : this(context, System::currentTimeMillis)
+
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
     val state: Flow<NextAlarmState> = callbackFlow {
@@ -50,7 +55,7 @@ class NextAlarmObserver(private val context: Context) {
         launch {
             while (isActive) {
                 val alarm = NextAlarmState(alarmManager?.nextAlarmClock?.triggerTime)
-                val nowMillis = System.currentTimeMillis()
+                val nowMillis = currentTimeMillis()
                 val triggerAtMillis = alarm.futureTriggerAtMillis(nowMillis)
                 send(alarm.copy(triggerAtMillis = triggerAtMillis))
 

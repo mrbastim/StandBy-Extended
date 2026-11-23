@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Looper
+import android.os.SystemClock
 import java.time.Duration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,7 @@ class NextAlarmObserverTest {
 
     @Test
     fun cancellationBroadcastPromotesTheNextAlarmAndThenClearsIt() {
-        val now = System.currentTimeMillis()
+        val now = nowMillis()
         val first = scheduleAlarm(now + 120_000, 1)
         val second = scheduleAlarm(now + 240_000, 2)
 
@@ -43,7 +44,7 @@ class NextAlarmObserverTest {
 
     @Test
     fun refreshClearsCancellationWithoutBroadcast() {
-        val trigger = System.currentTimeMillis() + 120_000
+        val trigger = nowMillis() + 120_000
         val operation = scheduleAlarm(trigger, 1)
 
         observe { triggers ->
@@ -56,7 +57,7 @@ class NextAlarmObserverTest {
 
     @Test
     fun expiryClearsAnAlarmEvenWhenAlarmManagerStillReturnsIt() {
-        val trigger = System.currentTimeMillis() + 10_000
+        val trigger = nowMillis() + 10_000
         scheduleAlarm(trigger, 1)
 
         observe { triggers ->
@@ -92,7 +93,7 @@ class NextAlarmObserverTest {
         val scope = CoroutineScope(Dispatchers.Main.immediate)
         val triggers = mutableListOf<Long?>()
         scope.launch {
-            NextAlarmObserver(context).state.collect { triggers += it.triggerAtMillis }
+            NextAlarmObserver(context, ::nowMillis).state.collect { triggers += it.triggerAtMillis }
         }
         try {
             looper.idle()
@@ -102,4 +103,7 @@ class NextAlarmObserverTest {
             looper.idle()
         }
     }
+
+    // Advance the observer's wall clock together with the Robolectric looper.
+    private fun nowMillis(): Long = 1_700_000_000_000L + SystemClock.uptimeMillis()
 }
