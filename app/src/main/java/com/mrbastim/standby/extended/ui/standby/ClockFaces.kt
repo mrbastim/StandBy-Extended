@@ -98,7 +98,9 @@ private fun AlarmCountdownCard(nextAlarm: NextAlarmState, showSeconds: Boolean, 
             it.minutes,
             it.seconds,
         )
-    } ?: stringResource(R.string.no_alarm_set)
+    } ?: stringResource(
+        if (nextAlarm.isCalendarReminder) R.string.next_alarm_unavailable else R.string.no_alarm_set,
+    )
     Row(
         modifier = modifier
             .semantics { contentDescription = countdownDescription },
