@@ -25,7 +25,7 @@ class SystemStateRepository(
 
     val nextAlarm: StateFlow<NextAlarmState> = nextAlarmObserver.state.stateIn(
         scope,
-        SharingStarted.WhileSubscribed(5_000),
+        SharingStarted.WhileSubscribed(replayExpirationMillis = 0),
         NextAlarmState(),
     )
 }

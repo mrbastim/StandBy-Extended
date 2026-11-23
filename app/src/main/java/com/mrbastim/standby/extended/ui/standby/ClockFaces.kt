@@ -86,9 +86,9 @@ fun FullClockPage(
 @Composable
 private fun AlarmCountdownCard(nextAlarm: NextAlarmState, showSeconds: Boolean, modifier: Modifier = Modifier) {
     val theme = LocalStandByTheme.current
-    val ticker = rememberStandByTime(showSeconds = showSeconds)
-    val nowMillis = ticker.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-    val remaining = nextAlarm.triggerAtMillis?.let { triggerAtMillis ->
+    rememberStandByTime(showSeconds = showSeconds)
+    val nowMillis = System.currentTimeMillis()
+    val remaining = nextAlarm.futureTriggerAtMillis(nowMillis)?.let { triggerAtMillis ->
         alarmCountdownParts(triggerAtMillis, nowMillis)
     }
     val countdownDescription = remaining?.let {

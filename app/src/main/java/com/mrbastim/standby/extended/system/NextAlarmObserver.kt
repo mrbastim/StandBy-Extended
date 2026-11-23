@@ -6,31 +6,60 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.core.content.ContextCompat
+import java.time.ZoneId
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
-data class NextAlarmState(val triggerAtMillis: Long? = null)
+data class NextAlarmState(
+    val triggerAtMillis: Long? = null,
+    val zoneId: ZoneId = ZoneId.systemDefault(),
+) {
+    internal fun futureTriggerAtMillis(nowMillis: Long): Long? =
+        triggerAtMillis?.takeIf { it > nowMillis }
+}
+
+private const val ALARM_REFRESH_INTERVAL_MILLIS = 60_000L
 
 class NextAlarmObserver(private val context: Context) {
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
     val state: Flow<NextAlarmState> = callbackFlow {
-        fun emitCurrent() {
-            trySend(NextAlarmState(alarmManager?.nextAlarmClock?.triggerTime))
-        }
-
+        val refreshRequests = Channel<Unit>(Channel.CONFLATED)
         val receiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) = emitCurrent()
+            override fun onReceive(context: Context?, intent: Intent?) {
+                refreshRequests.trySend(Unit)
+            }
         }
         ContextCompat.registerReceiver(
             context,
             receiver,
-            IntentFilter(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED),
+            IntentFilter(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED).apply {
+                addAction(Intent.ACTION_TIME_CHANGED)
+                addAction(Intent.ACTION_TIMEZONE_CHANGED)
+                addAction(Intent.ACTION_SCREEN_ON)
+            },
             ContextCompat.RECEIVER_EXPORTED,
         )
-        emitCurrent()
+        launch {
+            while (isActive) {
+                val alarm = NextAlarmState(alarmManager?.nextAlarmClock?.triggerTime)
+                val nowMillis = System.currentTimeMillis()
+                val triggerAtMillis = alarm.futureTriggerAtMillis(nowMillis)
+                send(alarm.copy(triggerAtMillis = triggerAtMillis))
+
+                // Recheck at expiry or periodically if an alarm-change broadcast was missed.
+                val waitMillis = triggerAtMillis?.let { it - nowMillis }
+                    ?.coerceAtMost(ALARM_REFRESH_INTERVAL_MILLIS) ?: ALARM_REFRESH_INTERVAL_MILLIS
+                withTimeoutOrNull(waitMillis) { refreshRequests.receive() }
+            }
+        }
         awaitClose { context.unregisterReceiver(receiver) }
-    }.distinctUntilChanged()
+    }.conflate().distinctUntilChanged()
 }
