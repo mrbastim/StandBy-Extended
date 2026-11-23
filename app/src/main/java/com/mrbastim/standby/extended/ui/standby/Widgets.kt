@@ -404,8 +404,8 @@ private fun CompactWorldClockWidget(settings: StandBySettings) {
 @Composable
 private fun CompactNextAlarmWidget(settings: StandBySettings, nextAlarm: NextAlarmState) {
     val theme = LocalStandByTheme.current
-    val alarmTime = nextAlarm.triggerAtMillis?.let {
-        Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault())
+    val alarmTime = nextAlarm.futureTriggerAtMillis(System.currentTimeMillis())?.let {
+        Instant.ofEpochMilli(it).atZone(nextAlarm.zoneId)
     }
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -589,8 +589,8 @@ fun CalendarPage(nextAlarm: NextAlarmState = NextAlarmState()) {
                 )
             }
         }
-        nextAlarm.triggerAtMillis?.let { triggerAtMillis ->
-            val alarm = Instant.ofEpochMilli(triggerAtMillis).atZone(ZoneId.systemDefault())
+        nextAlarm.futureTriggerAtMillis(System.currentTimeMillis())?.let { triggerAtMillis ->
+            val alarm = Instant.ofEpochMilli(triggerAtMillis).atZone(nextAlarm.zoneId)
             Text(
                 text = stringResource(R.string.next_alarm) + "  " +
                     alarm.format(DateTimeFormatter.ofPattern("EEE HH:mm", Locale.getDefault())),
