@@ -12,8 +12,8 @@ android {
         applicationId = "com.mrbastim.standby.extended"
         minSdk = 28
         targetSdk = 35
-        versionCode = 7
-        versionName = "1.0.6"
+        versionCode = providers.gradleProperty("standbyVersionCode").get().toInt()
+        versionName = providers.gradleProperty("standbyVersionName").get()
     }
 
     buildFeatures {

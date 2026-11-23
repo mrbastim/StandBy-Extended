@@ -2,6 +2,10 @@
 
 [English](README.md) | [Русский](README.ru.md)
 
+[![Последний стабильный релиз](https://img.shields.io/github/v/release/mrbastim/StandBy-Extended?label=stable)](https://github.com/mrbastim/StandBy-Extended/releases/latest)
+
+[Скачать стабильный APK](https://github.com/mrbastim/StandBy-Extended/releases/latest/download/standby-android-extended.apk) · [Сборка из dev](https://github.com/mrbastim/StandBy-Extended/releases/tag/dev)
+
 Эта сборка использует идентификатор приложения и namespace `com.mrbastim.standby.extended`, поэтому её можно установить рядом с оригинальным StandBy (`com.emretenoz.standby`). Приложения хранят настройки раздельно; настройки оригинального StandBy автоматически не переносятся.
 
 Нативное Android-приложение для режима ожидания, вдохновлённое iPhone StandBy. Пока приложение открыто, оно отслеживает зарядку и ориентацию устройства. Если включён автоматический режим, устройство заряжается и находится в альбомной ориентации, приложение показывает полноэкранный интерфейс StandBy с чёрным AMOLED-фоном. На поддерживаемых устройствах Android `DreamService` предоставляет тот же интерфейс после истечения системного тайм-аута экрана.

@@ -2,6 +2,10 @@
 
 [English](README.md) | [Русский](README.ru.md)
 
+[![Latest stable release](https://img.shields.io/github/v/release/mrbastim/StandBy-Extended?label=stable)](https://github.com/mrbastim/StandBy-Extended/releases/latest)
+
+[Download stable APK](https://github.com/mrbastim/StandBy-Extended/releases/latest/download/standby-android-extended.apk) · [Development build](https://github.com/mrbastim/StandBy-Extended/releases/tag/dev)
+
 This build uses application ID and namespace `com.mrbastim.standby.extended`, so it can be installed alongside the original StandBy (`com.emretenoz.standby`). Each app keeps its own settings; existing StandBy settings are not automatically transferred.
 
 A polished, native Android ambient display inspired by iPhone StandBy. While the app is open, it watches charging and orientation state. When automatic mode is enabled and the device is both charging and in landscape, it enters an immersive, AMOLED-black StandBy interface. An Android `DreamService` provides the same experience after display timeout on supported devices.
