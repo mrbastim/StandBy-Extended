@@ -66,6 +66,11 @@ jobs:
             adb shell settings put system accelerometer_rotation 0;
             adb shell settings put system user_rotation 1;
             adb logcat -c;
+            adb root;
+            adb wait-for-device;
+            if [ "$(adb shell id -u | tr -d '\r')" != "0" ]; then
+            echo "API 35 Google APIs emulator did not grant ADB root" >&2; exit 1;
+            fi;
             adb shell cmd dreams start-dreaming;
             sleep 8;
             adb shell dumpsys dreams > dream-state.log;
