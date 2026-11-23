@@ -29,12 +29,18 @@ jobs:
         run: |
           tag="$GITHUB_REF_NAME"
           if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then tag="$INPUT_TAG"; fi
-          [[ "$tag" == v* ]]
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Stable release tags must use vMAJOR.MINOR.PATCH (got $tag)" >&2
+            exit 1
+          fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
         with:
           ref: ${{ steps.release.outputs.tag }}
+          fetch-depth: 0
           persist-credentials: false
+      - name: Verify release commit comes from main
+        run: git merge-base --is-ancestor HEAD origin/main
       - name: Record source commit
         id: commit
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -45,6 +51,18 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Test, lint and assemble without release secrets
         run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleRelease
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install APK inspection tools
+        run: sdkmanager "build-tools;35.0.0"
+      - name: Verify stable APK identity and version progression
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          python3 .github/scripts/check_release_metadata.py --repo "$GH_REPO" --tag "$RELEASE_TAG" --apk app/build/outputs/apk/release/app-release-unsigned.apk --aapt "$ANDROID_HOME/build-tools/35.0.0/aapt"
       - uses: actions/upload-artifact@v4
         with:
           name: unsigned-release
