@@ -2,10 +2,10 @@
 
 [English](github-release-pipeline.md) | [Русский](github-release-pipeline.ru.md)
 
-Теги `v*` используют `release.yml` и публикуют `standby-android-extended.apk`.
+Теги `v*` используют `release.yml` и публикуют `standbymode.apk`.
 Каждый push/merge в `dev` запускает `dev-prerelease.yml`. После успешных проверок
 обновляется один prerelease с тегом `dev` и `--prerelease --latest=false`,
-заменяется файл `standby-android-extended-dev.apk`. Существующий prerelease
+заменяется файл `standbymode-dev.apk`. Существующий prerelease
 редактируется на месте: его ID и ссылка на скачивание сохраняются. Перемещаемый
 тег указывает на точный проверенный коммит. Заголовок и описание содержат коммит
 и ссылку на CI; стабильный Latest сохраняется.
@@ -18,7 +18,7 @@ concurrency может объединять ожидающие job публик�
 выполнять сборку без подписи и публикации.
 
 Постоянная ссылка:
-[standby-android-extended-dev.apk](https://github.com/mrbastim/StandBy-Extended/releases/download/dev/standby-android-extended-dev.apk).
+[standbymode-dev.apk](https://github.com/mrbastim/StandByMode/releases/download/dev/standbymode-dev.apk).
 После первой успешной общей публикации с разрешения владельца удаляются четыре
 старых автоматических prerelease: `dev-1-ffae1ad`, `dev-2-f5a5cd5`,
 `dev-3-03a3f22`, `dev-4-40441d0`. Git-теги сохраняются, старые ссылки на APK
@@ -44,7 +44,7 @@ concurrency может объединять ожидающие job публик�
 обновляемого prerelease `dev` эти ограничения версий не вводятся.
 3. Job подписи в `publish-apk.yml` использует `contents: read` и environment
    `release-signing`. Она подписывает и проверяет APK через apksigner, удаляет
-   временный keystore и загружает `standby-android-extended-signed-<sha>`.
+   временный keystore и загружает `standbymode-signed-<sha>`.
 4. Отдельная job скачивает подписанный APK и публикует его с `contents: write`.
    У неё нет доступа к секретам подписи через environment, и она не делает checkout.
    Тег `dev` должен оставаться перемещаемым. Защиту стабильных тегов применяйте только к `v*`.

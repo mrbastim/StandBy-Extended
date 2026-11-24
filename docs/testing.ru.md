@@ -39,7 +39,7 @@ DreamService не поднимает системную dream-сессию че�
   Проверки физической AMOLED-панели, системного запуска DreamService и реального пересоздания
   Activity не выполнялись.
 - Позднее debug-билд установлен и запущен на realme RMX1921 через Android Studio.
-  Подтверждены пакет com.mrbastim.standby.extended, versionCode 6 и отображение главного
+  Подтверждены пакет com.mrbastim.standbymode, versionCode 6 и отображение главного
   экрана StandBy. Это базовая проверка установки и запуска, а не полная матрица
   яркости, жизненного цикла и поведения физической панели.
 - Проверена конфигурация Android CI: push в main / pull_request,
