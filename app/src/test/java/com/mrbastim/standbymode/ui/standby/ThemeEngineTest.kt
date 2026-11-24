@@ -1,9 +1,9 @@
-package com.mrbastim.standby.extended.ui.standby
+package com.mrbastim.standbymode.ui.standby
 
 import androidx.compose.ui.graphics.Color
-import com.mrbastim.standby.extended.data.settings.ClockColor
-import com.mrbastim.standby.extended.data.settings.StandBySettings
-import com.mrbastim.standby.extended.data.settings.StandByThemeId
+import com.mrbastim.standbymode.data.settings.ClockColor
+import com.mrbastim.standbymode.data.settings.StandBySettings
+import com.mrbastim.standbymode.data.settings.StandByThemeId
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

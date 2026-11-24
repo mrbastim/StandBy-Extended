@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "StandBy"
+rootProject.name = "StandByMode"
 include(":app")

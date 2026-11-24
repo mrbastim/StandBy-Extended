@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.mrbastim.standby.extended"
+    namespace = "com.mrbastim.standbymode"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.mrbastim.standby.extended"
+        applicationId = "com.mrbastim.standbymode"
         minSdk = 28
         targetSdk = 35
         versionCode = providers.gradleProperty("standbyVersionCode").get().toInt()
