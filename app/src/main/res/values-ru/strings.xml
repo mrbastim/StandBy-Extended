@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">StandBy Extended</string>
+    <string name="app_name">StandByMode</string>
     <string name="screen_saver_settings_unavailable">На этом устройстве настройки заставки недоступны.</string>
 
     <string name="clock_face_digital">Цифровые часы</string>

@@ -11,12 +11,14 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-PACKAGE = "com.mrbastim.standby.extended"
+PACKAGE = "com.mrbastim.standbymode"
+LEGACY_PACKAGE = "com.mrbastim.standby.extended"
+MIGRATION_TAG = "v1.1.0"
 TAG_RE = re.compile(r"^v([0-9]+)\.([0-9]+)\.([0-9]+)$")
 PACKAGE_RE = re.compile(
     r"^package:\s+name='([^']+)'\s+versionCode='([0-9]+)'\s+versionName='([^']+)'"
 )
-ALLOWED_APKS = ("standby-android-extended.apk", "app-release.apk")
+ALLOWED_APKS = ("standbymode.apk", "standby-android-extended.apk", "app-release.apk")
 
 
 def version_tuple(tag):
@@ -74,9 +76,16 @@ def validate_current(tag, identity):
         raise ValueError(f"Invalid versionCode: {code}")
 
 
-def check_progression(current, previous):
+def check_progression(current, previous, tag=None):
+    # v1.1.0 intentionally renames the Android package: a separate installation,
+    # not an in-place update. Still enforce monotonically increasing versionCode.
     if current[0] != previous[0]:
-        raise ValueError("Previous APK has a different applicationId")
+        if not (
+            tag == MIGRATION_TAG
+            and current[0] == PACKAGE
+            and previous[0] == LEGACY_PACKAGE
+        ):
+            raise ValueError("Previous APK has a different applicationId")
     if current[1] <= previous[1]:
         raise ValueError(
             f"versionCode must increase: current={current[1]}, previous={previous[1]}"
@@ -135,7 +144,7 @@ def main():
         )
         previous_apk = Path(temp) / asset["name"]
         previous = inspect_apk(args.aapt, previous_apk)
-        check_progression(current, previous)
+        check_progression(current, previous, args.tag)
     print(
         f"Verified {args.tag} ({current[1]}) is newer than "
         f"{previous_release['tag_name']} ({previous[1]})"

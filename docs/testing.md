@@ -39,7 +39,7 @@ Those integrations and physical brightness require separate device testing.
   Physical AMOLED behavior, system DreamService activation and real Activity recreation
   were not tested.
 - Later, the debug build was installed and launched on a realme RMX1921 through Android Studio.
-  Package com.mrbastim.standby.extended, versionCode 6 and the main StandBy screen were confirmed.
+  Package com.mrbastim.standbymode, versionCode 6 and the main StandBy screen were confirmed.
   This is an installation/startup smoke check, not the complete brightness, lifecycle
   or physical-panel test matrix.
 - Android CI configuration was checked: pushes to main / pull_request,

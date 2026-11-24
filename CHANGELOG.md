@@ -2,7 +2,20 @@
 
 [English](CHANGELOG.md) | [Русский](CHANGELOG.ru.md)
 
-All notable changes to StandBy are documented here.
+All notable changes to StandByMode are documented here.
+
+## 1.1.0 — StandByMode
+
+### Breaking change
+
+- **New Android app identity:** `com.mrbastim.standbymode` replaces `com.mrbastim.standby.extended`. Android installs this as a **separate app**, not as an in-place update of v1.0.6. Existing settings are not transferred. The old installation can be removed manually when no longer needed.
+- The GitHub repository and visible app name are renamed to **StandByMode**. Project sources and tests use the new Kotlin package.
+
+### Changed
+
+- Version name `1.1.0` and Android `versionCode 8`.
+- New stable APK name: `standbymode.apk`. New development APK name: `standbymode-dev.apk`.
+- Release metadata checks explicitly allow the one-time package migration from v1.0.6, while continuing to require an increased version code.
 
 ## 1.0.6
 

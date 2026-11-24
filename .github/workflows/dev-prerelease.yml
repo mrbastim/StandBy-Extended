@@ -10,7 +10,7 @@ permissions:
 # Every push builds independently. Signing never executes repository build code.
 jobs:
   build:
-    if: github.repository == 'mrbastim/StandBy-Extended'
+    if: github.repository_id == '1457038002' && github.repository_owner == 'mrbastim'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
