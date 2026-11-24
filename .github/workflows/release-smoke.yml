@@ -49,10 +49,10 @@ jobs:
             adb install smoke.apk;
             for attempt in 1 2; do
             adb logcat -c;
-            adb shell am force-stop com.mrbastim.standby.extended;
-            adb shell am start -W -n com.mrbastim.standby.extended/.MainActivity;
+            adb shell am force-stop com.mrbastim.standbymode;
+            adb shell am start -W -n com.mrbastim.standbymode/.MainActivity;
             sleep 5;
-            app_pid="$(adb shell pidof com.mrbastim.standby.extended | tr -d '\r')";
+            app_pid="$(adb shell pidof com.mrbastim.standbymode | tr -d '\r')";
             test -n "$app_pid";
             adb logcat -d --pid="$app_pid" -s AndroidRuntime:E > runtime.log;
             if grep -Eq 'FATAL EXCEPTION|LocalLifecycleOwner not present' runtime.log; then
@@ -60,9 +60,9 @@ jobs:
             fi;
             done;
             if [ "${{ matrix.api-level }}" -ge 35 ]; then
-            adb shell am force-stop com.mrbastim.standby.extended;
+            adb shell am force-stop com.mrbastim.standbymode;
             adb shell settings put secure screensaver_enabled 1;
-            adb shell settings put secure screensaver_components com.mrbastim.standby.extended/.StandByDreamService;
+            adb shell settings put secure screensaver_components com.mrbastim.standbymode/.StandByDreamService;
             adb shell settings put system accelerometer_rotation 0;
             adb shell settings put system user_rotation 1;
             adb logcat -c;
@@ -77,7 +77,7 @@ jobs:
             if ! grep -E 'mCurrentDream=DreamRecord.*StandByDreamService' dream-state.log; then
             cat dream-state.log; adb logcat -d -s AndroidRuntime:E; exit 1;
             fi;
-            test -n "$(adb shell pidof com.mrbastim.standby.extended | tr -d '\r')";
+            test -n "$(adb shell pidof com.mrbastim.standbymode | tr -d '\r')";
             adb logcat -d -s AndroidRuntime:E > dream-runtime.log;
             if grep -Eq 'FATAL EXCEPTION|LocalLifecycleOwner not present' dream-runtime.log; then
             cat dream-runtime.log; exit 1;

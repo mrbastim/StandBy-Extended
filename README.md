@@ -1,12 +1,12 @@
-# StandBy Extended
+# StandByMode
 
 [English](README.md) | [Русский](README.ru.md)
 
-[![Latest stable release](https://img.shields.io/github/v/release/mrbastim/StandBy-Extended?label=stable)](https://github.com/mrbastim/StandBy-Extended/releases/latest)
+[![Latest stable release](https://img.shields.io/github/v/release/mrbastim/StandByMode?label=stable)](https://github.com/mrbastim/StandByMode/releases/latest)
 
-[Download stable APK](https://github.com/mrbastim/StandBy-Extended/releases/latest/download/standby-android-extended.apk) · [Development build](https://github.com/mrbastim/StandBy-Extended/releases/tag/dev)
+[Download stable APK](https://github.com/mrbastim/StandByMode/releases/latest/download/standbymode.apk) · [Development build](https://github.com/mrbastim/StandByMode/releases/tag/dev)
 
-This build uses application ID and namespace `com.mrbastim.standby.extended`, so it can be installed alongside the original StandBy (`com.emretenoz.standby`). Each app keeps its own settings; existing StandBy settings are not automatically transferred.
+**Important: v1.1.0 changes the Android app ID.** StandByMode now uses `com.mrbastim.standbymode` (the previous StandBy Extended used `com.mrbastim.standby.extended`). Android treats v1.1.0 as a **separate installation**, not an update to v1.0.6 or earlier. Existing preferences are **not migrated**; the two apps can coexist, and you can uninstall the old one manually. StandByMode also remains independent of the original StandBy (`com.emretenoz.standby`).
 
 A polished, native Android ambient display inspired by iPhone StandBy. While the app is open, it watches charging and orientation state. When automatic mode is enabled and the device is both charging and in landscape, it enters an immersive, AMOLED-black StandBy interface. An Android `DreamService` provides the same experience after display timeout on supported devices.
 
@@ -70,7 +70,7 @@ StandBy activates when all three conditions are true:
 
 An ordinary Android app cannot reliably launch an activity from the background whenever power is connected. Modern Android background-activity launch restrictions intentionally prevent this, so this MVP does not attempt unreliable workarounds. Open the app before docking or charging; it will react immediately to charging and rotation changes while it is running.
 
-For activation after the display times out or locks, the app also provides an Android `DreamService`. In the app, tap **Open Android screen saver settings**, select **StandBy Extended**, and configure the system screen saver to start **while charging**. Android then owns activation and can safely show StandBy after screen timeout without background-activity hacks. Menu wording and availability vary by device manufacturer; some OEMs disable or replace Android screen savers.
+For activation after the display times out or locks, the app also provides an Android `DreamService`. In the app, tap **Open Android screen saver settings**, select **StandByMode**, and configure the system screen saver to start **while charging**. Android then owns activation and can safely show StandBy after screen timeout without background-activity hacks. Menu wording and availability vary by device manufacturer; some OEMs disable or replace Android screen savers.
 
 The system-state and UI layers are separated so future versions can add an opt-in foreground service with a persistent notification, a notification action, OEM-specific integration, or another user-granted capability without rewriting the StandBy UI or activation logic.
 
@@ -101,8 +101,8 @@ app/src/main/java/com/mrbastim/standby/extended/
 Every push to `dev`, including a merge, runs tests, lint and a minified APK startup check.
 Owner-triggered runs sign in the `release-signing` environment and update one rolling
 GitHub **prerelease** tagged `dev`, after the required environment/branch settings are
-configured. Its APK is `standby-android-extended-dev.apk`; stable releases use
-`standby-android-extended.apk`. Superseded builds cannot replace the current dev APK.
+configured. Its APK is `standbymode-dev.apk`; stable releases use
+`standbymode.apk`. Superseded builds cannot replace the current dev APK.
 The stable Latest release is retained. See [pipeline setup](docs/github-release-pipeline.md).
 
 ## Build and run
@@ -112,8 +112,8 @@ Requirements: Android Studio with JDK 17 and Android SDK 35 or newer.
 1. Open this directory in Android Studio.
 2. Allow Gradle sync to finish.
 3. Run the `app` configuration on a physical device or emulator running Android 9 (API 28) or later.
-4. Open StandBy Extended, connect power, and rotate the device to landscape.
-5. For locked/timeout activation, use the in-app button to select StandBy Extended as Android's charging screen saver.
+4. Open StandByMode, connect power, and rotate the device to landscape.
+5. For locked/timeout activation, use the in-app button to select StandByMode as Android's charging screen saver.
 
 From a terminal:
 

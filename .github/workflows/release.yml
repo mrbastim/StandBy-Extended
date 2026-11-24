@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build:
-    if: github.repository == 'mrbastim/StandBy-Extended' && github.actor == 'mrbastim'
+    if: github.repository == 'mrbastim/StandByMode' && github.actor == 'mrbastim'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     outputs:
