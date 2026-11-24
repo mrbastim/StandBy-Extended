@@ -209,7 +209,7 @@
     <string name="show_next_alarm">Widget ve takvimde alarm</string>
     <string name="show_next_alarm_description">Alarm kartını ve takvim hatırlatıcısını gizler. Tam ekran saatin ayarı ayrıdır.</string>
     <string name="clock_accessory">Saatin yanında</string>
-    <string name="clock_accessory_none">Yalnızca saat</string>
+    <string name="clock_accessory_none">Yok</string>
     <string name="widget_timer">Zamanlayıcı</string>
     <string name="widget_pomodoro">Pomodoro</string>
     <string name="widget_stopwatch">Kronometre</string>
