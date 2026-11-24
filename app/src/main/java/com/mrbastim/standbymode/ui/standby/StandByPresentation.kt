@@ -1,7 +1,7 @@
-package com.mrbastim.standby.extended.ui.standby
+package com.mrbastim.standbymode.ui.standby
 
-import com.mrbastim.standby.extended.data.settings.BackgroundStyle
-import com.mrbastim.standby.extended.data.settings.StandBySettings
+import com.mrbastim.standbymode.data.settings.BackgroundStyle
+import com.mrbastim.standbymode.data.settings.StandBySettings
 
 /** Inactivity reduces visual activity; it never selects a different theme by itself. */
 internal fun standByPresentationSettings(

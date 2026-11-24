@@ -1,19 +1,19 @@
-package com.mrbastim.standby.extended.ui
+package com.mrbastim.standbymode.ui
 
 import android.content.Context
 import androidx.annotation.StringRes
-import com.mrbastim.standby.extended.R
-import com.mrbastim.standby.extended.data.settings.BackgroundStyle
-import com.mrbastim.standby.extended.data.settings.BatteryWidgetStyle
-import com.mrbastim.standby.extended.data.settings.ClockColor
-import com.mrbastim.standby.extended.data.settings.ClockFace
-import com.mrbastim.standby.extended.data.settings.ClockWidgetStyle
-import com.mrbastim.standby.extended.data.settings.DateWidgetStyle
-import com.mrbastim.standby.extended.data.settings.ScreenTimeout
-import com.mrbastim.standby.extended.data.settings.StandByThemeId
-import com.mrbastim.standby.extended.data.settings.StandByWidgetType
-import com.mrbastim.standby.extended.data.settings.TypographyStyle
-import com.mrbastim.standby.extended.data.settings.WorldClockZone
+import com.mrbastim.standbymode.R
+import com.mrbastim.standbymode.data.settings.BackgroundStyle
+import com.mrbastim.standbymode.data.settings.BatteryWidgetStyle
+import com.mrbastim.standbymode.data.settings.ClockColor
+import com.mrbastim.standbymode.data.settings.ClockFace
+import com.mrbastim.standbymode.data.settings.ClockWidgetStyle
+import com.mrbastim.standbymode.data.settings.DateWidgetStyle
+import com.mrbastim.standbymode.data.settings.ScreenTimeout
+import com.mrbastim.standbymode.data.settings.StandByThemeId
+import com.mrbastim.standbymode.data.settings.StandByWidgetType
+import com.mrbastim.standbymode.data.settings.TypographyStyle
+import com.mrbastim.standbymode.data.settings.WorldClockZone
 
 @StringRes
 fun ClockFace.labelRes(): Int = when (this) {

@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.ui.standby
+package com.mrbastim.standbymode.ui.standby
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -41,10 +41,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.mrbastim.standby.extended.R
-import com.mrbastim.standby.extended.data.settings.StandBySettings
-import com.mrbastim.standby.extended.system.MusicRepository
-import com.mrbastim.standby.extended.system.MusicState
+import com.mrbastim.standbymode.R
+import com.mrbastim.standbymode.data.settings.StandBySettings
+import com.mrbastim.standbymode.system.MusicRepository
+import com.mrbastim.standbymode.system.MusicState
 
 @Composable
 fun CompactMusicWidget() {

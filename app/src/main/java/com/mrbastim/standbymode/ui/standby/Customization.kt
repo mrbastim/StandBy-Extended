@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.ui.standby
+package com.mrbastim.standbymode.ui.standby
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -48,17 +48,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mrbastim.standby.extended.data.settings.ClockColor
-import com.mrbastim.standby.extended.data.settings.ClockFace
-import com.mrbastim.standby.extended.data.settings.BatteryWidgetStyle
-import com.mrbastim.standby.extended.data.settings.ClockWidgetStyle
-import com.mrbastim.standby.extended.data.settings.DateWidgetStyle
-import com.mrbastim.standby.extended.data.settings.StandByThemeId
-import com.mrbastim.standby.extended.data.settings.StandBySettings
-import com.mrbastim.standby.extended.data.settings.StandByWidgetType
-import com.mrbastim.standby.extended.data.settings.WidgetColumn
-import com.mrbastim.standby.extended.R
-import com.mrbastim.standby.extended.ui.localizedLabel
+import com.mrbastim.standbymode.data.settings.ClockColor
+import com.mrbastim.standbymode.data.settings.ClockFace
+import com.mrbastim.standbymode.data.settings.BatteryWidgetStyle
+import com.mrbastim.standbymode.data.settings.ClockWidgetStyle
+import com.mrbastim.standbymode.data.settings.DateWidgetStyle
+import com.mrbastim.standbymode.data.settings.StandByThemeId
+import com.mrbastim.standbymode.data.settings.StandBySettings
+import com.mrbastim.standbymode.data.settings.StandByWidgetType
+import com.mrbastim.standbymode.data.settings.WidgetColumn
+import com.mrbastim.standbymode.R
+import com.mrbastim.standbymode.ui.localizedLabel
 
 @Composable
 fun StackEditor(

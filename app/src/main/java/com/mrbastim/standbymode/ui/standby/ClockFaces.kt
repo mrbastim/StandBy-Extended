@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.ui.standby
+package com.mrbastim.standbymode.ui.standby
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -35,11 +35,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
-import com.mrbastim.standby.extended.data.settings.ClockFace
-import com.mrbastim.standby.extended.data.settings.StandBySettings
-import com.mrbastim.standby.extended.R
-import com.mrbastim.standby.extended.system.NextAlarmState
-import com.mrbastim.standby.extended.ui.localizedLabel
+import com.mrbastim.standbymode.data.settings.ClockFace
+import com.mrbastim.standbymode.data.settings.StandBySettings
+import com.mrbastim.standbymode.R
+import com.mrbastim.standbymode.system.NextAlarmState
+import com.mrbastim.standbymode.ui.localizedLabel
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter

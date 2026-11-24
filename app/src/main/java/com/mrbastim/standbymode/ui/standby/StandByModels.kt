@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.ui.standby
+package com.mrbastim.standbymode.ui.standby
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,17 +15,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.mrbastim.standby.extended.data.settings.ClockFace
-import com.mrbastim.standby.extended.data.settings.BackgroundStyle
-import com.mrbastim.standby.extended.data.settings.BatteryWidgetStyle
-import com.mrbastim.standby.extended.data.settings.ClockColor
-import com.mrbastim.standby.extended.data.settings.ClockWidgetStyle
-import com.mrbastim.standby.extended.data.settings.DateWidgetStyle
-import com.mrbastim.standby.extended.data.settings.StandBySettings
-import com.mrbastim.standby.extended.data.settings.StandByThemeId
-import com.mrbastim.standby.extended.data.settings.StandByWidgetType
-import com.mrbastim.standby.extended.data.settings.TypographyStyle
-import com.mrbastim.standby.extended.data.settings.WidgetColumn
+import com.mrbastim.standbymode.data.settings.ClockFace
+import com.mrbastim.standbymode.data.settings.BackgroundStyle
+import com.mrbastim.standbymode.data.settings.BatteryWidgetStyle
+import com.mrbastim.standbymode.data.settings.ClockColor
+import com.mrbastim.standbymode.data.settings.ClockWidgetStyle
+import com.mrbastim.standbymode.data.settings.DateWidgetStyle
+import com.mrbastim.standbymode.data.settings.StandBySettings
+import com.mrbastim.standbymode.data.settings.StandByThemeId
+import com.mrbastim.standbymode.data.settings.StandByWidgetType
+import com.mrbastim.standbymode.data.settings.TypographyStyle
+import com.mrbastim.standbymode.data.settings.WidgetColumn
 import java.time.LocalDateTime
 import kotlinx.coroutines.delay
 

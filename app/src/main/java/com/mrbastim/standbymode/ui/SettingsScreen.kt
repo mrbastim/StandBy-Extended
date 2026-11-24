@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.ui
+package com.mrbastim.standbymode.ui
 
 import android.content.Context
 import androidx.compose.foundation.clickable
@@ -28,7 +28,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.saveable.rememberSaveable
-import com.mrbastim.standby.extended.data.settings.DisplayProtectionSettings
+import com.mrbastim.standbymode.data.settings.DisplayProtectionSettings
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import androidx.compose.material3.DropdownMenu
@@ -54,22 +54,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
-import com.mrbastim.standby.extended.ui.theme.StandByTheme
-import com.mrbastim.standby.extended.data.settings.StandBySettings
-import com.mrbastim.standby.extended.system.ChargingState
-import com.mrbastim.standby.extended.BuildConfig
-import com.mrbastim.standby.extended.R
-import com.mrbastim.standby.extended.data.settings.ClockColor
-import com.mrbastim.standby.extended.data.settings.ClockFace
-import com.mrbastim.standby.extended.data.settings.BackgroundStyle
-import com.mrbastim.standby.extended.data.settings.BatteryWidgetStyle
-import com.mrbastim.standby.extended.data.settings.ClockWidgetStyle
-import com.mrbastim.standby.extended.data.settings.DateWidgetStyle
-import com.mrbastim.standby.extended.data.settings.ScreenTimeout
-import com.mrbastim.standby.extended.data.settings.StandByThemeId
-import com.mrbastim.standby.extended.data.settings.TypographyStyle
-import com.mrbastim.standby.extended.data.settings.WorldClockZone
-import com.mrbastim.standby.extended.system.ChargingSource
+import com.mrbastim.standbymode.ui.theme.StandByTheme
+import com.mrbastim.standbymode.data.settings.StandBySettings
+import com.mrbastim.standbymode.system.ChargingState
+import com.mrbastim.standbymode.BuildConfig
+import com.mrbastim.standbymode.R
+import com.mrbastim.standbymode.data.settings.ClockColor
+import com.mrbastim.standbymode.data.settings.ClockFace
+import com.mrbastim.standbymode.data.settings.BackgroundStyle
+import com.mrbastim.standbymode.data.settings.BatteryWidgetStyle
+import com.mrbastim.standbymode.data.settings.ClockWidgetStyle
+import com.mrbastim.standbymode.data.settings.DateWidgetStyle
+import com.mrbastim.standbymode.data.settings.ScreenTimeout
+import com.mrbastim.standbymode.data.settings.StandByThemeId
+import com.mrbastim.standbymode.data.settings.TypographyStyle
+import com.mrbastim.standbymode.data.settings.WorldClockZone
+import com.mrbastim.standbymode.system.ChargingSource
 
 @Composable
 fun SettingsScreen(
