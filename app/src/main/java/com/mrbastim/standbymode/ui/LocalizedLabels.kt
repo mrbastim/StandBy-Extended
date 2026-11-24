@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import com.mrbastim.standbymode.R
 import com.mrbastim.standbymode.data.settings.BackgroundStyle
 import com.mrbastim.standbymode.data.settings.BatteryWidgetStyle
+import com.mrbastim.standbymode.data.settings.ClockAccessory
 import com.mrbastim.standbymode.data.settings.ClockColor
 import com.mrbastim.standbymode.data.settings.ClockFace
 import com.mrbastim.standbymode.data.settings.ClockWidgetStyle
@@ -101,6 +102,18 @@ fun StandByWidgetType.labelRes(): Int = when (this) {
     StandByWidgetType.NEXT_ALARM -> R.string.widget_next_alarm
     StandByWidgetType.WEATHER -> R.string.widget_weather
     StandByWidgetType.MUSIC -> R.string.widget_music
+    StandByWidgetType.TIMER -> R.string.widget_timer
+    StandByWidgetType.POMODORO -> R.string.widget_pomodoro
+    StandByWidgetType.STOPWATCH -> R.string.widget_stopwatch
+}
+
+@StringRes
+fun ClockAccessory.labelRes(): Int = when (this) {
+    ClockAccessory.NONE -> R.string.clock_accessory_none
+    ClockAccessory.NEXT_ALARM -> R.string.widget_next_alarm
+    ClockAccessory.TIMER -> R.string.widget_timer
+    ClockAccessory.POMODORO -> R.string.widget_pomodoro
+    ClockAccessory.STOPWATCH -> R.string.widget_stopwatch
 }
 
 @StringRes
@@ -135,6 +148,7 @@ fun WorldClockZone.labelRes(): Int = when (this) {
 fun Context.localizedLabel(value: Any): String = getString(
     when (value) {
         is ClockFace -> value.labelRes()
+        is ClockAccessory -> value.labelRes()
         is ClockColor -> value.labelRes()
         is StandByThemeId -> value.labelRes()
         is BackgroundStyle -> value.labelRes()

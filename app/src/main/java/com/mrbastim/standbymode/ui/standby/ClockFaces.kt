@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
+import com.mrbastim.standbymode.data.settings.ClockAccessory
 import com.mrbastim.standbymode.data.settings.ClockFace
 import com.mrbastim.standbymode.data.settings.StandBySettings
 import com.mrbastim.standbymode.R
@@ -73,13 +74,17 @@ fun FullClockPage(
             ),
     ) {
         ClockFaceContent(settings, Modifier.fillMaxSize())
-        AlarmCountdownCard(
-            nextAlarm = nextAlarm,
-            showSeconds = !LocalAmbientMode.current,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(start = 20.dp, bottom = 20.dp),
-        )
+        val accessoryModifier = Modifier.align(Alignment.BottomStart)
+            .padding(start = 16.dp, bottom = 12.dp)
+        when (settings.clockAccessory) {
+            ClockAccessory.NONE -> Unit
+            ClockAccessory.NEXT_ALARM -> if (settings.showNextAlarm) {
+                AlarmCountdownCard(nextAlarm, !LocalAmbientMode.current, accessoryModifier)
+            }
+            ClockAccessory.TIMER -> LocalTimerCard(TimerMode.TIMER, accessoryModifier, compact = true)
+            ClockAccessory.POMODORO -> LocalTimerCard(TimerMode.POMODORO, accessoryModifier, compact = true)
+            ClockAccessory.STOPWATCH -> LocalTimerCard(TimerMode.STOPWATCH, accessoryModifier, compact = true)
+        }
     }
 }
 

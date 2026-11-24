@@ -208,4 +208,20 @@
     <string name="display_group_brightness">Яркость</string>
     <string name="display_group_behavior">Поведение экрана</string>
     <string name="display_group_anti_burn_in">Защита дисплея</string>
+    <string name="show_next_alarm">Показывать ближайший будильник</string>
+    <string name="show_next_alarm_description">Показывать системный будильник на экранах StandBy. При отключении карточки будильника скрываются, но остаются в настройках стеков.</string>
+    <string name="clock_accessory">Дополнительный блок часов</string>
+    <string name="clock_accessory_none">Ничего</string>
+    <string name="widget_timer">Таймер</string>
+    <string name="widget_pomodoro">Pomodoro</string>
+    <string name="widget_stopwatch">Секундомер</string>
+    <string name="pomodoro_focus">Работа</string>
+    <string name="pomodoro_break">Перерыв</string>
+    <string name="timer_start">Старт</string>
+    <string name="timer_pause">Пауза</string>
+    <string name="timer_reset">Сброс</string>
+    <string name="timer_finished">Завершено</string>
+    <string name="timer_next_phase">Следующий этап</string>
+    <string name="timer_minus_minute">−1 мин</string>
+    <string name="timer_plus_minute">+1 мин</string>
 </resources>

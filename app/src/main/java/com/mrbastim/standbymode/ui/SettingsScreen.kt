@@ -60,6 +60,7 @@ import com.mrbastim.standbymode.system.ChargingState
 import com.mrbastim.standbymode.BuildConfig
 import com.mrbastim.standbymode.R
 import com.mrbastim.standbymode.data.settings.ClockColor
+import com.mrbastim.standbymode.data.settings.ClockAccessory
 import com.mrbastim.standbymode.data.settings.ClockFace
 import com.mrbastim.standbymode.data.settings.BackgroundStyle
 import com.mrbastim.standbymode.data.settings.BatteryWidgetStyle
@@ -83,6 +84,8 @@ fun SettingsScreen(
     onClockFaceChanged: (ClockFace) -> Unit,
     onClockColorChanged: (ClockColor) -> Unit,
     onShowDateChanged: (Boolean) -> Unit,
+    onShowNextAlarmChanged: (Boolean) -> Unit = {},
+    onClockAccessoryChanged: (ClockAccessory) -> Unit = {},
     onNightModeChanged: (Boolean) -> Unit,
     onBurnInProtectionChanged: (Boolean) -> Unit,
     onDayThemeChanged: (StandByThemeId) -> Unit,
@@ -219,6 +222,19 @@ fun SettingsScreen(
             SettingSwitch(stringResource(R.string.time_24_hour), null, state.settings.use24HourClock, on24HourChanged)
             SettingSwitch(stringResource(R.string.show_seconds), null, state.settings.showSeconds, onShowSecondsChanged)
             SettingSwitch(stringResource(R.string.show_date), null, state.settings.showDate, onShowDateChanged)
+            SettingSwitch(
+                stringResource(R.string.show_next_alarm),
+                stringResource(R.string.show_next_alarm_description),
+                state.settings.showNextAlarm,
+                onShowNextAlarmChanged,
+            )
+            ChoiceSetting(
+                stringResource(R.string.clock_accessory),
+                context.localizedLabel(state.settings.clockAccessory),
+                choices = ClockAccessory.entries.filter { state.settings.showNextAlarm || it != ClockAccessory.NEXT_ALARM },
+                label = context::localizedLabel,
+                onSelected = onClockAccessoryChanged,
+            )
             ChoiceSetting(stringResource(R.string.typography), context.localizedLabel(state.settings.typographyStyle),
                 choices = TypographyStyle.entries, label = context::localizedLabel, onSelected = onTypographyStyleChanged)
             SettingSwitch(

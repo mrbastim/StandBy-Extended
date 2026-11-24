@@ -208,4 +208,20 @@
     <string name="display_group_brightness">Brightness</string>
     <string name="display_group_behavior">Screen behavior</string>
     <string name="display_group_anti_burn_in">Display protection</string>
+    <string name="show_next_alarm">Show next alarm</string>
+    <string name="show_next_alarm_description">Hide or show the system alarm on all StandBy screens. Alarm cards in your stacks are retained but hidden when disabled.</string>
+    <string name="clock_accessory">Clock accessory</string>
+    <string name="clock_accessory_none">None</string>
+    <string name="widget_timer">Timer</string>
+    <string name="widget_pomodoro">Pomodoro</string>
+    <string name="widget_stopwatch">Stopwatch</string>
+    <string name="pomodoro_focus">Focus</string>
+    <string name="pomodoro_break">Break</string>
+    <string name="timer_start">Start</string>
+    <string name="timer_pause">Pause</string>
+    <string name="timer_reset">Reset</string>
+    <string name="timer_finished">Finished</string>
+    <string name="timer_next_phase">Next phase</string>
+    <string name="timer_minus_minute">−1 min</string>
+    <string name="timer_plus_minute">+1 min</string>
 </resources>

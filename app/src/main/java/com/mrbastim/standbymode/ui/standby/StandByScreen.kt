@@ -163,7 +163,7 @@ private fun StandByDisplayContent(
                         editingStack = it
                     }
                     1 -> FullClockPage(settings, nextAlarm) { editingClock = true }
-                    2 -> CalendarPage(nextAlarm)
+                    2 -> CalendarPage(if (settings.showNextAlarm) nextAlarm else NextAlarmState())
                     else -> BatteryPage(settings, charging)
                 }
             }

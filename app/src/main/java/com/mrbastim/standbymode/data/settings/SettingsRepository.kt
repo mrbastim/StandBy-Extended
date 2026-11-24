@@ -70,6 +70,8 @@ class SettingsRepository(private val context: Context) {
         val clockFace = stringPreferencesKey("clock_face")
         val clockColor = stringPreferencesKey("clock_color")
         val showDate = booleanPreferencesKey("show_date")
+        val showNextAlarm = booleanPreferencesKey("show_next_alarm")
+        val clockAccessory = stringPreferencesKey("clock_accessory")
         val nightMode = booleanPreferencesKey("night_mode")
         val burnInProtection = booleanPreferencesKey("burn_in_protection")
         val dayTheme = stringPreferencesKey("day_theme")
@@ -116,6 +118,8 @@ class SettingsRepository(private val context: Context) {
                     ?.let { saved -> ClockColor.entries.firstOrNull { it.name == saved } }
                     ?: ClockColor.INHERIT,
                 showDate = preferences[Keys.showDate] ?: true,
+                showNextAlarm = preferences[Keys.showNextAlarm] ?: true,
+                clockAccessory = enumValue(preferences[Keys.clockAccessory], ClockAccessory.NEXT_ALARM),
                 nightMode = preferences[Keys.nightMode] ?: false,
                 burnInProtection = preferences[Keys.burnInProtection] ?: true,
                 dayTheme = enumValue(preferences[Keys.dayTheme], StandByThemeId.CLASSIC),
@@ -157,6 +161,8 @@ class SettingsRepository(private val context: Context) {
     suspend fun setShowSeconds(enabled: Boolean) = update(Keys.showSeconds, enabled)
     suspend fun setKeepScreenAwake(enabled: Boolean) = update(Keys.keepScreenAwake, enabled)
     suspend fun setShowDate(enabled: Boolean) = update(Keys.showDate, enabled)
+    suspend fun setShowNextAlarm(enabled: Boolean) = update(Keys.showNextAlarm, enabled)
+    suspend fun setClockAccessory(value: ClockAccessory) = setEnum(Keys.clockAccessory, value)
     suspend fun setNightMode(enabled: Boolean) = update(Keys.nightMode, enabled)
     suspend fun setBurnInProtection(enabled: Boolean) = update(Keys.burnInProtection, enabled)
 

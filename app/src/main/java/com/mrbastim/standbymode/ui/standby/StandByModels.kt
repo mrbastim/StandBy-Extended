@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.mrbastim.standbymode.data.settings.ClockAccessory
 import com.mrbastim.standbymode.data.settings.ClockFace
 import com.mrbastim.standbymode.data.settings.BackgroundStyle
 import com.mrbastim.standbymode.data.settings.BatteryWidgetStyle
@@ -40,6 +41,7 @@ data class StandByActions(
     val onShowSecondsChanged: ((Boolean) -> Unit)? = null,
     val on24HourChanged: ((Boolean) -> Unit)? = null,
     val onShowDateChanged: ((Boolean) -> Unit)? = null,
+    val onClockAccessoryChanged: ((ClockAccessory) -> Unit)? = null,
     val onDayThemeChanged: ((StandByThemeId) -> Unit)? = null,
     val onNightThemeChanged: ((StandByThemeId) -> Unit)? = null,
     val onBackgroundStyleChanged: ((BackgroundStyle) -> Unit)? = null,

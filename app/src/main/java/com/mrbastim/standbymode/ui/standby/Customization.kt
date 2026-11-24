@@ -49,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mrbastim.standbymode.data.settings.ClockColor
+import com.mrbastim.standbymode.data.settings.ClockAccessory
 import com.mrbastim.standbymode.data.settings.ClockFace
 import com.mrbastim.standbymode.data.settings.BatteryWidgetStyle
 import com.mrbastim.standbymode.data.settings.ClockWidgetStyle
@@ -193,7 +194,7 @@ fun StackEditor(
                 ) {
                     Column {
                         StandByWidgetType.entries
-                            .filterNot { it in selectedWidgets }
+                            .filterNot { it in selectedWidgets || (!settings.showNextAlarm && it == StandByWidgetType.NEXT_ALARM) }
                             .forEach { widget ->
                                 Text(
                                     text = context.localizedLabel(widget),
@@ -455,6 +456,19 @@ private fun ClockCustomizerContent(
             CompactToggle(stringResource(R.string.time_24_hour), settings.use24HourClock) { actions.on24HourChanged?.invoke(it) }
             CompactToggle(stringResource(R.string.seconds), settings.showSeconds) { actions.onShowSecondsChanged?.invoke(it) }
             CompactToggle(stringResource(R.string.date), settings.showDate) { actions.onShowDateChanged?.invoke(it) }
+        }
+        Text(stringResource(R.string.clock_accessory), color = theme.secondary, fontSize = 12.sp)
+        Row(
+            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            ClockAccessory.entries.filter { settings.showNextAlarm || it != ClockAccessory.NEXT_ALARM }.forEach { accessory ->
+                TextButton(onClick = { actions.onClockAccessoryChanged?.invoke(accessory) }) {
+                    val active = accessory == settings.clockAccessory ||
+                        (accessory == ClockAccessory.NONE && !settings.showNextAlarm && settings.clockAccessory == ClockAccessory.NEXT_ALARM)
+                    Text(context.localizedLabel(accessory), color = if (active) theme.accent else theme.secondary)
+                }
+            }
         }
     }
 }

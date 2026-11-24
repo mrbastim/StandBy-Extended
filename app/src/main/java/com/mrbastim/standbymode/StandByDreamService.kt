@@ -151,6 +151,9 @@ class StandByDreamService : DreamService(), LifecycleOwner, ViewModelStoreOwner,
                                     onShowDateChanged = { value ->
                                         serviceScope.launch { settingsRepository.setShowDate(value) }
                                     },
+                                    onClockAccessoryChanged = { value ->
+                                        serviceScope.launch { settingsRepository.setClockAccessory(value) }
+                                    },
                                     onDayThemeChanged = { value ->
                                         serviceScope.launch { settingsRepository.setDayTheme(value) }
                                     },
