@@ -59,6 +59,12 @@ internal fun moveWidgetInList(
     }
 }
 
+internal fun decodeClockAccessory(saved: String?, legacy: String?, legacyShowAlarm: Boolean): ClockAccessory {
+    ClockAccessory.entries.firstOrNull { it.name == saved }?.let { return it }
+    val old = ClockAccessory.entries.firstOrNull { it.name == legacy } ?: ClockAccessory.NEXT_ALARM
+    return if (!legacyShowAlarm && old == ClockAccessory.NEXT_ALARM) ClockAccessory.NONE else old
+}
+
 class SettingsRepository(private val context: Context) {
     private object Keys {
         val protectionEnabled = booleanPreferencesKey("display_protection_enabled")
@@ -81,7 +87,8 @@ class SettingsRepository(private val context: Context) {
         val clockColor = stringPreferencesKey("clock_color")
         val showDate = booleanPreferencesKey("show_date")
         val showNextAlarm = booleanPreferencesKey("show_next_alarm")
-        val clockAccessory = stringPreferencesKey("clock_accessory")
+        val legacyClockAccessory = stringPreferencesKey("clock_accessory")
+        val clockAccessory = stringPreferencesKey("clock_footer")
         val nightMode = booleanPreferencesKey("night_mode")
         val burnInProtection = booleanPreferencesKey("burn_in_protection")
         val dayTheme = stringPreferencesKey("day_theme")
@@ -129,7 +136,8 @@ class SettingsRepository(private val context: Context) {
                     ?: ClockColor.INHERIT,
                 showDate = preferences[Keys.showDate] ?: true,
                 showNextAlarm = preferences[Keys.showNextAlarm] ?: true,
-                clockAccessory = enumValue(preferences[Keys.clockAccessory], ClockAccessory.NEXT_ALARM),
+                clockAccessory = decodeClockAccessory(preferences[Keys.clockAccessory],
+                    preferences[Keys.legacyClockAccessory], preferences[Keys.showNextAlarm] ?: true),
                 nightMode = preferences[Keys.nightMode] ?: false,
                 burnInProtection = preferences[Keys.burnInProtection] ?: true,
                 dayTheme = enumValue(preferences[Keys.dayTheme], StandByThemeId.CLASSIC),
@@ -173,7 +181,16 @@ class SettingsRepository(private val context: Context) {
     suspend fun setShowSeconds(enabled: Boolean) = update(Keys.showSeconds, enabled)
     suspend fun setKeepScreenAwake(enabled: Boolean) = update(Keys.keepScreenAwake, enabled)
     suspend fun setShowDate(enabled: Boolean) = update(Keys.showDate, enabled)
-    suspend fun setShowNextAlarm(enabled: Boolean) = update(Keys.showNextAlarm, enabled)
+    suspend fun setShowNextAlarm(enabled: Boolean) {
+        context.settingsDataStore.edit { preferences ->
+            // Freeze the old effective clock selection before changing the independent widget/calendar flag.
+            if (preferences[Keys.clockAccessory] == null) {
+                preferences[Keys.clockAccessory] = decodeClockAccessory(null,
+                    preferences[Keys.legacyClockAccessory], preferences[Keys.showNextAlarm] ?: true).name
+            }
+            preferences[Keys.showNextAlarm] = enabled
+        }
+    }
     suspend fun setClockAccessory(value: ClockAccessory) = setEnum(Keys.clockAccessory, value)
     suspend fun setNightMode(enabled: Boolean) = update(Keys.nightMode, enabled)
     suspend fun setBurnInProtection(enabled: Boolean) = update(Keys.burnInProtection, enabled)

@@ -206,10 +206,10 @@
     <string name="display_group_brightness">Parlaklık</string>
     <string name="display_group_behavior">Ekran davranışı</string>
     <string name="display_group_anti_burn_in">Ekran koruması</string>
-    <string name="show_next_alarm">Sonraki alarmı göster</string>
-    <string name="show_next_alarm_description">Sistem alarmını StandBy ekranlarında göster. Kapalıyken alarm kartları gizlenir, ancak yığın ayarları korunur.</string>
-    <string name="clock_accessory">Saat ek bilgisi</string>
-    <string name="clock_accessory_none">Yok</string>
+    <string name="show_next_alarm">Widget ve takvimde alarm</string>
+    <string name="show_next_alarm_description">Alarm kartını ve takvim hatırlatıcısını gizler. Tam ekran saatin ayarı ayrıdır.</string>
+    <string name="clock_accessory">Tam ekran saatin altında</string>
+    <string name="clock_accessory_none">Yalnızca saat</string>
     <string name="widget_timer">Zamanlayıcı</string>
     <string name="widget_pomodoro">Pomodoro</string>
     <string name="widget_stopwatch">Kronometre</string>
@@ -220,8 +220,8 @@
     <string name="timer_reset">Sıfırla</string>
     <string name="timer_finished">Tamamlandı</string>
     <string name="timer_next_phase">Sonraki aşama</string>
-    <string name="timer_minus_minute">−1 dk</string>
-    <string name="timer_plus_minute">+1 dk</string>
+    <string name="timer_minus_minute">Bir dakika azalt</string>
+    <string name="timer_plus_minute">Bir dakika ekle</string>
     <string name="back_to_stack">Yığına dön</string>
     <string name="all_widgets_added">Tüm kullanılabilir widget’lar eklendi</string>
 </resources>
