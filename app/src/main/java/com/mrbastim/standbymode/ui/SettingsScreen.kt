@@ -230,7 +230,10 @@ fun SettingsScreen(
             )
             ChoiceSetting(
                 stringResource(R.string.clock_accessory),
-                context.localizedLabel(state.settings.clockAccessory),
+                context.localizedLabel(
+                    if (!state.settings.showNextAlarm && state.settings.clockAccessory == ClockAccessory.NEXT_ALARM)
+                        ClockAccessory.NONE else state.settings.clockAccessory,
+                ),
                 choices = ClockAccessory.entries.filter { state.settings.showNextAlarm || it != ClockAccessory.NEXT_ALARM },
                 label = context::localizedLabel,
                 onSelected = onClockAccessoryChanged,

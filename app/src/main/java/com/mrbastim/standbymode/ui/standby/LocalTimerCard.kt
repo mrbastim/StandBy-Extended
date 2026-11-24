@@ -2,7 +2,7 @@ package com.mrbastim.standbymode.ui.standby
 
 import android.os.SystemClock
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,7 +43,7 @@ internal fun LocalTimerCard(
     LaunchedEffect(mode, session) {
         now = SystemClock.elapsedRealtime()
         while (session.running(mode, now)) {
-            delay(250L)
+            delay(1_000L - now % 1_000L)
             now = SystemClock.elapsedRealtime()
         }
     }
@@ -110,7 +110,7 @@ internal fun LocalTimerCard(
             adjustment()
         }
     } else {
-        BoxWithConstraints(modifier = modifier.padding(8.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = modifier.padding(8.dp), contentAlignment = Alignment.Center) {
             Column(
                 Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
