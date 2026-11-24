@@ -29,8 +29,11 @@ jobs:
 
       - name: Verify release metadata checks
         run: python3 -m unittest discover -s .github/scripts -p 'test_*.py'
-      - name: Verify, lint, and assemble
-        run: ./gradlew testDebugUnitTest lintDebug assembleDebug assembleRelease
+      - name: Run unit tests (retry transient Robolectric downloads)
+        run: python3 .github/scripts/retry_robolectric_tests.py
+
+      - name: Lint and assemble
+        run: ./gradlew lintDebug assembleDebug assembleRelease
 
       - name: Upload installable PR APK
         if: github.event_name == 'pull_request'
