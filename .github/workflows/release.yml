@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build:
-    if: github.repository == 'mrbastim/StandByMode' && github.actor == 'mrbastim'
+    if: github.repository_id == '1457038002' && github.repository_owner == 'mrbastim' && github.actor == 'mrbastim'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     outputs:
