@@ -210,7 +210,7 @@
     <string name="display_group_anti_burn_in">Защита дисплея</string>
     <string name="show_next_alarm">Будильник в виджетах и календаре</string>
     <string name="show_next_alarm_description">Скрывает карточку будильника и напоминание в календаре. Полноэкранные часы настраиваются отдельно.</string>
-    <string name="clock_accessory">Под полноэкранными часами</string>
+    <string name="clock_accessory">Рядом с часами</string>
     <string name="clock_accessory_none">Только часы</string>
     <string name="widget_timer">Таймер</string>
     <string name="widget_pomodoro">Pomodoro</string>
@@ -226,4 +226,7 @@
     <string name="timer_plus_minute">Добавить одну минуту</string>
     <string name="back_to_stack">Вернуться к стеку</string>
     <string name="all_widgets_added">Все доступные виджеты добавлены</string>
+    <string name="clock_accessory_position">Расположение</string>
+    <string name="clock_accessory_selected">Выбрано</string>
+    <string name="swap_clock_accessory">Поменять местами</string>
 </resources>

@@ -208,7 +208,7 @@
     <string name="display_group_anti_burn_in">Ekran koruması</string>
     <string name="show_next_alarm">Widget ve takvimde alarm</string>
     <string name="show_next_alarm_description">Alarm kartını ve takvim hatırlatıcısını gizler. Tam ekran saatin ayarı ayrıdır.</string>
-    <string name="clock_accessory">Tam ekran saatin altında</string>
+    <string name="clock_accessory">Saatin yanında</string>
     <string name="clock_accessory_none">Yalnızca saat</string>
     <string name="widget_timer">Zamanlayıcı</string>
     <string name="widget_pomodoro">Pomodoro</string>
@@ -224,4 +224,7 @@
     <string name="timer_plus_minute">Bir dakika ekle</string>
     <string name="back_to_stack">Yığına dön</string>
     <string name="all_widgets_added">Tüm kullanılabilir widget’lar eklendi</string>
+    <string name="clock_accessory_position">Konum</string>
+    <string name="clock_accessory_selected">Seçili</string>
+    <string name="swap_clock_accessory">Yer değiştir</string>
 </resources>
