@@ -302,6 +302,7 @@ private fun AnalogClockFace(settings: StandBySettings, modifier: Modifier) {
     val secondary = theme.analogMarkers
     BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
     val dialSize = min(maxHeight.value * 0.78f, maxWidth.value * (if (settings.showDate) 0.49f else 0.85f)).coerceAtMost(270f)
+    val dateFontSize = (maxWidth.value * 0.065f).coerceIn(16f, 30f).sp
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -341,7 +342,7 @@ private fun AnalogClockFace(settings: StandBySettings, modifier: Modifier) {
                 Text(
                     now.format(DateTimeFormatter.ofPattern(android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "MMMMd"), Locale.getDefault())),
                     color = accent,
-                    fontSize = (maxWidth.value * 0.065f).coerceIn(16f, 30f).sp,
+                    fontSize = dateFontSize,
                     fontWeight = FontWeight.Light,
                 )
             }
@@ -378,6 +379,7 @@ private fun OrbitClockFace(settings: StandBySettings, modifier: Modifier) {
     val secondary = theme.clockSecondary
     BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
     val dialSize = min(maxHeight.value * 0.8f, maxWidth.value * 0.43f).coerceAtMost(250f)
+    val timeFontSize = (maxWidth.value * (if (settings.showSeconds) 0.105f else 0.14f)).coerceAtMost(58f).sp
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -405,7 +407,7 @@ private fun OrbitClockFace(settings: StandBySettings, modifier: Modifier) {
             Text(
                 formatTime(now, settings),
                 color = accent,
-                fontSize = (maxWidth.value * (if (settings.showSeconds) 0.105f else 0.14f)).coerceAtMost(58f).sp,
+                fontSize = timeFontSize,
                 maxLines = 1,
                 fontWeight = FontWeight.Thin,
                 style = tabularStyle,
