@@ -12,6 +12,7 @@ data class StandBySettings(
     val showDate: Boolean = true,
     val showNextAlarm: Boolean = true,
     val clockAccessory: ClockAccessory = ClockAccessory.NEXT_ALARM,
+    val clockAccessorySide: ClockAccessorySide = ClockAccessorySide.RIGHT,
     val nightMode: Boolean = false,
     val burnInProtection: Boolean = true,
     val dayTheme: StandByThemeId = StandByThemeId.CLASSIC,
@@ -109,6 +110,8 @@ enum class StandByWidgetType(val label: String) {
     POMODORO("Pomodoro"),
     STOPWATCH("Stopwatch"),
 }
+
+enum class ClockAccessorySide { LEFT, RIGHT }
 
 enum class ClockAccessory {
     NONE, NEXT_ALARM, TIMER, POMODORO, STOPWATCH,

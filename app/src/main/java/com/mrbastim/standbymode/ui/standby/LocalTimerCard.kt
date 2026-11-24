@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,6 +49,7 @@ internal fun LocalTimerCard(
     mode: TimerMode,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
+    hideControls: Boolean = false,
 ) {
     val context = LocalContext.current
     val store = remember(context.applicationContext) { LocalTimerStore.get(context) }
@@ -125,7 +128,7 @@ internal fun LocalTimerCard(
             controls()
         }
     } else {
-        Box(modifier = modifier.padding(8.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = modifier.padding(horizontal = 4.dp, vertical = 8.dp), contentAlignment = Alignment.Center) {
             Column(
                 Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -133,7 +136,7 @@ internal fun LocalTimerCard(
             ) {
                 Text(label, color = theme.secondary, fontSize = 14.sp, textAlign = TextAlign.Center)
                 timeText()
-                controls()
+                if (hideControls) Spacer(Modifier.height(48.dp)) else controls()
             }
         }
     }

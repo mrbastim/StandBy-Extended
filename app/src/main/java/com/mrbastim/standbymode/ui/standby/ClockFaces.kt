@@ -1,6 +1,8 @@
 package com.mrbastim.standbymode.ui.standby
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
 import com.mrbastim.standbymode.data.settings.ClockAccessory
+import com.mrbastim.standbymode.data.settings.ClockAccessorySide
 import com.mrbastim.standbymode.data.settings.ClockFace
 import com.mrbastim.standbymode.data.settings.StandBySettings
 import com.mrbastim.standbymode.R
@@ -76,16 +79,35 @@ fun FullClockPage(
         if (settings.clockAccessory == ClockAccessory.NONE) {
             ClockFaceContent(settings, Modifier.fillMaxSize())
         } else {
-            // The accessory occupies real layout space instead of overlapping the face or date.
-            Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                ClockFaceContent(settings, Modifier.weight(1f).fillMaxWidth())
-                val accessoryModifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp)
-                when (settings.clockAccessory) {
-                    ClockAccessory.NONE -> Unit
-                    ClockAccessory.NEXT_ALARM -> AlarmCountdownCard(nextAlarm, !LocalAmbientMode.current, accessoryModifier)
-                    ClockAccessory.TIMER -> LocalTimerCard(TimerMode.TIMER, accessoryModifier, compact = true)
-                    ClockAccessory.POMODORO -> LocalTimerCard(TimerMode.POMODORO, accessoryModifier, compact = true)
-                    ClockAccessory.STOPWATCH -> LocalTimerCard(TimerMode.STOPWATCH, accessoryModifier, compact = true)
+            BoxWithConstraints(Modifier.fillMaxSize()) {
+                val toolFraction = (212f / maxWidth.value).coerceIn(0.35f, 0.48f)
+                val clock: @Composable (Modifier) -> Unit = { area ->
+                    ClockFaceContent(settings, area)
+                }
+                val tool: @Composable (Modifier) -> Unit = { area ->
+                    Box(area, contentAlignment = Alignment.Center) {
+                        when (settings.clockAccessory) {
+                            ClockAccessory.NONE -> Unit
+                            ClockAccessory.NEXT_ALARM -> AlarmCountdownCard(nextAlarm, !LocalAmbientMode.current, Modifier.fillMaxWidth())
+                            ClockAccessory.TIMER -> LocalTimerCard(TimerMode.TIMER, Modifier.fillMaxSize(), hideControls = LocalAmbientMode.current)
+                            ClockAccessory.POMODORO -> LocalTimerCard(TimerMode.POMODORO, Modifier.fillMaxSize(), hideControls = LocalAmbientMode.current)
+                            ClockAccessory.STOPWATCH -> LocalTimerCard(TimerMode.STOPWATCH, Modifier.fillMaxSize(), hideControls = LocalAmbientMode.current)
+                        }
+                    }
+                }
+                val divider: @Composable () -> Unit = {
+                    Box(Modifier.fillMaxHeight(0.68f).width(1.dp).background(LocalStandByTheme.current.separator))
+                }
+                Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+                    if (settings.clockAccessorySide == ClockAccessorySide.LEFT) {
+                        tool(Modifier.weight(toolFraction).fillMaxHeight())
+                        divider()
+                        clock(Modifier.weight(1f - toolFraction).fillMaxHeight())
+                    } else {
+                        clock(Modifier.weight(1f - toolFraction).fillMaxHeight())
+                        divider()
+                        tool(Modifier.weight(toolFraction).fillMaxHeight())
+                    }
                 }
             }
         }
@@ -278,12 +300,14 @@ private fun AnalogClockFace(settings: StandBySettings, modifier: Modifier) {
     val theme = LocalStandByTheme.current
     val accent = theme.clockPrimary
     val secondary = theme.analogMarkers
+    BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
+    val dialSize = min(maxHeight.value * 0.78f, maxWidth.value * (if (settings.showDate) 0.49f else 0.85f)).coerceAtMost(270f)
     Row(
-        modifier = modifier.padding(horizontal = 30.dp, vertical = 18.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
-        Canvas(Modifier.size(270.dp)) {
+        Canvas(Modifier.size(dialSize.dp)) {
             val radius = size.minDimension / 2f
             val center = Offset(size.width / 2f, size.height / 2f)
             drawCircle(secondary.copy(alpha = 0.4f), radius, center, style = Stroke(2.dp.toPx()))
@@ -307,7 +331,7 @@ private fun AnalogClockFace(settings: StandBySettings, modifier: Modifier) {
             drawCircle(accent, 5.dp.toPx(), center)
         }
         if (settings.showDate) {
-            Column(Modifier.padding(start = 34.dp)) {
+            Column(Modifier.weight(1f, fill = false).padding(start = 12.dp)) {
                 Text(
                     now.format(DateTimeFormatter.ofPattern("EEEE", Locale.getDefault())).uppercase(),
                     color = secondary,
@@ -315,13 +339,14 @@ private fun AnalogClockFace(settings: StandBySettings, modifier: Modifier) {
                     letterSpacing = 2.sp,
                 )
                 Text(
-                    now.format(DateTimeFormatter.ofPattern("MMMM d", Locale.getDefault())),
+                    now.format(DateTimeFormatter.ofPattern(android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "MMMMd"), Locale.getDefault())),
                     color = accent,
-                    fontSize = 30.sp,
+                    fontSize = (maxWidth.value * 0.065f).coerceIn(16f, 30f).sp,
                     fontWeight = FontWeight.Light,
                 )
             }
         }
+    }
     }
 }
 
@@ -351,12 +376,14 @@ private fun OrbitClockFace(settings: StandBySettings, modifier: Modifier) {
     val theme = LocalStandByTheme.current
     val accent = theme.accent
     val secondary = theme.clockSecondary
+    BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
+    val dialSize = min(maxHeight.value * 0.8f, maxWidth.value * 0.43f).coerceAtMost(250f)
     Row(
-        modifier = modifier.padding(horizontal = 36.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Canvas(Modifier.size(250.dp)) {
+        Canvas(Modifier.size(dialSize.dp)) {
             val radius = size.minDimension * 0.42f
             val center = Offset(size.width / 2f, size.height / 2f)
             drawCircle(secondary.copy(alpha = 0.22f), radius, center, style = Stroke(1.dp.toPx()))
@@ -374,16 +401,18 @@ private fun OrbitClockFace(settings: StandBySettings, modifier: Modifier) {
             drawCircle(accent, 8.dp.toPx(), dot)
             drawCircle(accent.copy(alpha = 0.18f), radius * 0.54f, center, style = Stroke(1.dp.toPx()))
         }
-        Column(horizontalAlignment = Alignment.Start) {
+        Column(Modifier.weight(1f, fill = false), horizontalAlignment = Alignment.Start) {
             Text(
                 formatTime(now, settings),
                 color = accent,
-                fontSize = 58.sp,
+                fontSize = (maxWidth.value * (if (settings.showSeconds) 0.105f else 0.14f)).coerceAtMost(58f).sp,
+                maxLines = 1,
                 fontWeight = FontWeight.Thin,
                 style = tabularStyle,
             )
             ClockDate(settings, now, Alignment.Start)
         }
+    }
     }
 }
 
@@ -394,18 +423,22 @@ private fun WorldClockFace(settings: StandBySettings, modifier: Modifier) {
     val secondary = local.atZone(ZoneId.systemDefault())
         .withZoneSameInstant(ZoneId.of(settings.worldClockZone.zoneId))
         .toLocalDateTime()
+    BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
+    val numberSize = (maxWidth.value * (if (settings.showSeconds) 0.085f else 0.12f)).coerceAtMost(74f)
     Row(
-        modifier = modifier.padding(horizontal = 44.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        WorldTimeBlock(stringResource(R.string.local_time), local, settings, Alignment.Start)
+        WorldTimeBlock(stringResource(R.string.local_time), local, settings, Alignment.Start, numberSize)
         WorldTimeBlock(
             context.localizedLabel(settings.worldClockZone).uppercase(Locale.getDefault()),
             secondary,
             settings,
             Alignment.End,
+            numberSize,
         )
+    }
     }
 }
 
@@ -415,6 +448,7 @@ private fun WorldTimeBlock(
     time: LocalDateTime,
     settings: StandBySettings,
     alignment: Alignment.Horizontal,
+    numberSize: Float,
 ) {
     val theme = LocalStandByTheme.current
     val typography = resolveTypography(settings, ClockFace.WORLD)
@@ -423,8 +457,9 @@ private fun WorldTimeBlock(
         Text(
             formatTime(time, settings),
             color = theme.clockPrimary,
-            fontSize = 74.sp,
-            lineHeight = 78.sp,
+            fontSize = numberSize.sp,
+            lineHeight = (numberSize + 4f).sp,
+            maxLines = 1,
             fontWeight = FontWeight.Thin,
             fontFamily = typography.family,
             letterSpacing = typography.letterSpacing,

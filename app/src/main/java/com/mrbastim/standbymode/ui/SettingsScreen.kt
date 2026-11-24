@@ -61,6 +61,7 @@ import com.mrbastim.standbymode.BuildConfig
 import com.mrbastim.standbymode.R
 import com.mrbastim.standbymode.data.settings.ClockColor
 import com.mrbastim.standbymode.data.settings.ClockAccessory
+import com.mrbastim.standbymode.data.settings.ClockAccessorySide
 import com.mrbastim.standbymode.data.settings.ClockFace
 import com.mrbastim.standbymode.data.settings.BackgroundStyle
 import com.mrbastim.standbymode.data.settings.BatteryWidgetStyle
@@ -86,6 +87,7 @@ fun SettingsScreen(
     onShowDateChanged: (Boolean) -> Unit,
     onShowNextAlarmChanged: (Boolean) -> Unit = {},
     onClockAccessoryChanged: (ClockAccessory) -> Unit = {},
+    onClockAccessorySideChanged: (ClockAccessorySide) -> Unit = {},
     onNightModeChanged: (Boolean) -> Unit,
     onBurnInProtectionChanged: (Boolean) -> Unit,
     onDayThemeChanged: (StandByThemeId) -> Unit,
@@ -223,6 +225,25 @@ fun SettingsScreen(
             SettingSwitch(stringResource(R.string.show_seconds), null, state.settings.showSeconds, onShowSecondsChanged)
             SettingSwitch(stringResource(R.string.show_date), null, state.settings.showDate, onShowDateChanged)
             ClockAccessorySetting(state.settings.clockAccessory, onClockAccessoryChanged)
+            if (state.settings.clockAccessory != ClockAccessory.NONE) {
+                Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.clock_accessory_position), Modifier.weight(1f), fontSize = 16.sp)
+                    ClockAccessorySide.entries.forEach { side ->
+                        val active = state.settings.clockAccessorySide == side
+                        TextButton(
+                            onClick = { onClockAccessorySideChanged(side) },
+                            colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                                containerColor = if (active) MaterialTheme.colorScheme.secondaryContainer else androidx.compose.ui.graphics.Color.Transparent,
+                                contentColor = if (active) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                            modifier = Modifier.semantics { stateDescription = if (active) context.getString(R.string.clock_accessory_selected) else "" },
+                        ) {
+                            Text(stringResource(if (side == ClockAccessorySide.LEFT) R.string.left else R.string.right))
+                        }
+                    }
+                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+            }
             ChoiceSetting(stringResource(R.string.typography), context.localizedLabel(state.settings.typographyStyle),
                 choices = TypographyStyle.entries, label = context::localizedLabel, onSelected = onTypographyStyleChanged)
             SettingSwitch(

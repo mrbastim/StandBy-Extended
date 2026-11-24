@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mrbastim.standbymode.data.settings.ClockColor
 import com.mrbastim.standbymode.data.settings.ClockAccessory
+import com.mrbastim.standbymode.data.settings.ClockAccessorySide
 import com.mrbastim.standbymode.data.settings.ClockFace
 import com.mrbastim.standbymode.data.settings.BatteryWidgetStyle
 import com.mrbastim.standbymode.data.settings.ClockWidgetStyle
@@ -473,6 +474,19 @@ private fun ClockCustomizerContent(
                     ),
                 ) {
                     Text(context.localizedLabel(accessory))
+                }
+            }
+        }
+        if (settings.clockAccessory != ClockAccessory.NONE) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                Text(stringResource(R.string.clock_accessory_position), color = theme.secondary, fontSize = 12.sp)
+                TextButton(onClick = {
+                    actions.onClockAccessorySideChanged?.invoke(
+                        if (settings.clockAccessorySide == ClockAccessorySide.LEFT) ClockAccessorySide.RIGHT else ClockAccessorySide.LEFT,
+                    )
+                }) {
+                    Text(stringResource(R.string.swap_clock_accessory) + " · " +
+                        stringResource(if (settings.clockAccessorySide == ClockAccessorySide.LEFT) R.string.left else R.string.right), color = theme.primary)
                 }
             }
         }

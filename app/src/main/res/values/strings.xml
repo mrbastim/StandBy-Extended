@@ -210,7 +210,7 @@
     <string name="display_group_anti_burn_in">Display protection</string>
     <string name="show_next_alarm">Alarm in widgets and calendar</string>
     <string name="show_next_alarm_description">Hide the alarm card and calendar reminder. The full-screen clock has its own setting.</string>
-    <string name="clock_accessory">Below the full-screen clock</string>
+    <string name="clock_accessory">Next to the clock</string>
     <string name="clock_accessory_none">Clock only</string>
     <string name="widget_timer">Timer</string>
     <string name="widget_pomodoro">Pomodoro</string>
@@ -224,4 +224,7 @@
     <string name="timer_next_phase">Next phase</string>
     <string name="timer_minus_minute">Subtract one minute</string>
     <string name="timer_plus_minute">Add one minute</string>
+    <string name="clock_accessory_position">Position</string>
+    <string name="clock_accessory_selected">Selected</string>
+    <string name="swap_clock_accessory">Swap sides</string>
 </resources>
