@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.display
+package com.mrbastim.standbymode.display
 
 import android.view.Window
 import androidx.compose.foundation.layout.Box
@@ -21,7 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.mrbastim.standby.extended.data.settings.StandBySettings
+import com.mrbastim.standbymode.data.settings.StandBySettings
 
 /** Observes real input before children, without consuming it or treating recomposition as activity. */
 @Composable

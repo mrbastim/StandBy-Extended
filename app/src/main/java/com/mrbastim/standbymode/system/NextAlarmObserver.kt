@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.system
+package com.mrbastim.standbymode.system
 
 import android.app.AlarmManager
 import android.content.BroadcastReceiver

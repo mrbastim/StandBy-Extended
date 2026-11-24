@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.system
+package com.mrbastim.standbymode.system
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted

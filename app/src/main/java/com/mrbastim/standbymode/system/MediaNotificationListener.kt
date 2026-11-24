@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.system
+package com.mrbastim.standbymode.system
 
 import android.service.notification.NotificationListenerService
 import kotlinx.coroutines.flow.MutableStateFlow

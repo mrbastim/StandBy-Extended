@@ -1,8 +1,8 @@
-package com.mrbastim.standby.extended.display
+package com.mrbastim.standbymode.display
 
-import com.mrbastim.standby.extended.data.settings.DisplayProtectionSettings
-import com.mrbastim.standby.extended.data.settings.ScreenTimeout
-import com.mrbastim.standby.extended.data.settings.StandBySettings
+import com.mrbastim.standbymode.data.settings.DisplayProtectionSettings
+import com.mrbastim.standbymode.data.settings.ScreenTimeout
+import com.mrbastim.standbymode.data.settings.StandBySettings
 import kotlin.math.abs
 import kotlin.math.exp
 
