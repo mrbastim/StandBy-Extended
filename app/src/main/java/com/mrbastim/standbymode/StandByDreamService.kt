@@ -136,6 +136,7 @@ class StandByDreamService : DreamService(), LifecycleOwner, ViewModelStoreOwner,
                                     onMoveWidget = { column, from, to ->
                                         serviceScope.launch { settingsRepository.moveWidget(column, from, to) }
                                     },
+                                    onActiveWidgetChanged = settingsRepository::rememberActiveWidget,
                                     onClockFaceChanged = { face ->
                                         serviceScope.launch { settingsRepository.setClockFace(face) }
                                     },

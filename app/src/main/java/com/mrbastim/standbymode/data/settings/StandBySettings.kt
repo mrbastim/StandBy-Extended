@@ -27,6 +27,8 @@ data class StandBySettings(
     val batteryWidgetStyle: BatteryWidgetStyle = BatteryWidgetStyle.CIRCULAR,
     val worldClockZone: WorldClockZone = WorldClockZone.UTC,
     val weatherEnabled: Boolean = false,
+    val leftActiveWidget: StandByWidgetType? = null,
+    val rightActiveWidget: StandByWidgetType? = null,
     val leftWidgets: List<StandByWidgetType> = listOf(
         StandByWidgetType.CLOCK,
         StandByWidgetType.BATTERY,
@@ -121,6 +123,12 @@ internal fun visibleWidgets(
 ): List<StandByWidgetType> =
     widgets.filter { showNextAlarm || it != StandByWidgetType.NEXT_ALARM }
         .ifEmpty { listOf(StandByWidgetType.CLOCK) }
+
+/** Remember identity rather than index; removed/hidden cards fall back to the first visible card. */
+internal fun resolveActiveWidget(
+    visible: List<StandByWidgetType>,
+    selected: StandByWidgetType?,
+): StandByWidgetType = selected?.takeIf { it in visible } ?: visible.firstOrNull() ?: StandByWidgetType.CLOCK
 
 enum class WorldClockZone(
     val label: String,

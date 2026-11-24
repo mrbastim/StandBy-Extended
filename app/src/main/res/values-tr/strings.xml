@@ -222,4 +222,6 @@
     <string name="timer_next_phase">Sonraki aşama</string>
     <string name="timer_minus_minute">−1 dk</string>
     <string name="timer_plus_minute">+1 dk</string>
+    <string name="back_to_stack">Yığına dön</string>
+    <string name="all_widgets_added">Tüm kullanılabilir widget’lar eklendi</string>
 </resources>

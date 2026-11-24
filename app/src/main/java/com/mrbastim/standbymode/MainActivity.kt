@@ -71,6 +71,7 @@ class MainActivity : ComponentActivity() {
                             onExitStandBy = if (!state.isPreviewMode) viewModel::dismissStandBy else null,
                             onToggleWidget = viewModel::toggleWidget,
                             onMoveWidget = viewModel::moveWidget,
+                            onActiveWidgetChanged = viewModel::rememberActiveWidget,
                             onClockFaceChanged = viewModel::setClockFace,
                             onClockColorChanged = viewModel::setClockColor,
                             onShowSecondsChanged = viewModel::setShowSeconds,

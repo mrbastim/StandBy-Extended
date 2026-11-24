@@ -224,4 +224,6 @@
     <string name="timer_next_phase">Следующий этап</string>
     <string name="timer_minus_minute">−1 мин</string>
     <string name="timer_plus_minute">+1 мин</string>
+    <string name="back_to_stack">Вернуться к стеку</string>
+    <string name="all_widgets_added">Все доступные виджеты добавлены</string>
 </resources>

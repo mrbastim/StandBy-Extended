@@ -224,4 +224,6 @@
     <string name="timer_next_phase">Next phase</string>
     <string name="timer_minus_minute">−1 min</string>
     <string name="timer_plus_minute">+1 min</string>
+    <string name="back_to_stack">Back to stack</string>
+    <string name="all_widgets_added">All available widgets added</string>
 </resources>
