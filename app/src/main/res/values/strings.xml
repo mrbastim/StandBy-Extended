@@ -211,7 +211,7 @@
     <string name="show_next_alarm">Alarm in widgets and calendar</string>
     <string name="show_next_alarm_description">Hide the alarm card and calendar reminder. The full-screen clock has its own setting.</string>
     <string name="clock_accessory">Next to the clock</string>
-    <string name="clock_accessory_none">Clock only</string>
+    <string name="clock_accessory_none">None</string>
     <string name="widget_timer">Timer</string>
     <string name="widget_pomodoro">Pomodoro</string>
     <string name="widget_stopwatch">Stopwatch</string>
