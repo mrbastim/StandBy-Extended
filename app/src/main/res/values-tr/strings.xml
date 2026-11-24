@@ -145,6 +145,7 @@
     <string name="city_novosibirsk">Novosibirsk</string>
     <string name="city_vladivostok">Vladivostok</string>
     <string name="no_alarm_set">Alarm ayarlanmamış</string>
+    <string name="next_alarm_unavailable">Alarm saati kullanılamıyor</string>
     <string name="next_alarm">SONRAKİ ALARM</string>
     <string name="alarm_countdown_accessibility">Alarma %1$d saat, %2$d dakika, %3$d saniye kaldı</string>
     <string name="widget_weather">Hava durumu</string>

@@ -20,12 +20,14 @@ import kotlinx.coroutines.withTimeoutOrNull
 data class NextAlarmState(
     val triggerAtMillis: Long? = null,
     val zoneId: ZoneId = ZoneId.systemDefault(),
+    val isCalendarReminder: Boolean = false,
 ) {
     internal fun futureTriggerAtMillis(nowMillis: Long): Long? =
         triggerAtMillis?.takeIf { it > nowMillis }
 }
 
 private const val ALARM_REFRESH_INTERVAL_MILLIS = 60_000L
+private const val CALENDAR_PROVIDER_PACKAGE = "com.android.providers.calendar"
 
 class NextAlarmObserver internal constructor(
     private val context: Context,
@@ -54,12 +56,20 @@ class NextAlarmObserver internal constructor(
         )
         launch {
             while (isActive) {
-                val alarm = NextAlarmState(alarmManager?.nextAlarmClock?.triggerTime)
+                val alarm = alarmManager?.nextAlarmClock
                 val nowMillis = currentTimeMillis()
-                val triggerAtMillis = alarm.futureTriggerAtMillis(nowMillis)
-                send(alarm.copy(triggerAtMillis = triggerAtMillis))
+                val triggerAtMillis = alarm?.triggerTime?.takeIf { it > nowMillis }
+                // Some calendar reminders occupy the system's single next-alarm slot.
+                val isCalendarReminder = triggerAtMillis != null &&
+                    alarm?.showIntent?.creatorPackage == CALENDAR_PROVIDER_PACKAGE
+                send(
+                    NextAlarmState(
+                        triggerAtMillis = if (isCalendarReminder) null else triggerAtMillis,
+                        isCalendarReminder = isCalendarReminder,
+                    ),
+                )
 
-                // Recheck at expiry or periodically if an alarm-change broadcast was missed.
+                // Recheck at the system event's expiry even if its time is hidden in the UI.
                 val waitMillis = triggerAtMillis?.let { it - nowMillis }
                     ?.coerceAtMost(ALARM_REFRESH_INTERVAL_MILLIS) ?: ALARM_REFRESH_INTERVAL_MILLIS
                 withTimeoutOrNull(waitMillis) { refreshRequests.receive() }
