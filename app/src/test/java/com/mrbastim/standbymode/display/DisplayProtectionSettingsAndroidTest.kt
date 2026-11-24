@@ -1,7 +1,7 @@
-package com.mrbastim.standby.extended.display
+package com.mrbastim.standbymode.display
 
-import com.mrbastim.standby.extended.data.settings.DisplayProtectionSettings
-import com.mrbastim.standby.extended.data.settings.SettingsRepository
+import com.mrbastim.standbymode.data.settings.DisplayProtectionSettings
+import com.mrbastim.standbymode.data.settings.SettingsRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*

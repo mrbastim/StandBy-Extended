@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.ui
+package com.mrbastim.standbymode.ui
 
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

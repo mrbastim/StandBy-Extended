@@ -1,10 +1,10 @@
-package com.mrbastim.standby.extended.display
+package com.mrbastim.standbymode.display
 
 import android.app.Activity
 import android.os.Looper
 import android.view.WindowManager
-import com.mrbastim.standby.extended.StandByDreamService
-import com.mrbastim.standby.extended.data.settings.StandBySettings
+import com.mrbastim.standbymode.StandByDreamService
+import com.mrbastim.standbymode.data.settings.StandBySettings
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -101,7 +101,7 @@ class DisplayProtectionAndroidTest {
         var releases = 0
         val controller = controller(activity.get()) { releases++ }
         controller.update(StandBySettings(displayProtection =
-            com.mrbastim.standby.extended.data.settings.DisplayProtectionSettings(releaseAfterMinutes = 1)))
+            com.mrbastim.standbymode.data.settings.DisplayProtectionSettings(releaseAfterMinutes = 1)))
         controller.start()
         advance(65_000)
         assertEquals(1, releases)
