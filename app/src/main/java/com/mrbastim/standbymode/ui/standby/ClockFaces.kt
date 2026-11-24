@@ -73,17 +73,21 @@ fun FullClockPage(
                 },
             ),
     ) {
-        ClockFaceContent(settings, Modifier.fillMaxSize())
-        val accessoryModifier = Modifier.align(Alignment.BottomStart)
-            .padding(start = 16.dp, bottom = 12.dp)
-        when (settings.clockAccessory) {
-            ClockAccessory.NONE -> Unit
-            ClockAccessory.NEXT_ALARM -> if (settings.showNextAlarm) {
-                AlarmCountdownCard(nextAlarm, !LocalAmbientMode.current, accessoryModifier)
+        if (settings.clockAccessory == ClockAccessory.NONE) {
+            ClockFaceContent(settings, Modifier.fillMaxSize())
+        } else {
+            // The accessory occupies real layout space instead of overlapping the face or date.
+            Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                ClockFaceContent(settings, Modifier.weight(1f).fillMaxWidth())
+                val accessoryModifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp)
+                when (settings.clockAccessory) {
+                    ClockAccessory.NONE -> Unit
+                    ClockAccessory.NEXT_ALARM -> AlarmCountdownCard(nextAlarm, !LocalAmbientMode.current, accessoryModifier)
+                    ClockAccessory.TIMER -> LocalTimerCard(TimerMode.TIMER, accessoryModifier, compact = true)
+                    ClockAccessory.POMODORO -> LocalTimerCard(TimerMode.POMODORO, accessoryModifier, compact = true)
+                    ClockAccessory.STOPWATCH -> LocalTimerCard(TimerMode.STOPWATCH, accessoryModifier, compact = true)
+                }
             }
-            ClockAccessory.TIMER -> LocalTimerCard(TimerMode.TIMER, accessoryModifier, compact = true)
-            ClockAccessory.POMODORO -> LocalTimerCard(TimerMode.POMODORO, accessoryModifier, compact = true)
-            ClockAccessory.STOPWATCH -> LocalTimerCard(TimerMode.STOPWATCH, accessoryModifier, compact = true)
         }
     }
 }
@@ -109,6 +113,7 @@ private fun AlarmCountdownCard(nextAlarm: NextAlarmState, showSeconds: Boolean, 
     Row(
         modifier = modifier
             .semantics { contentDescription = countdownDescription },
+        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Canvas(Modifier.size(22.dp)) {
@@ -445,12 +450,19 @@ private fun ClockDate(
     val theme = LocalStandByTheme.current
     Spacer(Modifier.height(8.dp))
     Text(
-        text = time.format(DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.getDefault())),
+        text = time.format(DateTimeFormatter.ofPattern(
+            android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "EEEEMMMMd"),
+            Locale.getDefault(),
+        )),
         color = theme.clockSecondary,
         fontFamily = androidx.compose.ui.text.font.FontFamily.Serif,
         fontSize = 20.sp,
         fontWeight = FontWeight.Light,
-        textAlign = if (alignment == Alignment.End) TextAlign.End else TextAlign.Start,
+        textAlign = when (alignment) {
+            Alignment.End -> TextAlign.End
+            Alignment.Start -> TextAlign.Start
+            else -> TextAlign.Center
+        },
     )
 }
 

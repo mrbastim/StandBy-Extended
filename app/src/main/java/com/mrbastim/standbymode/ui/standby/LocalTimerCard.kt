@@ -1,14 +1,17 @@
 package com.mrbastim.standbymode.ui.standby
 
 import android.os.SystemClock
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,6 +21,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -63,62 +76,120 @@ internal fun LocalTimerCard(
     })
     val canAdjust = mode == TimerMode.TIMER && session.startedAtMillis < 0L && session.accumulatedMillis == 0L
 
-    val timeAndLabel: @Composable () -> Unit = {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(title, color = theme.secondary, fontSize = if (compact) 11.sp else 14.sp, textAlign = TextAlign.Center)
-            Text(
-                value,
-                color = if (finished) theme.accent else theme.clockPrimary,
-                fontSize = if (compact) 24.sp else 46.sp,
-                fontWeight = FontWeight.Light,
-                style = TextStyle(fontFeatureSettings = "tnum"),
-                maxLines = 1,
-            )
-            if (finished) {
-                Text(stringResource(R.string.timer_finished), color = theme.accent, fontSize = 11.sp)
-            }
-        }
-    }
     val controls: @Composable () -> Unit = {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-            TextButton(onClick = { store.update(mode) { current, tick -> current.primaryAction(mode, tick) } }) {
-                Text(primaryLabel, color = theme.accent, fontSize = if (compact) 12.sp else 14.sp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
+        ) {
+            if (mode == TimerMode.TIMER) {
+                TimerControl(TimerIcon.MINUS, stringResource(R.string.timer_minus_minute),
+                    enabled = canAdjust && session.durationMillis > 60_000L) {
+                    store.update(mode) { current, _ -> current.adjustTimer(-1) }
+                }
+                TimerControl(TimerIcon.PLUS, stringResource(R.string.timer_plus_minute),
+                    enabled = canAdjust && session.durationMillis < 10_800_000L) {
+                    store.update(mode) { current, _ -> current.adjustTimer(1) }
+                }
             }
-            TextButton(onClick = { store.update(mode) { current, _ -> current.reset(mode) } }) {
-                Text(stringResource(R.string.timer_reset), color = theme.secondary, fontSize = if (compact) 12.sp else 14.sp)
+            TimerControl(
+                icon = when {
+                    finished && mode == TimerMode.POMODORO -> TimerIcon.NEXT
+                    running -> TimerIcon.PAUSE
+                    else -> TimerIcon.PLAY
+                },
+                label = primaryLabel,
+                primary = true,
+            ) { store.update(mode) { current, tick -> current.primaryAction(mode, tick) } }
+            TimerControl(TimerIcon.RESET, stringResource(R.string.timer_reset),
+                enabled = session.startedAtMillis >= 0L || session.accumulatedMillis > 0L || session.breakPhase) {
+                store.update(mode) { current, _ -> current.reset(mode) }
             }
         }
     }
-    val adjustment: @Composable () -> Unit = {
-        if (canAdjust) {
-            Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = { store.update(mode) { current, _ -> current.adjustTimer(-1) } }) {
-                    Text(stringResource(R.string.timer_minus_minute), color = theme.secondary)
-                }
-                TextButton(onClick = { store.update(mode) { current, _ -> current.adjustTimer(1) } }) {
-                    Text(stringResource(R.string.timer_plus_minute), color = theme.secondary)
-                }
-            }
-        }
+    val label = if (finished) stringResource(R.string.timer_finished) else title
+    val timeText: @Composable () -> Unit = {
+        Text(
+            value, color = if (finished) theme.accent else theme.clockPrimary,
+            fontSize = if (compact) 24.sp else 46.sp, fontWeight = FontWeight.Light,
+            style = TextStyle(fontFeatureSettings = "tnum"), maxLines = 1,
+        )
     }
     if (compact) {
-        Column(modifier = modifier, horizontalAlignment = Alignment.Start) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                timeAndLabel()
-                controls()
-            }
-            adjustment()
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+        ) {
+            Text(label, color = theme.secondary, fontSize = 12.sp, maxLines = 1)
+            timeText()
+            controls()
         }
     } else {
         Box(modifier = modifier.padding(8.dp), contentAlignment = Alignment.Center) {
             Column(
                 Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
             ) {
-                timeAndLabel()
+                Text(label, color = theme.secondary, fontSize = 14.sp, textAlign = TextAlign.Center)
+                timeText()
                 controls()
-                adjustment()
+            }
+        }
+    }
+}
+
+private enum class TimerIcon { MINUS, PLUS, PLAY, PAUSE, RESET, NEXT }
+
+@Composable
+private fun TimerControl(
+    icon: TimerIcon,
+    label: String,
+    enabled: Boolean = true,
+    primary: Boolean = false,
+    onClick: () -> Unit,
+) {
+    val theme = LocalStandByTheme.current
+    val foreground = (if (primary) theme.background else theme.primary).copy(alpha = if (enabled) 1f else 0.32f)
+    Box(
+        modifier = Modifier.size(48.dp)
+            .clip(CircleShape)
+            .semantics { contentDescription = label }
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            Modifier.size(36.dp).background(
+                if (primary) theme.primary else theme.separator.copy(alpha = if (enabled) 0.9f else 0.45f),
+                CircleShape,
+            ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Canvas(Modifier.size(18.dp)) {
+                val w = size.width
+                val h = size.height
+                val stroke = 1.7.dp.toPx()
+                fun line(x1: Float, y1: Float, x2: Float, y2: Float) =
+                    drawLine(foreground, Offset(x1*w,y1*h), Offset(x2*w,y2*h), stroke, StrokeCap.Round)
+                when (icon) {
+                    TimerIcon.MINUS -> line(.2f,.5f,.8f,.5f)
+                    TimerIcon.PLUS -> { line(.2f,.5f,.8f,.5f); line(.5f,.2f,.5f,.8f) }
+                    TimerIcon.PAUSE -> { line(.35f,.22f,.35f,.78f); line(.65f,.22f,.65f,.78f) }
+                    TimerIcon.PLAY, TimerIcon.NEXT -> {
+                        val triangle = Path().apply {
+                            moveTo(w*.28f,h*.18f); lineTo(w*.76f,h*.5f); lineTo(w*.28f,h*.82f); close()
+                        }
+                        drawPath(triangle, foreground)
+                        if (icon == TimerIcon.NEXT) line(.82f,.22f,.82f,.78f)
+                    }
+                    TimerIcon.RESET -> {
+                        drawArc(foreground, -105f, 285f, false,
+                            topLeft = Offset(w*.16f,h*.16f), size = Size(w*.68f,h*.68f),
+                            style = Stroke(stroke, cap = StrokeCap.Round))
+                        line(.43f,.04f,.68f,.17f)
+                        line(.68f,.17f,.47f,.33f)
+                    }
+                }
             }
         }
     }

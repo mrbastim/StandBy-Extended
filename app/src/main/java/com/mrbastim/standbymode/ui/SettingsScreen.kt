@@ -222,22 +222,7 @@ fun SettingsScreen(
             SettingSwitch(stringResource(R.string.time_24_hour), null, state.settings.use24HourClock, on24HourChanged)
             SettingSwitch(stringResource(R.string.show_seconds), null, state.settings.showSeconds, onShowSecondsChanged)
             SettingSwitch(stringResource(R.string.show_date), null, state.settings.showDate, onShowDateChanged)
-            SettingSwitch(
-                stringResource(R.string.show_next_alarm),
-                stringResource(R.string.show_next_alarm_description),
-                state.settings.showNextAlarm,
-                onShowNextAlarmChanged,
-            )
-            ChoiceSetting(
-                stringResource(R.string.clock_accessory),
-                context.localizedLabel(
-                    if (!state.settings.showNextAlarm && state.settings.clockAccessory == ClockAccessory.NEXT_ALARM)
-                        ClockAccessory.NONE else state.settings.clockAccessory,
-                ),
-                choices = ClockAccessory.entries.filter { state.settings.showNextAlarm || it != ClockAccessory.NEXT_ALARM },
-                label = context::localizedLabel,
-                onSelected = onClockAccessoryChanged,
-            )
+            ClockAccessorySetting(state.settings.clockAccessory, onClockAccessoryChanged)
             ChoiceSetting(stringResource(R.string.typography), context.localizedLabel(state.settings.typographyStyle),
                 choices = TypographyStyle.entries, label = context::localizedLabel, onSelected = onTypographyStyleChanged)
             SettingSwitch(
@@ -248,6 +233,12 @@ fun SettingsScreen(
             )
 
             SettingsSection(stringResource(R.string.section_widgets))
+            SettingSwitch(
+                stringResource(R.string.show_next_alarm),
+                stringResource(R.string.show_next_alarm_description),
+                state.settings.showNextAlarm,
+                onShowNextAlarmChanged,
+            )
             InfoRow(stringResource(R.string.left_stack), state.settings.leftWidgets.joinToString { context.localizedLabel(it) })
             InfoRow(stringResource(R.string.right_stack), state.settings.rightWidgets.joinToString { context.localizedLabel(it) })
             ChoiceSetting(stringResource(R.string.clock_widget_style), context.localizedLabel(state.settings.clockWidgetStyle),
@@ -574,6 +565,49 @@ private fun <T> ChoiceSetting(
         }
     }
     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+}
+
+@Composable
+private fun ClockAccessorySetting(
+    selected: ClockAccessory,
+    onSelected: (ClockAccessory) -> Unit,
+) {
+    val context = LocalContext.current
+    var open by rememberSaveable { mutableStateOf(false) }
+    val title = stringResource(R.string.clock_accessory)
+    Column(Modifier.fillMaxWidth().clickable { open = true }.padding(vertical = 13.dp)) {
+        Text(title, fontSize = 16.sp)
+        Text(context.localizedLabel(selected), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+    }
+    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+    if (open) {
+        AlertDialog(
+            onDismissRequest = { open = false },
+            title = { Text(title) },
+            text = {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    ClockAccessory.entries.forEach { option ->
+                        Row(
+                            Modifier.fillMaxWidth().clickable {
+                                onSelected(option)
+                                open = false
+                            }.padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(context.localizedLabel(option), Modifier.weight(1f), fontSize = 16.sp)
+                            RadioButton(selected = option == selected, onClick = {
+                                onSelected(option)
+                                open = false
+                            })
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { open = false }) { Text(stringResource(android.R.string.cancel)) }
+            },
+        )
+    }
 }
 
 @Composable

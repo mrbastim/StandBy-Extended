@@ -462,11 +462,17 @@ private fun ClockCustomizerContent(
             Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            ClockAccessory.entries.filter { settings.showNextAlarm || it != ClockAccessory.NEXT_ALARM }.forEach { accessory ->
-                TextButton(onClick = { actions.onClockAccessoryChanged?.invoke(accessory) }) {
-                    val active = accessory == settings.clockAccessory ||
-                        (accessory == ClockAccessory.NONE && !settings.showNextAlarm && settings.clockAccessory == ClockAccessory.NEXT_ALARM)
-                    Text(context.localizedLabel(accessory), color = if (active) theme.accent else theme.secondary)
+            ClockAccessory.entries.forEach { accessory ->
+                val active = accessory == settings.clockAccessory
+                TextButton(
+                    onClick = { actions.onClockAccessoryChanged?.invoke(accessory) },
+                    modifier = Modifier.semantics { selected = active },
+                    colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                        containerColor = if (active) theme.separator else Color.Transparent,
+                        contentColor = if (active) theme.primary else theme.secondary,
+                    ),
+                ) {
+                    Text(context.localizedLabel(accessory))
                 }
             }
         }
