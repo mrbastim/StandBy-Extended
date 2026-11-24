@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.ui.standby
+package com.mrbastim.standbymode.ui.standby
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -15,11 +15,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import com.mrbastim.standby.extended.data.settings.BackgroundStyle
-import com.mrbastim.standby.extended.data.settings.ClockFace
-import com.mrbastim.standby.extended.data.settings.StandBySettings
-import com.mrbastim.standby.extended.data.settings.StandByThemeId
-import com.mrbastim.standby.extended.data.settings.TypographyStyle
+import com.mrbastim.standbymode.data.settings.BackgroundStyle
+import com.mrbastim.standbymode.data.settings.ClockFace
+import com.mrbastim.standbymode.data.settings.StandBySettings
+import com.mrbastim.standbymode.data.settings.StandByThemeId
+import com.mrbastim.standbymode.data.settings.TypographyStyle
 
 data class StandByThemeTokens(
     val id: StandByThemeId,

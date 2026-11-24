@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.data.settings
+package com.mrbastim.standbymode.data.settings
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

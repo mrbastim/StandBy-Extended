@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.data.weather
+package com.mrbastim.standbymode.data.weather
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

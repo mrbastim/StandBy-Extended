@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.ui.standby
+package com.mrbastim.standbymode.ui.standby
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -47,17 +47,17 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
-import com.mrbastim.standby.extended.R
+import com.mrbastim.standbymode.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
-import com.mrbastim.standby.extended.data.settings.StandBySettings
-import com.mrbastim.standby.extended.data.weather.WeatherKind
-import com.mrbastim.standby.extended.data.settings.WidgetColumn
-import com.mrbastim.standby.extended.system.ChargingState
-import com.mrbastim.standby.extended.system.NextAlarmState
-import com.mrbastim.standby.extended.data.weather.WeatherState
-import com.mrbastim.standby.extended.ui.StandByUiState
+import com.mrbastim.standbymode.data.settings.StandBySettings
+import com.mrbastim.standbymode.data.weather.WeatherKind
+import com.mrbastim.standbymode.data.settings.WidgetColumn
+import com.mrbastim.standbymode.system.ChargingState
+import com.mrbastim.standbymode.system.NextAlarmState
+import com.mrbastim.standbymode.data.weather.WeatherState
+import com.mrbastim.standbymode.ui.StandByUiState
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 
@@ -301,7 +301,7 @@ private fun StandByDisplayPreview() {
         charging = ChargingState(
             isCharging = true,
             batteryPercent = 82,
-            source = com.mrbastim.standby.extended.system.ChargingSource.AC,
+            source = com.mrbastim.standbymode.system.ChargingSource.AC,
         ),
         nextAlarm = NextAlarmState(
             triggerAtMillis = System.currentTimeMillis() + 3_600_000L,

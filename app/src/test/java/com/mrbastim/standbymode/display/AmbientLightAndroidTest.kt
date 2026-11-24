@@ -1,10 +1,10 @@
-package com.mrbastim.standby.extended.display
+package com.mrbastim.standbymode.display
 
 import android.app.Activity
 import android.hardware.Sensor
 import android.hardware.SensorManager
-import com.mrbastim.standby.extended.data.settings.DisplayProtectionSettings
-import com.mrbastim.standby.extended.data.settings.StandBySettings
+import com.mrbastim.standbymode.data.settings.DisplayProtectionSettings
+import com.mrbastim.standbymode.data.settings.StandBySettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

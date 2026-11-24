@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.ui.theme
+package com.mrbastim.standbymode.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
