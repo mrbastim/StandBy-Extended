@@ -147,6 +147,7 @@
     <string name="city_novosibirsk">Novosibirsk</string>
     <string name="city_vladivostok">Vladivostok</string>
     <string name="no_alarm_set">No alarm set</string>
+    <string name="next_alarm_unavailable">Alarm time unavailable</string>
     <string name="next_alarm">NEXT ALARM</string>
     <string name="alarm_countdown_accessibility">%1$d hours, %2$d minutes, %3$d seconds until alarm</string>
     <string name="widget_weather">Weather</string>

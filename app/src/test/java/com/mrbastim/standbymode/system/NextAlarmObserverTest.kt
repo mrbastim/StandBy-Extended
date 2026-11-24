@@ -31,14 +31,14 @@ class NextAlarmObserverTest {
         val first = scheduleAlarm(now + 120_000, 1)
         val second = scheduleAlarm(now + 240_000, 2)
 
-        observe { triggers ->
-            assertEquals(listOf(now + 120_000), triggers)
+        observe { states ->
+            assertEquals(listOf(now + 120_000), states.map { it.triggerAtMillis })
             manager.cancel(first)
             notifyAlarmChanged()
-            assertEquals(listOf(now + 120_000, now + 240_000), triggers)
+            assertEquals(listOf(now + 120_000, now + 240_000), states.map { it.triggerAtMillis })
             manager.cancel(second)
             notifyAlarmChanged()
-            assertEquals(listOf(now + 120_000, now + 240_000, null), triggers)
+            assertEquals(listOf(now + 120_000, now + 240_000, null), states.map { it.triggerAtMillis })
         }
     }
 
@@ -47,11 +47,11 @@ class NextAlarmObserverTest {
         val trigger = nowMillis() + 120_000
         val operation = scheduleAlarm(trigger, 1)
 
-        observe { triggers ->
-            assertEquals(listOf(trigger), triggers)
+        observe { states ->
+            assertEquals(listOf(trigger), states.map { it.triggerAtMillis })
             manager.cancel(operation)
             looper.idleFor(Duration.ofMinutes(1))
-            assertEquals(listOf(trigger, null), triggers)
+            assertEquals(listOf(trigger, null), states.map { it.triggerAtMillis })
         }
     }
 
@@ -60,26 +60,51 @@ class NextAlarmObserverTest {
         val trigger = nowMillis() + 10_000
         scheduleAlarm(trigger, 1)
 
-        observe { triggers ->
+        observe { states ->
             looper.idleFor(Duration.ofMillis(9_999))
-            assertEquals(listOf(trigger), triggers)
+            assertEquals(listOf(trigger), states.map { it.triggerAtMillis })
             looper.idleFor(Duration.ofMillis(1))
             assertEquals(trigger, manager.nextAlarmClock?.triggerTime)
-            assertEquals(listOf(trigger, null), triggers)
+            assertEquals(listOf(trigger, null), states.map { it.triggerAtMillis })
         }
 
-        observe { triggers ->
-            assertEquals(listOf<Long?>(null), triggers)
+        observe { states ->
+            assertEquals(listOf(NextAlarmState()), states)
         }
     }
 
-    private fun scheduleAlarm(trigger: Long, requestCode: Int): PendingIntent {
+    @Test
+    fun calendarReminderHidesItsTimeUntilTheSystemReportsTheClockAlarm() {
+        val now = nowMillis()
+        val reminder = scheduleAlarm(now + 10_000, 1, "com.android.providers.calendar")
+        val alarm = scheduleAlarm(now + 120_000, 2, "com.sec.android.app.clockpackage")
+
+        observe { states ->
+            assertEquals(NextAlarmState(isCalendarReminder = true), states.single())
+
+            looper.idleFor(Duration.ofMillis(9_999))
+            manager.cancel(reminder)
+            looper.idleFor(Duration.ofMillis(1))
+            assertEquals(NextAlarmState(triggerAtMillis = now + 120_000), states.last())
+
+            manager.cancel(alarm)
+            notifyAlarmChanged()
+            assertEquals(NextAlarmState(), states.last())
+        }
+    }
+
+    private fun scheduleAlarm(
+        trigger: Long,
+        requestCode: Int,
+        creatorPackage: String = context.packageName,
+    ): PendingIntent {
         val operation = PendingIntent.getBroadcast(
             context,
             requestCode,
             Intent("test.NEXT_ALARM").setPackage(context.packageName),
             PendingIntent.FLAG_IMMUTABLE,
         )
+        shadowOf(operation).setCreatorPackage(creatorPackage)
         manager.setAlarmClock(AlarmManager.AlarmClockInfo(trigger, operation), operation)
         return operation
     }
@@ -89,15 +114,15 @@ class NextAlarmObserverTest {
         looper.idle()
     }
 
-    private fun observe(assertUpdates: (List<Long?>) -> Unit) {
+    private fun observe(assertUpdates: (List<NextAlarmState>) -> Unit) {
         val scope = CoroutineScope(Dispatchers.Main.immediate)
-        val triggers = mutableListOf<Long?>()
+        val states = mutableListOf<NextAlarmState>()
         scope.launch {
-            NextAlarmObserver(context, ::nowMillis).state.collect { triggers += it.triggerAtMillis }
+            NextAlarmObserver(context, ::nowMillis).state.collect { states += it }
         }
         try {
             looper.idle()
-            assertUpdates(triggers)
+            assertUpdates(states)
         } finally {
             scope.cancel()
             looper.idle()

@@ -420,7 +420,9 @@ private fun CompactNextAlarmWidget(settings: StandBySettings, nextAlarm: NextAla
         )
         if (alarmTime == null) {
             Text(
-                stringResource(R.string.no_alarm_set),
+                stringResource(
+                    if (nextAlarm.isCalendarReminder) R.string.next_alarm_unavailable else R.string.no_alarm_set,
+                ),
                 modifier = Modifier.padding(top = 12.dp),
                 color = theme.primary,
                 fontSize = 24.sp,
