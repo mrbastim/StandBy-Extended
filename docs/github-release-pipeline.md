@@ -2,10 +2,10 @@
 
 [English](github-release-pipeline.md) | [Русский](github-release-pipeline.ru.md)
 
-Stable tags `v*` use `release.yml` and publish `standby-android-extended.apk`.
+Stable tags `v*` use `release.yml` and publish `standbymode.apk`.
 Every push/merge to `dev` uses `dev-prerelease.yml`. After successful checks it updates
 one prerelease tagged `dev`, with `--prerelease --latest=false`, replacing
-`standby-android-extended-dev.apk`. The existing release is edited in place, keeping
+`standbymode-dev.apk`. The existing release is edited in place, keeping
 its ID and download URL. The lightweight tag moves to the exact tested commit.
 The title/notes identify that commit and its CI run; stable Latest is preserved.
 
@@ -16,7 +16,7 @@ Retries replace the same asset. App ID/version are unchanged. Publication is lim
 to runs triggered by `mrbastim`; other actors can build but cannot sign/publish.
 
 Permanent dev download:
-[standby-android-extended-dev.apk](https://github.com/mrbastim/StandBy-Extended/releases/download/dev/standby-android-extended-dev.apk).
+[standbymode-dev.apk](https://github.com/mrbastim/StandByMode/releases/download/dev/standbymode-dev.apk).
 After the first successful rolling publication, the four old automatic prereleases
 `dev-1-ffae1ad`, `dev-2-f5a5cd5`, `dev-3-03a3f22`, `dev-4-40441d0` are removed
 with owner authorization. Their Git tags remain; old APK download URLs stop working.
@@ -42,7 +42,7 @@ non-incrementing version blocks publication. The check is intentionally limited
 to stable releases; the rolling `dev` prerelease may reuse a version.
 3. The signing job in `publish-apk.yml` has `contents: read` and uses the
    `release-signing` environment. It signs and verifies the APK using apksigner,
-   removes the temporary keystore and uploads `standby-android-extended-signed-<sha>`.
+   removes the temporary keystore and uploads `standbymode-signed-<sha>`.
 4. A separate job downloads the signed APK and publishes it with `contents: write`.
    The job does not use the signing environment or check out the repository.
    The moving `dev` tag must stay mutable. Apply stable tag protection to `v*` only.
