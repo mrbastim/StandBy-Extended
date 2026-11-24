@@ -139,6 +139,11 @@ jobs:
               fi
               # Keep the last tested tag if uploading the new APK fails.
               gh release upload "$tag" standbymode-dev.apk --clobber
+              # Remove only the legacy rolling dev asset after the new APK is uploaded.
+              # Historical stable release assets must remain available.
+              if gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fxq 'standby-android-extended-dev.apk'; then
+                gh release delete-asset "$tag" standby-android-extended-dev.apk --yes
+              fi
               gh api --method PATCH "repos/$GH_REPO/git/refs/tags/dev" -f sha="$TARGET_SHA" -F force=true --silent
               gh release edit "$tag" --prerelease --latest=false --title "$title" --notes "$notes"
             else
