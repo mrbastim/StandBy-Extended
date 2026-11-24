@@ -1,10 +1,10 @@
-package com.mrbastim.standby.extended.display
+package com.mrbastim.standbymode.display
 
 import android.content.Context
 import android.os.SystemClock
 import android.view.Window
 import android.view.WindowManager
-import com.mrbastim.standby.extended.data.settings.StandBySettings
+import com.mrbastim.standbymode.data.settings.StandBySettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel

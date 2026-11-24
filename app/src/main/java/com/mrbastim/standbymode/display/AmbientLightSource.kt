@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.display
+package com.mrbastim.standbymode.display
 
 import android.content.Context
 import android.hardware.Sensor

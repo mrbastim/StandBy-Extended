@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.data.settings
+package com.mrbastim.standbymode.data.settings
 
 data class StandBySettings(
     val displayProtection: DisplayProtectionSettings = DisplayProtectionSettings(),

@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended.data.settings
+package com.mrbastim.standbymode.data.settings
 
 data class DisplayProtectionSettings(
     val enabled: Boolean = true,

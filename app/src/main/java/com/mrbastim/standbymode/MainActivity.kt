@@ -1,4 +1,4 @@
-package com.mrbastim.standby.extended
+package com.mrbastim.standbymode
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -18,19 +18,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.mrbastim.standby.extended.data.settings.SettingsRepository
-import com.mrbastim.standby.extended.data.weather.WeatherRepository
-import com.mrbastim.standby.extended.system.ChargingObserver
-import com.mrbastim.standby.extended.system.OrientationObserver
-import com.mrbastim.standby.extended.system.NextAlarmObserver
-import com.mrbastim.standby.extended.system.SystemStateRepository
-import com.mrbastim.standby.extended.ui.SettingsScreen
-import com.mrbastim.standby.extended.ui.StandByViewModel
-import com.mrbastim.standby.extended.ui.standby.StandByActions
-import com.mrbastim.standby.extended.ui.standby.StandByRoot
-import com.mrbastim.standby.extended.ui.theme.StandByTheme
-import com.mrbastim.standby.extended.display.DisplayProtectionHost
-import com.mrbastim.standby.extended.display.DisplayPhase
+import com.mrbastim.standbymode.data.settings.SettingsRepository
+import com.mrbastim.standbymode.data.weather.WeatherRepository
+import com.mrbastim.standbymode.system.ChargingObserver
+import com.mrbastim.standbymode.system.OrientationObserver
+import com.mrbastim.standbymode.system.NextAlarmObserver
+import com.mrbastim.standbymode.system.SystemStateRepository
+import com.mrbastim.standbymode.ui.SettingsScreen
+import com.mrbastim.standbymode.ui.StandByViewModel
+import com.mrbastim.standbymode.ui.standby.StandByActions
+import com.mrbastim.standbymode.ui.standby.StandByRoot
+import com.mrbastim.standbymode.ui.theme.StandByTheme
+import com.mrbastim.standbymode.display.DisplayProtectionHost
+import com.mrbastim.standbymode.display.DisplayPhase
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -1,6 +1,6 @@
-package com.mrbastim.standby.extended.data.weather
+package com.mrbastim.standbymode.data.weather
 
-import com.mrbastim.standby.extended.data.settings.WorldClockZone
+import com.mrbastim.standbymode.data.settings.WorldClockZone
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlinx.coroutines.Dispatchers
