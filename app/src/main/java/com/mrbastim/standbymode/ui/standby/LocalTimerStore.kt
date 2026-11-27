@@ -1,6 +1,7 @@
 package com.mrbastim.standbymode.ui.standby
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.SystemClock
 import android.provider.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,11 +65,11 @@ internal data class TimerSession(
 /** One process-wide store, shared by Activity and DreamService, persisted locally.
  * A device reboot clears running sessions because elapsedRealtime restarts.
  */
-internal class LocalTimerStore private constructor(context: Context) {
-    private val prefs = context.getSharedPreferences("standby_local_timers", Context.MODE_PRIVATE)
-    private val bootCount = runCatching {
-        Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT, -1)
-    }.getOrDefault(-1)
+internal class LocalTimerStore internal constructor(
+    private val prefs: SharedPreferences,
+    private val bootCount: Int,
+    private val nowMillis: () -> Long,
+) {
     private val sessions = MutableStateFlow(TimerMode.entries.associateWith { mode ->
         val initial = TimerSession.initial(mode)
         val prefix = mode.name
@@ -76,9 +77,11 @@ internal class LocalTimerStore private constructor(context: Context) {
             TimerMode.TIMER -> prefs.getLong("${prefix}_duration", initial.durationMillis).coerceIn(MINUTE, 180L * MINUTE)
             else -> initial.durationMillis
         }
-        val now = SystemClock.elapsedRealtime()
+        val now = nowMillis()
         val startedAt = prefs.getLong("${prefix}_start", -1L)
-        val sameBoot = bootCount < 0 || prefs.getInt("boot_count", -2) == bootCount
+        // elapsedRealtime is valid only within a confirmed boot session.
+        // On devices that do not expose BOOT_COUNT, prefer a reset to a false countdown.
+        val sameBoot = bootCount >= 0 && prefs.getInt("boot_count", -2) == bootCount
         if (!sameBoot || startedAt > now) initial.copy(durationMillis = duration)
         else {
             val isBreak = mode == TimerMode.POMODORO && prefs.getBoolean("${prefix}_break", false)
@@ -99,7 +102,7 @@ internal class LocalTimerStore private constructor(context: Context) {
     @Synchronized
     fun update(mode: TimerMode, change: (TimerSession, Long) -> TimerSession) {
         val old = sessions.value
-        val next = old + (mode to change(old.getValue(mode), SystemClock.elapsedRealtime()))
+        val next = old + (mode to change(old.getValue(mode), nowMillis()))
         sessions.value = next
         persist(next)
     }
@@ -119,7 +122,16 @@ internal class LocalTimerStore private constructor(context: Context) {
     companion object {
         @Volatile private var instance: LocalTimerStore? = null
         fun get(context: Context): LocalTimerStore = instance ?: synchronized(this) {
-            instance ?: LocalTimerStore(context.applicationContext).also { instance = it }
+            instance ?: context.applicationContext.let { app ->
+                val boot = runCatching {
+                    Settings.Global.getInt(app.contentResolver, Settings.Global.BOOT_COUNT, -1)
+                }.getOrDefault(-1)
+                LocalTimerStore(
+                    app.getSharedPreferences("standby_local_timers", Context.MODE_PRIVATE),
+                    boot,
+                    SystemClock::elapsedRealtime,
+                )
+            }.also { instance = it }
         }
     }
 }

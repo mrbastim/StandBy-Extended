@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -79,64 +81,68 @@ internal fun LocalTimerCard(
     })
     val canAdjust = mode == TimerMode.TIMER && session.startedAtMillis < 0L && session.accumulatedMillis == 0L
 
-    val controls: @Composable () -> Unit = {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
-        ) {
-            if (mode == TimerMode.TIMER) {
-                TimerControl(TimerIcon.MINUS, stringResource(R.string.timer_minus_minute),
-                    enabled = canAdjust && session.durationMillis > 60_000L) {
-                    store.update(mode) { current, _ -> current.adjustTimer(-1) }
-                }
-                TimerControl(TimerIcon.PLUS, stringResource(R.string.timer_plus_minute),
-                    enabled = canAdjust && session.durationMillis < 10_800_000L) {
-                    store.update(mode) { current, _ -> current.adjustTimer(1) }
-                }
-            }
-            TimerControl(
-                icon = when {
-                    finished && mode == TimerMode.POMODORO -> TimerIcon.NEXT
-                    running -> TimerIcon.PAUSE
-                    else -> TimerIcon.PLAY
-                },
-                label = primaryLabel,
-                primary = true,
-            ) { store.update(mode) { current, tick -> current.primaryAction(mode, tick) } }
-            TimerControl(TimerIcon.RESET, stringResource(R.string.timer_reset),
-                enabled = session.startedAtMillis >= 0L || session.accumulatedMillis > 0L || session.breakPhase) {
-                store.update(mode) { current, _ -> current.reset(mode) }
-            }
+    val adjustControls: @Composable () -> Unit = {
+        TimerControl(TimerIcon.MINUS, stringResource(R.string.timer_minus_minute),
+            enabled = canAdjust && session.durationMillis > 60_000L) {
+            store.update(mode) { current, _ -> current.adjustTimer(-1) }
+        }
+        TimerControl(TimerIcon.PLUS, stringResource(R.string.timer_plus_minute),
+            enabled = canAdjust && session.durationMillis < 10_800_000L) {
+            store.update(mode) { current, _ -> current.adjustTimer(1) }
         }
     }
+    val sessionControls: @Composable () -> Unit = {
+        TimerControl(
+            icon = when {
+                finished && mode == TimerMode.POMODORO -> TimerIcon.NEXT
+                running -> TimerIcon.PAUSE
+                else -> TimerIcon.PLAY
+            },
+            label = primaryLabel,
+            primary = true,
+        ) { store.update(mode) { current, tick -> current.primaryAction(mode, tick) } }
+        TimerControl(TimerIcon.RESET, stringResource(R.string.timer_reset),
+            enabled = session.startedAtMillis >= 0L || session.accumulatedMillis > 0L || session.breakPhase) {
+            store.update(mode) { current, _ -> current.reset(mode) }
+        }
+    }
+
     val label = if (finished) stringResource(R.string.timer_finished) else title
-    val timeText: @Composable () -> Unit = {
-        Text(
-            value, color = if (finished) theme.accent else theme.clockPrimary,
-            fontSize = if (compact) 24.sp else 46.sp, fontWeight = FontWeight.Light,
-            style = TextStyle(fontFeatureSettings = "tnum"), maxLines = 1,
-        )
-    }
-    if (compact) {
-        Row(
-            modifier = modifier,
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+    BoxWithConstraints(
+        modifier = modifier.padding(horizontal = 4.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        // Preserve the usual centered single row and 48dp touch targets. Only a
+        // narrow window falls back to two rows rather than clipping the buttons.
+        val twoRows = mode == TimerMode.TIMER && maxWidth < 198.dp
+        val fontScale = LocalDensity.current.fontScale
+        val desiredSize = if (compact) 24f else 46f
+        val fittedSize = minOf(desiredSize, maxWidth.value / (value.length * 0.64f * fontScale))
+            .coerceAtLeast(1f)
+        val arrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally)
+        Column(
+            Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
         ) {
-            Text(label, color = theme.secondary, fontSize = 12.sp, maxLines = 1)
-            timeText()
-            controls()
-        }
-    } else {
-        Box(modifier = modifier.padding(horizontal = 4.dp, vertical = 8.dp), contentAlignment = Alignment.Center) {
-            Column(
-                Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
-            ) {
-                Text(label, color = theme.secondary, fontSize = 14.sp, textAlign = TextAlign.Center)
-                timeText()
-                if (hideControls) Spacer(Modifier.height(48.dp)) else controls()
+            Text(label, color = theme.secondary, fontSize = 14.sp, textAlign = TextAlign.Center)
+            Text(
+                value, color = if (finished) theme.accent else theme.clockPrimary,
+                fontSize = fittedSize.sp, fontWeight = FontWeight.Light,
+                style = TextStyle(fontFeatureSettings = "tnum"), maxLines = 1,
+            )
+            if (hideControls) {
+                Spacer(Modifier.height(if (twoRows) 98.dp else 48.dp))
+            } else if (twoRows) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Row(horizontalArrangement = arrangement) { adjustControls() }
+                    Row(horizontalArrangement = arrangement) { sessionControls() }
+                }
+            } else {
+                Row(horizontalArrangement = arrangement, verticalAlignment = Alignment.CenterVertically) {
+                    if (mode == TimerMode.TIMER) adjustControls()
+                    sessionControls()
+                }
             }
         }
     }

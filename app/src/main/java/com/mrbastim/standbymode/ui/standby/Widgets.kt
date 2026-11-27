@@ -205,9 +205,9 @@ fun WidgetContent(
         StandByWidgetType.NEXT_ALARM -> if (settings.showNextAlarm) CompactNextAlarmWidget(settings, nextAlarm) else CompactClockWidget(settings)
         StandByWidgetType.WEATHER -> CompactWeatherWidget(settings, weather)
         StandByWidgetType.MUSIC -> CompactMusicWidget()
-        StandByWidgetType.TIMER -> LocalTimerCard(TimerMode.TIMER, Modifier.fillMaxSize())
-        StandByWidgetType.POMODORO -> LocalTimerCard(TimerMode.POMODORO, Modifier.fillMaxSize())
-        StandByWidgetType.STOPWATCH -> LocalTimerCard(TimerMode.STOPWATCH, Modifier.fillMaxSize())
+        StandByWidgetType.TIMER -> LocalTimerCard(TimerMode.TIMER, Modifier.fillMaxSize(), hideControls = LocalAmbientMode.current)
+        StandByWidgetType.POMODORO -> LocalTimerCard(TimerMode.POMODORO, Modifier.fillMaxSize(), hideControls = LocalAmbientMode.current)
+        StandByWidgetType.STOPWATCH -> LocalTimerCard(TimerMode.STOPWATCH, Modifier.fillMaxSize(), hideControls = LocalAmbientMode.current)
     }
 }
 
