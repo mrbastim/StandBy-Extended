@@ -3,6 +3,8 @@ package com.mrbastim.standbymode.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mrbastim.standbymode.data.settings.ScreenTimeout
+import com.mrbastim.standbymode.data.settings.ClockAccessory
+import com.mrbastim.standbymode.data.settings.ClockAccessorySide
 import com.mrbastim.standbymode.data.settings.ClockColor
 import com.mrbastim.standbymode.data.settings.ClockFace
 import com.mrbastim.standbymode.data.settings.BackgroundStyle
@@ -128,6 +130,9 @@ class StandByViewModel(
     fun setClockFace(value: ClockFace) = update { setClockFace(value) }
     fun setClockColor(value: ClockColor) = update { setClockColor(value) }
     fun setShowDate(value: Boolean) = update { setShowDate(value) }
+    fun setShowNextAlarm(value: Boolean) = update { setShowNextAlarm(value) }
+    fun setClockAccessory(value: ClockAccessory) = update { setClockAccessory(value) }
+    fun setClockAccessorySide(value: ClockAccessorySide) = update { setClockAccessorySide(value) }
     fun setNightMode(value: Boolean) = update { setNightMode(value) }
     fun setBurnInProtection(value: Boolean) = update { setBurnInProtection(value) }
     fun setDayTheme(value: StandByThemeId) = update { setDayTheme(value) }

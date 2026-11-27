@@ -206,4 +206,23 @@
     <string name="display_group_brightness">Parlaklık</string>
     <string name="display_group_behavior">Ekran davranışı</string>
     <string name="display_group_anti_burn_in">Ekran koruması</string>
+    <string name="show_next_alarm">Widget ve takvimde alarm</string>
+    <string name="show_next_alarm_description">Alarm kartını ve takvim hatırlatıcısını gizler. Tam ekran saatin ayarı ayrıdır.</string>
+    <string name="clock_accessory">Saatin yanında</string>
+    <string name="clock_accessory_none">Yok</string>
+    <string name="widget_timer">Zamanlayıcı</string>
+    <string name="widget_pomodoro">Pomodoro</string>
+    <string name="widget_stopwatch">Kronometre</string>
+    <string name="pomodoro_focus">Odaklanma</string>
+    <string name="pomodoro_break">Mola</string>
+    <string name="timer_start">Başlat</string>
+    <string name="timer_pause">Duraklat</string>
+    <string name="timer_reset">Sıfırla</string>
+    <string name="timer_finished">Tamamlandı</string>
+    <string name="timer_next_phase">Sonraki aşama</string>
+    <string name="timer_minus_minute">Bir dakika azalt</string>
+    <string name="timer_plus_minute">Bir dakika ekle</string>
+    <string name="clock_accessory_position">Konum</string>
+    <string name="clock_accessory_selected">Seçili</string>
+    <string name="swap_clock_accessory">Yer değiştir</string>
 </resources>

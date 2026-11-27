@@ -60,6 +60,8 @@ import com.mrbastim.standbymode.system.ChargingState
 import com.mrbastim.standbymode.BuildConfig
 import com.mrbastim.standbymode.R
 import com.mrbastim.standbymode.data.settings.ClockColor
+import com.mrbastim.standbymode.data.settings.ClockAccessory
+import com.mrbastim.standbymode.data.settings.ClockAccessorySide
 import com.mrbastim.standbymode.data.settings.ClockFace
 import com.mrbastim.standbymode.data.settings.BackgroundStyle
 import com.mrbastim.standbymode.data.settings.BatteryWidgetStyle
@@ -83,6 +85,9 @@ fun SettingsScreen(
     onClockFaceChanged: (ClockFace) -> Unit,
     onClockColorChanged: (ClockColor) -> Unit,
     onShowDateChanged: (Boolean) -> Unit,
+    onShowNextAlarmChanged: (Boolean) -> Unit = {},
+    onClockAccessoryChanged: (ClockAccessory) -> Unit = {},
+    onClockAccessorySideChanged: (ClockAccessorySide) -> Unit = {},
     onNightModeChanged: (Boolean) -> Unit,
     onBurnInProtectionChanged: (Boolean) -> Unit,
     onDayThemeChanged: (StandByThemeId) -> Unit,
@@ -219,6 +224,26 @@ fun SettingsScreen(
             SettingSwitch(stringResource(R.string.time_24_hour), null, state.settings.use24HourClock, on24HourChanged)
             SettingSwitch(stringResource(R.string.show_seconds), null, state.settings.showSeconds, onShowSecondsChanged)
             SettingSwitch(stringResource(R.string.show_date), null, state.settings.showDate, onShowDateChanged)
+            ClockAccessorySetting(state.settings.clockAccessory, onClockAccessoryChanged)
+            if (state.settings.clockAccessory != ClockAccessory.NONE) {
+                Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.clock_accessory_position), Modifier.weight(1f), fontSize = 16.sp)
+                    ClockAccessorySide.entries.forEach { side ->
+                        val active = state.settings.clockAccessorySide == side
+                        TextButton(
+                            onClick = { onClockAccessorySideChanged(side) },
+                            colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                                containerColor = if (active) MaterialTheme.colorScheme.secondaryContainer else androidx.compose.ui.graphics.Color.Transparent,
+                                contentColor = if (active) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                            modifier = Modifier.semantics { stateDescription = if (active) context.getString(R.string.clock_accessory_selected) else "" },
+                        ) {
+                            Text(stringResource(if (side == ClockAccessorySide.LEFT) R.string.left else R.string.right))
+                        }
+                    }
+                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+            }
             ChoiceSetting(stringResource(R.string.typography), context.localizedLabel(state.settings.typographyStyle),
                 choices = TypographyStyle.entries, label = context::localizedLabel, onSelected = onTypographyStyleChanged)
             SettingSwitch(
@@ -229,6 +254,12 @@ fun SettingsScreen(
             )
 
             SettingsSection(stringResource(R.string.section_widgets))
+            SettingSwitch(
+                stringResource(R.string.show_next_alarm),
+                stringResource(R.string.show_next_alarm_description),
+                state.settings.showNextAlarm,
+                onShowNextAlarmChanged,
+            )
             InfoRow(stringResource(R.string.left_stack), state.settings.leftWidgets.joinToString { context.localizedLabel(it) })
             InfoRow(stringResource(R.string.right_stack), state.settings.rightWidgets.joinToString { context.localizedLabel(it) })
             ChoiceSetting(stringResource(R.string.clock_widget_style), context.localizedLabel(state.settings.clockWidgetStyle),
@@ -555,6 +586,49 @@ private fun <T> ChoiceSetting(
         }
     }
     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+}
+
+@Composable
+private fun ClockAccessorySetting(
+    selected: ClockAccessory,
+    onSelected: (ClockAccessory) -> Unit,
+) {
+    val context = LocalContext.current
+    var open by rememberSaveable { mutableStateOf(false) }
+    val title = stringResource(R.string.clock_accessory)
+    Column(Modifier.fillMaxWidth().clickable { open = true }.padding(vertical = 13.dp)) {
+        Text(title, fontSize = 16.sp)
+        Text(context.localizedLabel(selected), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+    }
+    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+    if (open) {
+        AlertDialog(
+            onDismissRequest = { open = false },
+            title = { Text(title) },
+            text = {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    ClockAccessory.entries.forEach { option ->
+                        Row(
+                            Modifier.fillMaxWidth().clickable {
+                                onSelected(option)
+                                open = false
+                            }.padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(context.localizedLabel(option), Modifier.weight(1f), fontSize = 16.sp)
+                            RadioButton(selected = option == selected, onClick = {
+                                onSelected(option)
+                                open = false
+                            })
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { open = false }) { Text(stringResource(android.R.string.cancel)) }
+            },
+        )
+    }
 }
 
 @Composable

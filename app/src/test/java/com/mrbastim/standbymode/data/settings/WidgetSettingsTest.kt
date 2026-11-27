@@ -43,6 +43,22 @@ class WidgetSettingsTest {
     }
 
     @Test
+    fun clockAccessoryIsIndependentOfAlarmCardsAndMigratesLegacyChoice() {
+        assertEquals(ClockAccessory.NONE, decodeClockAccessory(null, "NEXT_ALARM", false))
+        assertEquals(ClockAccessory.NEXT_ALARM, decodeClockAccessory("NEXT_ALARM", null, false))
+        assertEquals(ClockAccessory.NONE, decodeClockAccessory("NONE", null, true))
+        assertEquals(ClockAccessory.TIMER, decodeClockAccessory(null, "TIMER", false))
+    }
+
+    @Test
+    fun hiddenAlarmCardsDoNotDestroyConfiguredStacks() {
+        val configured = listOf(StandByWidgetType.NEXT_ALARM, StandByWidgetType.MUSIC)
+        assertEquals(configured, visibleWidgets(configured, true))
+        assertEquals(listOf(StandByWidgetType.MUSIC), visibleWidgets(configured, false))
+        assertEquals(listOf(StandByWidgetType.CLOCK), visibleWidgets(listOf(StandByWidgetType.NEXT_ALARM), false))
+    }
+
+    @Test
     fun invalidMoveLeavesWidgetsUntouched() {
         assertEquals(defaults, moveWidgetInList(defaults, -1, 1))
         assertEquals(defaults, moveWidgetInList(defaults, 0, 5))

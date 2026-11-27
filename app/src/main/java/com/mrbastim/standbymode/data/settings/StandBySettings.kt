@@ -10,6 +10,9 @@ data class StandBySettings(
     val clockFace: ClockFace = ClockFace.DIGITAL,
     val clockColor: ClockColor = ClockColor.INHERIT,
     val showDate: Boolean = true,
+    val showNextAlarm: Boolean = true,
+    val clockAccessory: ClockAccessory = ClockAccessory.NEXT_ALARM,
+    val clockAccessorySide: ClockAccessorySide = ClockAccessorySide.RIGHT,
     val nightMode: Boolean = false,
     val burnInProtection: Boolean = true,
     val dayTheme: StandByThemeId = StandByThemeId.CLASSIC,
@@ -103,7 +106,24 @@ enum class StandByWidgetType(val label: String) {
     NEXT_ALARM("Next alarm"),
     WEATHER("Weather"),
     MUSIC("Music"),
+    TIMER("Timer"),
+    POMODORO("Pomodoro"),
+    STOPWATCH("Stopwatch"),
 }
+
+enum class ClockAccessorySide { LEFT, RIGHT }
+
+enum class ClockAccessory {
+    NONE, NEXT_ALARM, TIMER, POMODORO, STOPWATCH,
+}
+
+/** Hiding alarms must not destroy the user's configured stacks. */
+internal fun visibleWidgets(
+    widgets: List<StandByWidgetType>,
+    showNextAlarm: Boolean,
+): List<StandByWidgetType> =
+    widgets.filter { showNextAlarm || it != StandByWidgetType.NEXT_ALARM }
+        .ifEmpty { listOf(StandByWidgetType.CLOCK) }
 
 enum class WorldClockZone(
     val label: String,

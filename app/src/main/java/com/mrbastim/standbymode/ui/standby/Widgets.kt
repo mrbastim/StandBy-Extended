@@ -53,6 +53,7 @@ import com.mrbastim.standbymode.data.settings.DateWidgetStyle
 import com.mrbastim.standbymode.data.settings.StandBySettings
 import com.mrbastim.standbymode.data.settings.StandByWidgetType
 import com.mrbastim.standbymode.data.settings.WidgetColumn
+import com.mrbastim.standbymode.data.settings.visibleWidgets
 import com.mrbastim.standbymode.data.weather.WeatherKind
 import com.mrbastim.standbymode.data.weather.WeatherState
 import com.mrbastim.standbymode.R
@@ -82,7 +83,7 @@ fun DualWidgetPage(
     ) {
         WidgetStack(
             column = WidgetColumn.LEFT,
-            widgets = settings.leftWidgets,
+            widgets = visibleWidgets(settings.leftWidgets, settings.showNextAlarm),
             settings = settings,
             charging = charging,
             nextAlarm = nextAlarm,
@@ -92,7 +93,7 @@ fun DualWidgetPage(
         )
         WidgetStack(
             column = WidgetColumn.RIGHT,
-            widgets = settings.rightWidgets,
+            widgets = visibleWidgets(settings.rightWidgets, settings.showNextAlarm),
             settings = settings,
             charging = charging,
             nextAlarm = nextAlarm,
@@ -176,9 +177,12 @@ fun WidgetContent(
         StandByWidgetType.BATTERY -> CompactBatteryWidget(settings, charging)
         StandByWidgetType.CHARGING -> CompactChargingWidget(charging)
         StandByWidgetType.WORLD_CLOCK -> CompactWorldClockWidget(settings)
-        StandByWidgetType.NEXT_ALARM -> CompactNextAlarmWidget(settings, nextAlarm)
+        StandByWidgetType.NEXT_ALARM -> if (settings.showNextAlarm) CompactNextAlarmWidget(settings, nextAlarm) else CompactClockWidget(settings)
         StandByWidgetType.WEATHER -> CompactWeatherWidget(settings, weather)
         StandByWidgetType.MUSIC -> CompactMusicWidget()
+        StandByWidgetType.TIMER -> LocalTimerCard(TimerMode.TIMER, Modifier.fillMaxSize())
+        StandByWidgetType.POMODORO -> LocalTimerCard(TimerMode.POMODORO, Modifier.fillMaxSize())
+        StandByWidgetType.STOPWATCH -> LocalTimerCard(TimerMode.STOPWATCH, Modifier.fillMaxSize())
     }
 }
 
