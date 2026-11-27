@@ -224,6 +224,8 @@
     <string name="timer_next_phase">Next phase</string>
     <string name="timer_minus_minute">Subtract one minute</string>
     <string name="timer_plus_minute">Add one minute</string>
+    <string name="back_to_stack">Back to stack</string>
+    <string name="all_widgets_added">All available widgets added</string>
     <string name="clock_accessory_position">Position</string>
     <string name="clock_accessory_selected">Selected</string>
     <string name="swap_clock_accessory">Swap sides</string>

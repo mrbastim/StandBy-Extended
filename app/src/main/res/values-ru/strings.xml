@@ -224,6 +224,8 @@
     <string name="timer_next_phase">Следующий этап</string>
     <string name="timer_minus_minute">Убавить одну минуту</string>
     <string name="timer_plus_minute">Добавить одну минуту</string>
+    <string name="back_to_stack">Вернуться к стеку</string>
+    <string name="all_widgets_added">Все доступные виджеты добавлены</string>
     <string name="clock_accessory_position">Расположение</string>
     <string name="clock_accessory_selected">Выбрано</string>
     <string name="swap_clock_accessory">Поменять местами</string>

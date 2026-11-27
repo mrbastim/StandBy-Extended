@@ -119,8 +119,7 @@ fun StackEditor(
                 modifier = Modifier
                     .weight(1.3f)
                     .fillMaxHeight()
-                    .padding(start = 8.dp)
-                    .verticalScroll(rememberScrollState()),
+                    .padding(start = 8.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -144,73 +143,76 @@ fun StackEditor(
                     TextButton(onClick = onDone) { Text(stringResource(R.string.done), color = theme.accent) }
                 }
 
-                selectedWidgets.forEachIndexed { index, widget ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            context.localizedLabel(widget),
-                            modifier = Modifier.weight(1f),
-                            color = theme.primary,
-                            fontSize = 15.sp,
-                        )
-                        when (widget) {
-                            StandByWidgetType.CLOCK -> StyleAction(context.localizedLabel(settings.clockWidgetStyle)) {
-                                onClockStyleChanged(settings.clockWidgetStyle.next())
-                            }
-                            StandByWidgetType.DATE -> StyleAction(context.localizedLabel(settings.dateWidgetStyle)) {
-                                onDateStyleChanged(settings.dateWidgetStyle.next())
-                            }
-                            StandByWidgetType.BATTERY -> StyleAction(context.localizedLabel(settings.batteryWidgetStyle)) {
-                                onBatteryStyleChanged(settings.batteryWidgetStyle.next())
-                            }
-                            else -> Unit
-                        }
-                        EditorAction("↑", context.getString(R.string.move_widget_up, context.localizedLabel(widget)), enabled = index > 0) {
-                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            onMoveWidget(selectedColumn, index, index - 1)
-                        }
-                        EditorAction("↓", context.getString(R.string.move_widget_down, context.localizedLabel(widget)), enabled = index < selectedWidgets.lastIndex) {
-                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            onMoveWidget(selectedColumn, index, index + 1)
-                        }
-                        EditorAction("−", context.getString(R.string.remove_widget, context.localizedLabel(widget)), enabled = selectedWidgets.size > 1) {
-                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onToggleWidget(selectedColumn, widget)
-                        }
-                    }
+                // Keep Add/Back and Done reachable even with every widget in the stack.
+                val availableWidgets = StandByWidgetType.entries.filterNot {
+                    it in selectedWidgets || (!settings.showNextAlarm && it == StandByWidgetType.NEXT_ALARM)
                 }
-
-                TextButton(onClick = { addingWidget = !addingWidget }) {
-                    Text(stringResource(R.string.add_widget), color = theme.accent)
-                }
-
-                AnimatedVisibility(
-                    visible = addingWidget,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
+                TextButton(
+                    onClick = { addingWidget = !addingWidget },
+                    enabled = addingWidget || availableWidgets.isNotEmpty(),
                 ) {
-                    Column {
-                        StandByWidgetType.entries
-                            .filterNot { it in selectedWidgets || (!settings.showNextAlarm && it == StandByWidgetType.NEXT_ALARM) }
-                            .forEach { widget ->
-                                Text(
-                                    text = context.localizedLabel(widget),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            onToggleWidget(selectedColumn, widget)
-                                            addingWidget = false
-                                        }
-                                        .padding(vertical = 7.dp),
-                                    color = theme.secondary,
-                                    fontSize = 14.sp,
-                                )
+                    Text(
+                        stringResource(if (addingWidget) R.string.back_to_stack else R.string.add_widget),
+                        color = theme.accent,
+                    )
+                }
+                androidx.compose.runtime.key(selectedColumn, addingWidget) {
+                    Column(
+                        Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
+                    ) {
+                        if (addingWidget) {
+                            if (availableWidgets.isEmpty()) {
+                                Text(stringResource(R.string.all_widgets_added), color = theme.secondary, fontSize = 14.sp)
                             }
+                            availableWidgets.forEach { widget ->
+                                TextButton(onClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onToggleWidget(selectedColumn, widget)
+                                }, modifier = Modifier.fillMaxWidth()) {
+                                    Text(context.localizedLabel(widget), color = theme.primary, fontSize = 15.sp)
+                                }
+                            }
+                        } else {
+                        selectedWidgets.forEachIndexed { index, widget ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    context.localizedLabel(widget),
+                                    modifier = Modifier.weight(1f),
+                                    color = theme.primary,
+                                    fontSize = 15.sp,
+                                )
+                                when (widget) {
+                                    StandByWidgetType.CLOCK -> StyleAction(context.localizedLabel(settings.clockWidgetStyle)) {
+                                        onClockStyleChanged(settings.clockWidgetStyle.next())
+                                    }
+                                    StandByWidgetType.DATE -> StyleAction(context.localizedLabel(settings.dateWidgetStyle)) {
+                                        onDateStyleChanged(settings.dateWidgetStyle.next())
+                                    }
+                                    StandByWidgetType.BATTERY -> StyleAction(context.localizedLabel(settings.batteryWidgetStyle)) {
+                                        onBatteryStyleChanged(settings.batteryWidgetStyle.next())
+                                    }
+                                    else -> Unit
+                                }
+                                EditorAction("↑", context.getString(R.string.move_widget_up, context.localizedLabel(widget)), enabled = index > 0) {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    onMoveWidget(selectedColumn, index, index - 1)
+                                }
+                                EditorAction("↓", context.getString(R.string.move_widget_down, context.localizedLabel(widget)), enabled = index < selectedWidgets.lastIndex) {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    onMoveWidget(selectedColumn, index, index + 1)
+                                }
+                                EditorAction("−", context.getString(R.string.remove_widget, context.localizedLabel(widget)), enabled = selectedWidgets.size > 1) {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onToggleWidget(selectedColumn, widget)
+                                }
+                            }
+                        }
+                        }
                     }
                 }
             }
@@ -264,13 +266,18 @@ private fun StackPreview(
     ) {
         Text(title, color = theme.secondary, fontSize = 10.sp, letterSpacing = 2.sp)
         Spacer(Modifier.size(12.dp))
-        Text(
-            widgets.joinToString("\n") { context.localizedLabel(it) },
-            color = theme.primary,
-            fontSize = 13.sp,
-            lineHeight = 22.sp,
-            textAlign = TextAlign.Center,
-        )
+        Column(
+            modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                widgets.joinToString("\n") { context.localizedLabel(it) },
+                color = theme.primary,
+                fontSize = 13.sp,
+                lineHeight = 22.sp,
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }
 

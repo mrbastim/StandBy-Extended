@@ -1,6 +1,7 @@
 package com.mrbastim.standbymode.data.settings
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -9,11 +10,18 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import java.io.IOException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
 private val Context.settingsDataStore by preferencesDataStore(name = "standby_settings")
+
+// A settled swipe must be saved even if the Activity/DreamService is immediately closed.
+private val activeWidgetWrites by lazy { CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate) }
 
 private val defaultLeftWidgets = listOf(StandByWidgetType.CLOCK, StandByWidgetType.BATTERY)
 private val defaultRightWidgets = listOf(StandByWidgetType.DATE, StandByWidgetType.CHARGING)
@@ -73,6 +81,8 @@ class SettingsRepository(private val context: Context) {
         val keepScreenAwake = booleanPreferencesKey("keep_screen_awake")
         val leftWidgets = stringPreferencesKey("left_widgets")
         val rightWidgets = stringPreferencesKey("right_widgets")
+        val leftActiveWidget = stringPreferencesKey("left_active_widget")
+        val rightActiveWidget = stringPreferencesKey("right_active_widget")
         val clockFace = stringPreferencesKey("clock_face")
         val clockColor = stringPreferencesKey("clock_color")
         val showDate = booleanPreferencesKey("show_date")
@@ -150,6 +160,8 @@ class SettingsRepository(private val context: Context) {
                 weatherEnabled = preferences[Keys.weatherEnabled] ?: false,
                 leftWidgets = decodeWidgets(preferences[Keys.leftWidgets], defaultLeftWidgets),
                 rightWidgets = decodeWidgets(preferences[Keys.rightWidgets], defaultRightWidgets),
+                leftActiveWidget = StandByWidgetType.entries.firstOrNull { it.name == preferences[Keys.leftActiveWidget] },
+                rightActiveWidget = StandByWidgetType.entries.firstOrNull { it.name == preferences[Keys.rightActiveWidget] },
             )
         }
 
@@ -223,6 +235,33 @@ class SettingsRepository(private val context: Context) {
         context.settingsDataStore.edit { preferences ->
             val widgets = toggleWidgetInList(decodeWidgets(preferences[key], defaults), widget)
             preferences[key] = widgets.joinToString(",") { it.name }
+            val activeKey = if (column == WidgetColumn.LEFT) Keys.leftActiveWidget else Keys.rightActiveWidget
+            if (preferences[activeKey] == widget.name && widget !in widgets) {
+                preferences[activeKey] = widgets.first().name
+            }
+        }
+    }
+
+    fun rememberActiveWidget(column: WidgetColumn, widget: StandByWidgetType) {
+        activeWidgetWrites.launch {
+            try {
+                setActiveWidget(column, widget)
+            } catch (error: IOException) {
+                Log.w("StandBySettings", "Unable to persist active widget", error)
+            }
+        }
+    }
+
+    internal suspend fun setActiveWidget(column: WidgetColumn, widget: StandByWidgetType) {
+        val key = if (column == WidgetColumn.LEFT) Keys.leftWidgets else Keys.rightWidgets
+        val activeKey = if (column == WidgetColumn.LEFT) Keys.leftActiveWidget else Keys.rightActiveWidget
+        val defaults = if (column == WidgetColumn.LEFT) defaultLeftWidgets else defaultRightWidgets
+        context.settingsDataStore.edit { preferences ->
+            val configured = decodeWidgets(preferences[key], defaults)
+            val showAlarm = preferences[Keys.showNextAlarm] ?: true
+            if (widget in configured && widget in visibleWidgets(configured, showAlarm)) {
+                preferences[activeKey] = widget.name
+            }
         }
     }
 

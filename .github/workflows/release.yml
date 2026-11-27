@@ -48,8 +48,17 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
-      - name: Test, lint and assemble without release secrets
-        run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleRelease
+      - name: Run unit tests (retry transient Robolectric downloads)
+        # Manual dispatch may select an older tag without the retry helper.
+        run: |
+          if [ -f .github/scripts/retry_robolectric_tests.py ]; then
+            python3 .github/scripts/retry_robolectric_tests.py
+          else
+            ./gradlew --no-daemon testDebugUnitTest
+          fi
+
+      - name: Lint and assemble without release secrets
+        run: ./gradlew --no-daemon lintDebug assembleDebug assembleRelease
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools
