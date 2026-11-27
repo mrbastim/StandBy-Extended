@@ -159,7 +159,7 @@ private fun StandByDisplayContent(
                 userScrollEnabled = editingStack == null && !editingClock,
             ) { page ->
                 when (page) {
-                    0 -> DualWidgetPage(settings, charging, nextAlarm, weather) {
+                    0 -> DualWidgetPage(settings, charging, nextAlarm, weather, actions.onActiveWidgetChanged) {
                         editingStack = it
                     }
                     1 -> FullClockPage(settings, nextAlarm) { editingClock = true }
