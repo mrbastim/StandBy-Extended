@@ -2,10 +2,10 @@
 
 [English](github-release-pipeline.md) | [Русский](github-release-pipeline.ru.md)
 
-Stable tags `v*` use `release.yml` and publish `standby-android-extended.apk`.
+Stable tags `v*` use `release.yml` and publish `standbymode.apk`.
 Every push/merge to `dev` uses `dev-prerelease.yml`. After successful checks it updates
 one prerelease tagged `dev`, with `--prerelease --latest=false`, replacing
-`standby-android-extended-dev.apk`. The existing release is edited in place, keeping
+`standbymode-dev.apk`. The existing release is edited in place, keeping
 its ID and download URL. The lightweight tag moves to the exact tested commit.
 The title/notes identify that commit and its CI run; stable Latest is preserved.
 
@@ -16,7 +16,7 @@ Retries replace the same asset. App ID/version are unchanged. Publication is lim
 to runs triggered by `mrbastim`; other actors can build but cannot sign/publish.
 
 Permanent dev download:
-[standby-android-extended-dev.apk](https://github.com/mrbastim/StandBy-Extended/releases/download/dev/standby-android-extended-dev.apk).
+[standbymode-dev.apk](https://github.com/mrbastim/StandByMode/releases/download/dev/standbymode-dev.apk).
 After the first successful rolling publication, the four old automatic prereleases
 `dev-1-ffae1ad`, `dev-2-f5a5cd5`, `dev-3-03a3f22`, `dev-4-40441d0` are removed
 with owner authorization. Their Git tags remain; old APK download URLs stop working.
@@ -27,13 +27,22 @@ This cleanup only removes those exact tags' releases if they are marked prerelea
 1. Build jobs check out source with `persist-credentials: false`, read-only token,
    no signing secrets, and run tests, lint and debug/release assembly.
    They upload `unsigned-release/app-release-unsigned.apk`.
-2. `release-smoke.yml` signs that same minified APK with a disposable key and launches
-   MainActivity twice on an API 28 emulator. The process must survive and have no fatal
-   AndroidRuntime error. This exercises the Compose/Lifecycle reflection path after R8.
-   PR CI runs the same check. Neither job receives the production key.
+2. `release-smoke.yml` signs that same minified APK with a disposable key and runs
+   a two-version emulator matrix: API 28 (minimum supported) and API 35 (Android 15).
+   MainActivity starts twice on both emulators. The API 35 run also enables the
+   Android screen saver, launches StandByDreamService through the dream manager,
+   and verifies the active DreamRecord and absence of fatal AndroidRuntime errors.
+   PR CI runs the same checks; no production key reaches the emulators.
+
+Before signing a stable release, `release.yml` also validates the tag
+(`vMAJOR.MINOR.PATCH`), ensures its source commit belongs to `main`, reads the
+actual unsigned APK's application ID/version via AAPT, and compares `versionCode`
+with the previous stable release APK downloaded from GitHub. A mismatch or
+non-incrementing version blocks publication. The check is intentionally limited
+to stable releases; the rolling `dev` prerelease may reuse a version.
 3. The signing job in `publish-apk.yml` has `contents: read` and uses the
    `release-signing` environment. It signs and verifies the APK using apksigner,
-   removes the temporary keystore and uploads `standby-android-extended-signed-<sha>`.
+   removes the temporary keystore and uploads `standbymode-signed-<sha>`.
 4. A separate job downloads the signed APK and publishes it with `contents: write`.
    The job does not use the signing environment or check out the repository.
    The moving `dev` tag must stay mutable. Apply stable tag protection to `v*` only.

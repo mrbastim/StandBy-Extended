@@ -10,7 +10,7 @@ permissions:
 # Every push builds independently. Signing never executes repository build code.
 jobs:
   build:
-    if: github.repository == 'mrbastim/StandBy-Extended'
+    if: github.repository_id == '1457038002' && github.repository_owner == 'mrbastim'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -23,8 +23,11 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
-      - name: Test, lint and assemble without release secrets
-        run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleRelease
+      - name: Run unit tests (retry transient Robolectric downloads)
+        run: python3 .github/scripts/retry_robolectric_tests.py
+
+      - name: Lint and assemble without release secrets
+        run: ./gradlew --no-daemon lintDebug assembleDebug assembleRelease
       - uses: actions/upload-artifact@v4
         with:
           name: unsigned-release

@@ -27,7 +27,7 @@ permissions:
 
 jobs:
   sign:
-    if: github.repository == 'mrbastim/StandBy-Extended' && github.actor == 'mrbastim'
+    if: github.repository_id == '1457038002' && github.repository_owner == 'mrbastim' && github.actor == 'mrbastim'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: release-signing
@@ -88,15 +88,15 @@ jobs:
             echo "ANDROID_KEYSTORE_BASE64 is not valid base64. Encode the original .jks/.keystore file, not its filename or password." >&2
             exit 1
           fi
-          apk_name="standby-android-extended.apk"
-          if [[ "$DEVELOPMENT" == "true" ]]; then apk_name="standby-android-extended-dev.apk"; fi
+          apk_name="standbymode.apk"
+          if [[ "$DEVELOPMENT" == "true" ]]; then apk_name="standbymode-dev.apk"; fi
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks "$keystore_path" --ks-key-alias "$ANDROID_KEY_ALIAS" --ks-pass env:ANDROID_KEYSTORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD --out "$apk_name" incoming/app-release-unsigned.apk
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify "$apk_name"
       - uses: actions/upload-artifact@v4
         if: steps.current.outputs.publish == 'true'
         with:
-          name: standby-android-extended-signed-${{ github.sha }}
-          path: standby-android-extended*.apk
+          name: standbymode-signed-${{ github.sha }}
+          path: standbymode*.apk
           if-no-files-found: error
   publish:
     needs: sign
@@ -112,7 +112,7 @@ jobs:
       # Only the signed artifact crosses the job boundary.
       - uses: actions/download-artifact@v4
         with:
-          name: standby-android-extended-signed-${{ github.sha }}
+          name: standbymode-signed-${{ github.sha }}
       - name: Publish signed APK
         env:
           GH_TOKEN: ${{ github.token }}
@@ -138,7 +138,12 @@ jobs:
                 exit 1
               fi
               # Keep the last tested tag if uploading the new APK fails.
-              gh release upload "$tag" standby-android-extended-dev.apk --clobber
+              gh release upload "$tag" standbymode-dev.apk --clobber
+              # Remove only the legacy rolling dev asset after the new APK is uploaded.
+              # Historical stable release assets must remain available.
+              if gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fxq 'standby-android-extended-dev.apk'; then
+                gh release delete-asset "$tag" standby-android-extended-dev.apk --yes
+              fi
               gh api --method PATCH "repos/$GH_REPO/git/refs/tags/dev" -f sha="$TARGET_SHA" -F force=true --silent
               gh release edit "$tag" --prerelease --latest=false --title "$title" --notes "$notes"
             else
@@ -149,7 +154,7 @@ jobs:
               else
                 gh api --method POST "repos/$GH_REPO/git/refs" -f ref="refs/tags/dev" -f sha="$TARGET_SHA" --silent
               fi
-              gh release create "$tag" standby-android-extended-dev.apk --verify-tag --prerelease --latest=false --title "$title" --notes "$notes"
+              gh release create "$tag" standbymode-dev.apk --verify-tag --prerelease --latest=false --title "$title" --notes "$notes"
             fi
             # Owner-approved migration: remove only these four old prereleases.
             # Keep source tags, stable releases and any unrelated publications.
@@ -162,8 +167,14 @@ jobs:
           else
             [[ "$RELEASE_TAG" == v* ]]
             if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-              gh release upload "$RELEASE_TAG" standby-android-extended.apk --clobber
+              gh release upload "$RELEASE_TAG" standbymode.apk --clobber
             else
-              gh release create "$RELEASE_TAG" standby-android-extended.apk --generate-notes --verify-tag
+              if [[ "$RELEASE_TAG" == "v1.1.0" ]]; then
+                # Always include the migration warning in the automatically published release.
+                rebrand_notes='IMPORTANT: StandByMode v1.1.0 uses a NEW Android application ID (com.mrbastim.standbymode, previously com.mrbastim.standby.extended). Android installs it as a separate app, NOT an update over StandBy Extended v1.0.6. Settings are NOT migrated. Both apps may coexist; uninstall the old app manually when no longer needed.'
+                gh release create "$RELEASE_TAG" standbymode.apk --generate-notes --verify-tag --notes "$rebrand_notes"
+              else
+                gh release create "$RELEASE_TAG" standbymode.apk --generate-notes --verify-tag
+              fi
             fi
           fi

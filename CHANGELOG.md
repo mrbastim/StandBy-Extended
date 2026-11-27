@@ -2,7 +2,45 @@
 
 [English](CHANGELOG.md) | [Русский](CHANGELOG.ru.md)
 
-All notable changes to StandBy are documented here.
+All notable changes to StandByMode are documented here.
+
+## 1.1.0 — StandByMode
+
+### Breaking change
+
+- **New Android app identity:** `com.mrbastim.standbymode` replaces `com.mrbastim.standby.extended`. Android installs this as a **separate app**, not as an in-place update of v1.0.6. Existing settings are not transferred. The old installation can be removed manually when no longer needed.
+- The GitHub repository and visible app name are renamed to **StandByMode**. Project sources and tests use the new Kotlin package.
+
+### Added
+
+- Local countdown timer (1–180 minutes), Pomodoro (25/5-minute phases with manual transitions) and stopwatch, available as widgets and alongside full-screen clocks.
+- Persistent left/right tool placement and an independent option to hide alarms in widgets and the calendar.
+- Each widget column remembers its active card; the scrollable editor supports all eleven unique widget types independently per column.
+
+### Changed
+
+- Clearer English, Russian and Turkish settings, grouped display controls, and a scrollable city picker.
+- Adaptive split clock/tool layout, centered timer controls and a narrow-screen fallback; Ambient hides timer controls.
+- Version name `1.1.0` and Android `versionCode 8`.
+- New stable APK name: `standbymode.apk`. New development APK name: `standbymode-dev.apk`.
+- Release metadata checks explicitly allow the one-time package migration from v1.0.6, while continuing to require an increased version code.
+
+### Fixed
+
+- Refresh stale and expired next-alarm information and exclude known calendar-provider reminders. Some OEM alarm sources may still report inaccurate entries; alarm display can be disabled.
+- Restore active widget identity across reopening and reordering.
+- Keep local timer sessions across ordinary app recreation when the boot session is known; reset on reboot or unverifiable boot identity.
+
+### CI and release
+
+- Centralized version metadata, release identity/version validation, API 28/35 startup smoke checks and API 35 DreamService verification.
+- Installable debug APK artifacts for pull requests.
+- Up to three additional attempts for confirmed Robolectric dependency-download failures across PR, dev and stable workflows; ordinary test, lint and compilation failures remain fatal.
+
+### Known limitations
+
+- Timer completion is visual only; there are no background alerts or automatic Pomodoro transitions.
+- OLED protection continues to use periodic pixel shifting and brightness management; experimental adaptive shifting is not part of this release.
 
 ## 1.0.6
 

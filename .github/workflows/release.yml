@@ -8,14 +8,13 @@ on:
       tag:
         description: Existing release tag to build and upload
         required: true
-        default: v1.0.6
 
 permissions:
   contents: read
 
 jobs:
   build:
-    if: github.repository == 'mrbastim/StandBy-Extended' && github.actor == 'mrbastim'
+    if: github.repository_id == '1457038002' && github.repository_owner == 'mrbastim' && github.actor == 'mrbastim'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     outputs:
@@ -29,12 +28,18 @@ jobs:
         run: |
           tag="$GITHUB_REF_NAME"
           if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then tag="$INPUT_TAG"; fi
-          [[ "$tag" == v* ]]
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Stable release tags must use vMAJOR.MINOR.PATCH (got $tag)" >&2
+            exit 1
+          fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
         with:
           ref: ${{ steps.release.outputs.tag }}
+          fetch-depth: 0
           persist-credentials: false
+      - name: Verify release commit comes from main
+        run: git merge-base --is-ancestor HEAD origin/main
       - name: Record source commit
         id: commit
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -43,8 +48,29 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
-      - name: Test, lint and assemble without release secrets
-        run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleRelease
+      - name: Run unit tests (retry transient Robolectric downloads)
+        # Manual dispatch may select an older tag without the retry helper.
+        run: |
+          if [ -f .github/scripts/retry_robolectric_tests.py ]; then
+            python3 .github/scripts/retry_robolectric_tests.py
+          else
+            ./gradlew --no-daemon testDebugUnitTest
+          fi
+
+      - name: Lint and assemble without release secrets
+        run: ./gradlew --no-daemon lintDebug assembleDebug assembleRelease
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install APK inspection tools
+        run: sdkmanager "build-tools;35.0.0"
+      - name: Verify stable APK identity and version progression
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          python3 .github/scripts/check_release_metadata.py --repo "$GH_REPO" --tag "$RELEASE_TAG" --apk app/build/outputs/apk/release/app-release-unsigned.apk --aapt "$ANDROID_HOME/build-tools/35.0.0/aapt"
       - uses: actions/upload-artifact@v4
         with:
           name: unsigned-release

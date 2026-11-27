@@ -2,10 +2,10 @@
 
 [English](github-release-pipeline.md) | [Русский](github-release-pipeline.ru.md)
 
-Теги `v*` используют `release.yml` и публикуют `standby-android-extended.apk`.
+Теги `v*` используют `release.yml` и публикуют `standbymode.apk`.
 Каждый push/merge в `dev` запускает `dev-prerelease.yml`. После успешных проверок
 обновляется один prerelease с тегом `dev` и `--prerelease --latest=false`,
-заменяется файл `standby-android-extended-dev.apk`. Существующий prerelease
+заменяется файл `standbymode-dev.apk`. Существующий prerelease
 редактируется на месте: его ID и ссылка на скачивание сохраняются. Перемещаемый
 тег указывает на точный проверенный коммит. Заголовок и описание содержат коммит
 и ссылку на CI; стабильный Latest сохраняется.
@@ -18,7 +18,7 @@ concurrency может объединять ожидающие job публик�
 выполнять сборку без подписи и публикации.
 
 Постоянная ссылка:
-[standby-android-extended-dev.apk](https://github.com/mrbastim/StandBy-Extended/releases/download/dev/standby-android-extended-dev.apk).
+[standbymode-dev.apk](https://github.com/mrbastim/StandByMode/releases/download/dev/standbymode-dev.apk).
 После первой успешной общей публикации с разрешения владельца удаляются четыре
 старых автоматических prerelease: `dev-1-ffae1ad`, `dev-2-f5a5cd5`,
 `dev-3-03a3f22`, `dev-4-40441d0`. Git-теги сохраняются, старые ссылки на APK
@@ -30,12 +30,21 @@ concurrency может объединять ожидающие job публик�
    чтения и не получает секреты подписи. Выполняются тесты, Lint, debug/release.
    Результат: артефакт `unsigned-release/app-release-unsigned.apk`.
 2. `release-smoke.yml` подписывает тот же minified APK временным тестовым ключом
-   и дважды запускает MainActivity на эмуляторе API 28. Процесс должен продолжать
-   работу без фатальных ошибок AndroidRuntime. Это проверяет мост Compose/Lifecycle
-   после R8. Тот же сценарий выполняется в PR CI. Релизный ключ сюда не передаётся.
+   и проверяет его на двух эмуляторах: API 28 (минимальная версия) и API 35 (Android 15).
+   На каждом MainActivity запускается дважды; на API 35 дополнительно включается
+   системная заставка и запускается StandByDreamService через менеджер Android.
+   Проверяются активный DreamRecord и отсутствие фатальных ошибок AndroidRuntime.
+   Такие же проверки выполняет PR CI; релизный ключ в эмуляторы не передаётся.
+
+Перед подписью стабильного релиза `release.yml` проверяет формат тега
+(`vMAJOR.MINOR.PATCH`), наличие его коммита в истории `main`, идентификатор
+и версии из манифеста собранного APK через AAPT. `versionCode` сравнивается с
+предыдущим стабильным APK, скачанным из GitHub Releases. Несовпадение версий
+или отсутствие увеличения `versionCode` блокируют публикацию. Для постоянно
+обновляемого prerelease `dev` эти ограничения версий не вводятся.
 3. Job подписи в `publish-apk.yml` использует `contents: read` и environment
    `release-signing`. Она подписывает и проверяет APK через apksigner, удаляет
-   временный keystore и загружает `standby-android-extended-signed-<sha>`.
+   временный keystore и загружает `standbymode-signed-<sha>`.
 4. Отдельная job скачивает подписанный APK и публикует его с `contents: write`.
    У неё нет доступа к секретам подписи через environment, и она не делает checkout.
    Тег `dev` должен оставаться перемещаемым. Защиту стабильных тегов применяйте только к `v*`.
