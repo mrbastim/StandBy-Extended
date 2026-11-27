@@ -1,138 +1,149 @@
-# StandByMode
+<p align="center">
+  <strong>English</strong> · <a href="README.ru.md">Русский</a>
+</p>
 
-[English](README.md) | [Русский](README.ru.md)
+<h1 align="center">StandByMode</h1>
 
-[![Latest stable release](https://img.shields.io/github/v/release/mrbastim/StandByMode?label=stable)](https://github.com/mrbastim/StandByMode/releases/latest)
+<p align="center">
+  Turn your Android phone into an elegant desk clock and ambient dashboard.
+</p>
 
-[Download stable APK](https://github.com/mrbastim/StandByMode/releases/latest/download/standbymode.apk) · [Development build](https://github.com/mrbastim/StandByMode/releases/tag/dev)
+<p align="center">
+  <img alt="Android 9+" src="https://img.shields.io/badge/Android-9%2B-3DDC84?logo=android&logoColor=white">
+  <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-Jetpack%20Compose-7F52FF?logo=kotlin&logoColor=white">
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-blue"></a>
+  <a href="https://github.com/mrbastim/StandByMode/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/mrbastim/StandByMode?label=stable"></a>
+</p>
 
-**Important: v1.1.0 changes the Android app ID.** StandByMode now uses `com.mrbastim.standbymode` (the previous StandBy Extended used `com.mrbastim.standby.extended`). Android treats v1.1.0 as a **separate installation**, not an update to v1.0.6 or earlier. Existing preferences are **not migrated**; the two apps can coexist, and you can uninstall the old one manually. StandByMode also remains independent of the original StandBy (`com.emretenoz.standby`).
+<p align="center">
+  <a href="https://github.com/mrbastim/StandByMode/releases/latest/download/standbymode.apk"><strong>⬇ Download APK</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/mrbastim/StandByMode/releases">All releases</a>
+  &nbsp;·&nbsp;
+  <a href="#get-started">Get started</a>
+</p>
 
-A polished, native Android ambient display inspired by iPhone StandBy. While the app is open, it watches charging and orientation state. When automatic mode is enabled and the device is both charging and in landscape, it enters an immersive, AMOLED-black StandBy interface. An Android `DreamService` provides the same experience after display timeout on supported devices.
+---
 
-The four horizontally swipeable pages show:
+Place your phone horizontally on a stand to see **clocks, music, a calendar, weather and useful widgets** in a customizable, AMOLED-friendly interface.
 
-- Two side-by-side, vertically swipeable widget stacks
-- A customizable full-screen clock
-- An editorial calendar view
-- A visual battery and charging view
+**Free · Open source · No root required.**
 
-Five clock faces are included: Digital, Digital Split, Analog, Solar / Orbit, and World Clock. The secondary world-clock city can be selected from eleven timezone-safe presets. Long-press the full-screen clock to open the live customization surface, where theme, face, clock color, seconds, 12/24-hour time, and date visibility can be previewed before the theme is saved.
+> **Upgrading from StandBy Extended 1.0.6 or earlier?** StandByMode 1.1.0 uses a new Android application ID (`com.mrbastim.standbymode`, previously `com.mrbastim.standby.extended`). Android installs it as a separate app, not an update. Existing settings are not migrated; both apps may coexist. StandByMode also remains independent of [StandBy-Android](https://github.com/emretenoz/StandBy-Android).
 
-The theme engine includes Classic, Midnight, Crimson Night, Sunset, Forest, Neon, Mono Light, and Custom themes. Every theme supplies centralized background, primary, secondary, accent, clock, analog-marker, separator, and icon tokens; screens and widgets consume these tokens instead of hard-coded colors. Day and Night Mode themes can be chosen independently. Mono Light is intentionally unavailable as a night theme, and Night Mode safely falls back to Crimson Night if an older preference requests it.
+## 🚀 Get started
 
-Custom themes expose separate background, primary, secondary, and accent colors. Five restrained background treatments are available: Solid, Radial, Vignette, Aura, and Grain. They remain subtle and contain no animated effects or gradients in the default Solid style. Typography can follow each theme automatically or use Modern, Editorial, Rounded, Condensed, or Mono styling.
+1. **Install the app.** Download the APK above and open it on your phone. Android may ask you to allow installation from the chosen source.
+2. **Try it without a charger.** Launch StandByMode and tap **Preview StandBy** to explore the interface and customize its appearance.
+3. **Use automatic activation.** Keep the app open, connect a charger, and turn the phone to landscape. With **Automatic activation** enabled, StandBy appears automatically.
+4. **Optionally enable the Android screen saver.** Tap **Open Android screen saver settings** in the app, select **StandByMode**, and configure it to run while charging. Some manufacturers do not expose this option.
 
-Settings include automatic activation, screen timeout behavior, keeping the screen awake, theme and background choices, clock appearance, manual Night Mode, and OLED burn-in protection. Theme choices, custom colors, typography, and widget styles are persisted with DataStore Preferences.
+**What's the difference?** Automatic activation works while the app is open. The **Android screen saver** can start after the display timeout if your device supports it. The app does not bypass Android's restrictions to launch itself from the background whenever a charger is connected.
 
-The widget page follows the dual-stack model: swipe either half vertically to change its widget, or long-press a stack to open an editor directly over StandBy. Clock, date, battery, charging, world-clock, next-alarm, weather, music, timer, Pomodoro, and stopwatch widgets can be independently added, removed, and reordered. The next-alarm widget reads Android’s system alarm schedule without an additional permission; some OEM alarm sources may be inaccurate. Choose **None** next to the full-screen clock to remove its accessory. Disable **Alarm in widgets and calendar** to hide the system alarm in those screens without deleting configured alarm cards. Weather is opt-in and uses the selected world-clock city. At least one widget is retained in each stack. Each stack supports every unique widget, independently of the other stack. The last selected widget in each column is restored when you reopen StandBy; reordering preserves the selected widget. Clock widgets provide Minimal, Bold, Editorial, and Compact styles; date widgets provide Numeric, Editorial, Calendar, and Minimal styles; battery widgets provide Circular, Horizontal, Percentage, and Minimal styles. Tap the style label beside a widget in the stack editor to cycle its presentation, or select it from Settings.
+## ✨ Features
 
-Night Mode switches between the independently selected day and night themes. Crimson Night provides the dim red, true-black OLED treatment; other night themes keep their own palettes. Pixel Shifting is enabled by default and moves page content through five positions at ±3 dp once per minute, with reserved edge space and no continuous movement animation.
+- **Four pages:** two independently scrollable widget columns, a full-screen clock, a calendar, and battery information.
+- **Five clock faces:** Digital, Digital Split, Analog, Solar / Orbit, and World Clock with a selectable second city.
+- **Useful widgets:** clock, date, battery, charging, world clock, next alarm, weather, music playback controls, countdown timer, Pomodoro, and stopwatch.
+- **Remembered widgets:** each column restores its last selected card; add and reorder all unique widget types independently.
+- **Clock tools:** choose an alarm, timer, Pomodoro, stopwatch or None next to the full-screen clock; place the tool on either side.
+- **Personalization:** preset themes, independent day and night palettes, custom colors, clock styles, and backgrounds.
+- **AMOLED protection:** idle dimming, optional light-sensor adaptation, and subtle periodic pixel shifting.
 
-The settings and customization surfaces are available in English, Russian, and Turkish. Interactive ambient controls expose accessibility labels and use enlarged touch targets.
+### 👆 Controls
 
-## Clock tools
+| Gesture | Action |
+| --- | --- |
+| Swipe left or right | Switch between the four pages |
+| Swipe up or down inside a widget column | Switch widgets in that column |
+| Long-press a widget column | Edit its widgets |
+| Long-press the full-screen clock | Customize the clock and theme |
+| Touch the Android screen saver | Reveal the **Exit** control briefly |
 
-Choose what appears next to the full-screen clock in Settings or by long-pressing the clock: none, next alarm, timer, Pomodoro, or stopwatch. Choose the left or right side in Settings or swap sides in the editor. None restores the full-size clock face. Controls are centered in a single row when space permits, with a two-row fallback for narrow timer panes. Ambient hides controls in both the full-screen clock and widget stacks. Timer, Pomodoro and stopwatch are also independent stack widgets. The local countdown starts at five minutes and can be adjusted from one to 180 minutes; Pomodoro uses 25-minute focus and five-minute breaks with a manual transition between phases. Tools share their state between the clock and stack widgets, and use elapsed time so closing StandBy does not pause them. A device reboot resets active sessions; devices that do not expose the boot count also reset sessions on process recreation rather than restoring unreliable elapsed time. Completion is shown visually; this version does not schedule background notifications or wake a sleeping screen.
+Use the **×** button to leave **Preview**. Regular StandBy mode also provides a way back to the app's settings. To close the Android screen saver, use its **Exit** control; Android decides which screen appears afterward.
 
-## Display & AMOLED Protection
+## ⏱ Clock tools and alarms
 
-Open **Settings → Display & AMOLED Protection → Show display controls**. Protection 2.0
-starts StandBy at 35% window brightness, waits for 2 minutes of inactivity, then fades
-to 8% over 12 seconds. Brightness limits, delay and fade duration are configurable
-and saved in DataStore. Touch restores active brightness smoothly and restarts inactivity;
-clock ticks, widget updates and recomposition do not restart it.
+Choose **Next to the clock** in Settings or long-press the full-screen clock to configure the tool and its side. Select **None** to use the whole screen for the clock.
 
-Optional ambient-light adaptation uses TYPE_LIGHT with filtering, hysteresis and rate
-limiting. Without a sensor, configured brightness remains usable. Inactivity takes
-priority over illumination. Ambient hides seconds, including the alarm countdown, while
-preserving the selected theme. With light adaptation enabled, automatic Night Mode requires
-sustained near darkness (about 0–1 lux for 10 seconds) and the configured minimum brightness.
-Inactivity alone never changes the theme; manual Night Mode remains available.
+The timer supports 1–180 minutes (default 5), Pomodoro has 25-minute focus and 5-minute break phases with manual transitions, and the stopwatch counts elapsed time. Each tool is also a separate widget. Start, pause and reset controls share one local session across both layouts; leaving StandBy does not pause it. Reboot resets sessions; if Android does not expose a boot count, process recreation also resets them. Completion is visual only, without background alarms or screen wake. Ambient hides the controls.
 
-Keep Awake and Screen Timeout remain available in the same section. An optional
-additional inactivity deadline overrides Keep Awake: the Activity releases its screen
-hold and Android applies its normal timeout; DreamService ends the screen saver.
-This does not guarantee immediate screen-off. Each resumed window has an independent
-session; leaving StandBy restores its previous brightness and releases subscriptions.
+Android's next-alarm information may include inaccurate OEM alarm entries. To hide alarms entirely, select **None** (or another tool) next to the clock and turn off **Alarm in widgets and calendar**. Configured alarm cards are retained when hidden.
 
-Protection uses per-window Android brightness, never global Settings.System writes
-or a dark overlay. Percentages are brightness requests, not calibrated nits. OEMs may
-restrict brightness and screen-saver behavior. These measures reduce OLED wear risk
-without guaranteeing prevention of burn-in.
+## 🎵 Music and weather
 
-See [architecture and policy](docs/amoled-protection.md) and
-[automated and device testing](docs/testing.md).
+**Music:** The optional widget displays the currently playing track from a compatible media app and can control playback. Android requires you to explicitly enable **notification access** so StandBy can discover other apps' media sessions. You can leave this permission disabled if you don't use the widget.
 
-## Activation and Android limitations
+**Weather:** Off by default. When enabled, it requests current conditions for your selected World Clock city from [Open-Meteo](https://open-meteo.com/). It does not need your device location.
 
-StandBy activates when all three conditions are true:
+## 🌙 AMOLED protection
 
-1. The app is in the foreground.
-2. Android reports that the battery is charging (AC, USB, or wireless).
-3. The orientation sensor or Android configuration reports landscape orientation. This also works when system auto-rotate is disabled, provided the device has an orientation sensor.
+By default, StandBy starts at **35% requested brightness**, waits **2 minutes** without interaction, then fades to **8%** over **12 seconds**. Touching the display restores the active brightness. You can change these values under **Display & AMOLED Protection**.
 
-An ordinary Android app cannot reliably launch an activity from the background whenever power is connected. Modern Android background-activity launch restrictions intentionally prevent this, so this MVP does not attempt unreliable workarounds. Open the app before docking or charging; it will react immediately to charging and rotation changes while it is running.
+You can also enable ambient-light adaptation (if the device has a light sensor), use a night palette, and shift page content slightly once a minute. Brightness percentages are Android window requests, not calibrated screen luminance. These measures can *reduce the risk* of OLED burn-in, but cannot guarantee prevention.
 
-For activation after the display times out or locks, the app also provides an Android `DreamService`. In the app, tap **Open Android screen saver settings**, select **StandByMode**, and configure the system screen saver to start **while charging**. Android then owns activation and can safely show StandBy after screen timeout without background-activity hacks. Menu wording and availability vary by device manufacturer; some OEMs disable or replace Android screen savers.
+[How AMOLED protection works](docs/amoled-protection.md)
 
-The system-state and UI layers are separated so future versions can add an opt-in foreground service with a persistent notification, a notification action, OEM-specific integration, or another user-granted capability without rewriting the StandBy UI or activation logic.
+## ❓ FAQ
 
-Immersive mode hides system bars while StandBy is active. Android may temporarily reveal them after an edge swipe, and device policy or OEM behavior can limit fullscreen behavior.
+<details>
+<summary><strong>Why doesn't StandBy appear when I plug in my phone?</strong></summary>
 
-While the activity is already running and StandBy is active, it requests permission to remain visible above the keyguard using Android's supported `setShowWhenLocked` API. The keep-awake setting prevents normal screen timeout. Deliberately turning the display off with the physical power button is still respected; the app does not use wake-lock or background-launch workarounds to override an explicit user lock action.
+Make sure the app is open, Automatic activation is enabled, Android reports the device is charging, and the phone is in landscape. To start StandBy after display timeout, configure the system screen saver.
 
-## Project structure
+</details>
 
-```text
-app/src/main/java/com/mrbastim/standby/extended/
-├── MainActivity.kt                  Activity and window behavior
-├── StandByDreamService.kt           System screen saver using shared StandBy UI
-├── data/                           Settings and weather repositories
-├── system/                         Charging, orientation, and next-alarm observers
-└── ui/
-    ├── SettingsScreen.kt            Categorized Material 3 settings
-    ├── StandByViewModel.kt          Combined observable UI state
-    ├── standby/                     Pager, theme engine, clock faces, widgets, editors
-    └── theme/                       Application color theme
-```
+<details>
+<summary><strong>Can I use it without charging?</strong></summary>
 
-`ChargingObserver` reads the sticky `ACTION_BATTERY_CHANGED` broadcast, checks `BatteryManager.isCharging` as an OEM fallback, and continues listening for updates. `OrientationObserver` combines physical orientation-sensor readings with Android configuration callbacks. `SystemStateRepository` exposes both as `StateFlow`; `StandByViewModel` combines them with persisted settings into a single UI state.
+Yes, in Preview. Automatic activation in normal mode requires charging.
 
-## Development branch
+</details>
 
-`main` is the stable branch; merge feature branches into `dev` for integration.
-Every push to `dev`, including a merge, runs tests, lint and a minified APK startup check.
-Owner-triggered runs sign in the `release-signing` environment and update one rolling
-GitHub **prerelease** tagged `dev`, after the required environment/branch settings are
-configured. Its APK is `standbymode-dev.apk`; stable releases use
-`standbymode.apk`. Superseded builds cannot replace the current dev APK.
-The stable Latest release is retained. See [pipeline setup](docs/github-release-pipeline.md).
+<details>
+<summary><strong>Why doesn't the screen saver start after locking the phone?</strong></summary>
 
-## Build and run
+Check Android's screen-saver settings. Some manufacturers disable or change screen-saver support.
 
-Requirements: Android Studio with JDK 17 and Android SDK 35 or newer.
+</details>
 
-1. Open this directory in Android Studio.
-2. Allow Gradle sync to finish.
-3. Run the `app` configuration on a physical device or emulator running Android 9 (API 28) or later.
-4. Open StandByMode, connect power, and rotate the device to landscape.
-5. For locked/timeout activation, use the in-app button to select StandByMode as Android's charging screen saver.
+<details>
+<summary><strong>Why can't I see my music?</strong></summary>
 
-From a terminal:
+Start playback in another app and enable notification access for StandByMode if prompted. Not every media app exposes every control.
 
-```shell
+</details>
+
+<details>
+<summary><strong>Why doesn't the screen turn off at the exact timeout?</strong></summary>
+
+StandBy can release its screen-awake request or finish the screen saver, but Android controls when the physical display turns off.
+
+</details>
+
+<details>
+<summary><strong>Can I install it alongside the original StandBy?</strong></summary>
+
+Yes. StandByMode has a different application ID and maintains separate settings.
+
+</details>
+
+## 🔒 Privacy
+
+StandByMode has no advertising or analytics SDKs. Internet access is used for the optional weather widget. Notification access is an optional, user-enabled feature for music controls. The described features do not need your location, contacts, files, or calendar. Preferences are stored on-device.
+
+## 🛠️ For developers
+
+Built with **Kotlin and Jetpack Compose**. Building requires JDK 17 and Android SDK 35 or newer:
+
+```bash
 ./gradlew testDebugUnitTest lintDebug assembleDebug
 ```
 
-On Windows, use `gradlew.bat testDebugUnitTest lintDebug assembleDebug`.
+On Windows, use `gradlew.bat` instead of `./gradlew`.
 
-The same verification runs in GitHub Actions for pushes and pull requests. Release builds enable R8 optimization and resource shrinking; signing credentials must remain outside the repository.
+Documentation: [display protection architecture](docs/amoled-protection.md) · [testing](docs/testing.md) · [release pipeline](docs/github-release-pipeline.md) · [contributing](CONTRIBUTING.md) · [changelog](CHANGELOG.md).
 
-## Privacy
+**Branches:** [`main`](https://github.com/mrbastim/StandByMode/tree/main) contains stable code; [`dev`](https://github.com/mrbastim/StandByMode/tree/dev) is for development. The [experimental APK](https://github.com/mrbastim/StandByMode/releases/tag/dev) may include unfinished changes.
 
-StandBy does not request notification, location, storage, calendar, or contacts access and includes no analytics or advertising SDK. Online weather is disabled by default; when enabled, the app sends the selected preset city's coordinates to [Open-Meteo](https://open-meteo.com/) to fetch current conditions. It never reads the device's location. All other charging, alarm, orientation, preference, and timezone processing remains on the device.
-
-## Project status
-
-The project is under active development. See [CHANGELOG.md](CHANGELOG.md) for unreleased changes and [CONTRIBUTING.md](CONTRIBUTING.md) for the verification and release checklist, and [release publishing instructions](docs/github-release-pipeline.md) for GitHub Release setup. The source is available under the [MIT License](LICENSE).
+Based on [StandBy-Android](https://github.com/emretenoz/StandBy-Android). Released under the [MIT License](LICENSE).
