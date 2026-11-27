@@ -23,6 +23,9 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -54,6 +57,7 @@ import com.mrbastim.standbymode.data.settings.StandBySettings
 import com.mrbastim.standbymode.data.settings.StandByWidgetType
 import com.mrbastim.standbymode.data.settings.WidgetColumn
 import com.mrbastim.standbymode.data.settings.visibleWidgets
+import com.mrbastim.standbymode.data.settings.resolveActiveWidget
 import com.mrbastim.standbymode.data.weather.WeatherKind
 import com.mrbastim.standbymode.data.weather.WeatherState
 import com.mrbastim.standbymode.R
@@ -65,6 +69,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlinx.coroutines.flow.drop
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -74,6 +79,7 @@ fun DualWidgetPage(
     charging: ChargingState,
     nextAlarm: NextAlarmState,
     weather: WeatherState,
+    onActiveWidgetChanged: ((WidgetColumn, StandByWidgetType) -> Unit)? = null,
     onEditRequest: (WidgetColumn) -> Unit,
 ) {
     Row(
@@ -84,6 +90,8 @@ fun DualWidgetPage(
         WidgetStack(
             column = WidgetColumn.LEFT,
             widgets = visibleWidgets(settings.leftWidgets, settings.showNextAlarm),
+            selectedWidget = settings.leftActiveWidget,
+            onActiveWidgetChanged = onActiveWidgetChanged,
             settings = settings,
             charging = charging,
             nextAlarm = nextAlarm,
@@ -94,6 +102,8 @@ fun DualWidgetPage(
         WidgetStack(
             column = WidgetColumn.RIGHT,
             widgets = visibleWidgets(settings.rightWidgets, settings.showNextAlarm),
+            selectedWidget = settings.rightActiveWidget,
+            onActiveWidgetChanged = onActiveWidgetChanged,
             settings = settings,
             charging = charging,
             nextAlarm = nextAlarm,
@@ -109,6 +119,8 @@ fun DualWidgetPage(
 private fun WidgetStack(
     column: WidgetColumn,
     widgets: List<StandByWidgetType>,
+    selectedWidget: StandByWidgetType?,
+    onActiveWidgetChanged: ((WidgetColumn, StandByWidgetType) -> Unit)?,
     settings: StandBySettings,
     charging: ChargingState,
     nextAlarm: NextAlarmState,
@@ -116,7 +128,19 @@ private fun WidgetStack(
     onEditRequest: (WidgetColumn) -> Unit,
     modifier: Modifier,
 ) {
-    val pagerState = rememberPagerState(pageCount = { widgets.size })
+    val activeWidget = resolveActiveWidget(widgets, selectedWidget)
+    val activeIndex = widgets.indexOf(activeWidget).coerceAtLeast(0)
+    val pagerState = rememberPagerState(initialPage = activeIndex, pageCount = { widgets.size })
+    val onSelected by rememberUpdatedState(onActiveWidgetChanged)
+
+    // Restoring settings and reordering are not new user selections. In particular, do
+    // not overwrite DataStore with the default page while its initial load is pending.
+    LaunchedEffect(pagerState, widgets, activeWidget) {
+        if (pagerState.currentPage != activeIndex) pagerState.scrollToPage(activeIndex)
+        snapshotFlow { pagerState.settledPage }.drop(1).collect { page ->
+            widgets.getOrNull(page)?.let { widget -> onSelected?.invoke(column, widget) }
+        }
+    }
     val haptics = LocalHapticFeedback.current
     val theme = LocalStandByTheme.current
     val stackName = stringResource(if (column == WidgetColumn.LEFT) R.string.left else R.string.right)
@@ -136,8 +160,9 @@ private fun WidgetStack(
         VerticalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
+            key = { page -> widgets[page].name },
         ) { page ->
-            WidgetContent(widgets[page], settings, charging, nextAlarm, weather)
+            widgets.getOrNull(page)?.let { WidgetContent(it, settings, charging, nextAlarm, weather) }
         }
         if (widgets.size > 1 && pagerState.isScrollInProgress) {
             Column(

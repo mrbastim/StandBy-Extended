@@ -59,6 +59,31 @@ class WidgetSettingsTest {
     }
 
     @Test
+    fun eachStackCanContainEveryUniqueWidget() {
+        val all = StandByWidgetType.entries
+        val filled = all.fold(listOf(StandByWidgetType.CLOCK)) { widgets, widget ->
+            if (widget in widgets) widgets else toggleWidgetInList(widgets, widget)
+        }
+        assertEquals(all.size, filled.size)
+        assertEquals(all.toSet(), filled.toSet())
+        assertEquals(filled, decodeWidgets(filled.joinToString(",") { it.name }, defaults))
+    }
+
+    @Test
+    fun activeWidgetIdentitySurvivesReorderAndFallsBackWhenUnavailable() {
+        val first = listOf(StandByWidgetType.CLOCK, StandByWidgetType.MUSIC)
+        val reordered = moveWidgetInList(first, 1, 0)
+        assertEquals(StandByWidgetType.MUSIC, resolveActiveWidget(first, StandByWidgetType.MUSIC))
+        assertEquals(StandByWidgetType.MUSIC, resolveActiveWidget(reordered, StandByWidgetType.MUSIC))
+        assertEquals(StandByWidgetType.CLOCK, resolveActiveWidget(listOf(StandByWidgetType.CLOCK), StandByWidgetType.MUSIC))
+        assertEquals(StandByWidgetType.CLOCK, resolveActiveWidget(first, null))
+        assertEquals(StandByWidgetType.CLOCK, resolveActiveWidget(
+            visibleWidgets(listOf(StandByWidgetType.NEXT_ALARM, StandByWidgetType.CLOCK), false),
+            StandByWidgetType.NEXT_ALARM,
+        ))
+    }
+
+    @Test
     fun invalidMoveLeavesWidgetsUntouched() {
         assertEquals(defaults, moveWidgetInList(defaults, -1, 1))
         assertEquals(defaults, moveWidgetInList(defaults, 0, 5))

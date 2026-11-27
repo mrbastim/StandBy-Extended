@@ -152,6 +152,8 @@ class StandByViewModel(
     fun dismissStandBy() { automaticModeDismissed.value = true }
     fun toggleWidget(column: WidgetColumn, widget: StandByWidgetType) =
         update { toggleWidget(column, widget) }
+    fun rememberActiveWidget(column: WidgetColumn, widget: StandByWidgetType) =
+        settingsRepository.rememberActiveWidget(column, widget)
     fun moveWidget(column: WidgetColumn, fromIndex: Int, toIndex: Int) =
         update { moveWidget(column, fromIndex, toIndex) }
 

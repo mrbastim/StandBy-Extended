@@ -37,6 +37,7 @@ data class StandByActions(
     val onExitPreview: (() -> Unit)? = null,
     val onToggleWidget: ((WidgetColumn, StandByWidgetType) -> Unit)? = null,
     val onMoveWidget: ((WidgetColumn, Int, Int) -> Unit)? = null,
+    val onActiveWidgetChanged: ((WidgetColumn, StandByWidgetType) -> Unit)? = null,
     val onClockFaceChanged: ((ClockFace) -> Unit)? = null,
     val onClockColorChanged: ((ClockColor) -> Unit)? = null,
     val onShowSecondsChanged: ((Boolean) -> Unit)? = null,
